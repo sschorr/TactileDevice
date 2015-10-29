@@ -47,3 +47,4 @@ release
 *.pro.user
 *.pdb
 Makefile*
+ui_*.h
