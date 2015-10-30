@@ -17,13 +17,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-
     First_Controller = new cMotorController(0);
-
-
-
     First_Controller->open();
-
     delete First_Controller;
     
     return a.exec();
@@ -31,10 +26,7 @@ int main(int argc, char *argv[])
 
 
 
-
-
 int Init_Motor_Controller(void)
 {
-    cMotorController Second_Controller(1);
     return 0;
 }
