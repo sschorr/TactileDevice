@@ -1,13 +1,17 @@
 #include <QApplication>
 #include "mainwindow.h"
 #include "cMotorController.h"
+#include "shared_data.h"
+#include "haptics_thread.h"
 
 // Variable Declarations ============================================
-cMotorController* First_Controller;
-
+shared_data shared; //create the shared_data structure for sharing
 
 // Function Declarations ============================================
-int Init_Motor_Controller();
+int Init_Motor_Controllers(int);
+
+// Create Threads
+haptics_thread hapticsThread;
 
 
 // MAIN FUNCTION ====================================================
@@ -17,16 +21,19 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-    First_Controller = new cMotorController(0);
-    First_Controller->open();
-    delete First_Controller;
+
+
+    // Initialize and then start the haptics thread
+    hapticsThread.p_CommonData = &shared; // set the haptics thread data pointer to the shared data
+    hapticsThread.initialize();
+    hapticsThread.start();
     
     return a.exec();
 }
 
 
 
-int Init_Motor_Controller(void)
+int Init_Motor_Controller(int number)
 {
-    return 0;
+    return number;
 }

@@ -12,15 +12,18 @@ TEMPLATE = app
 
 
 SOURCES += ./src/main.cpp\
-        ./src/mainwindow.cpp\
-        ./src/Win626.c \
-    ./src/cMotorController.cpp
+           ./src/mainwindow.cpp\
+           ./src/Win626.c \
+           ./src/cMotorController.cpp \
+           ./src/haptics_thread.cpp
 
 
 HEADERS  += ./include/mainwindow.h\
-         ./include/Win626.h\
-         ./include/APP626.h \
-    ./include/cMotorController.h
+            ./include/Win626.h\
+            ./include/APP626.h \
+            ./include/cMotorController.h \
+            ./include/shared_data.h \
+            ./include/haptics_thread.h \
 
 FORMS    += ./mainwindow.ui
 

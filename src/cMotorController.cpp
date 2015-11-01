@@ -10,9 +10,9 @@
 
 
 // Constructor of motor controller =========================================
-cMotorController::cMotorController(unsigned int motorNumber)
+cMotorController::cMotorController()
 {
-    m_motorID = motorNumber;
+
 }
 
 // Destructor of motor controller ================================
@@ -25,6 +25,14 @@ int cMotorController::open()
 {
     // load the .dll
     S626_DLLOpen();
+
+    // open the 626 card
+    S626_OpenBoard(0,0,0,0);
+
+    if (S626_GetErrors(0) != 0)
+        return S626_GetErrors(0);
+
+
     return 0;
 }
 
