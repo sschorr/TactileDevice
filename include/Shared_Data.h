@@ -4,15 +4,19 @@
 #ifndef SHARED_DATA_H
 #define SHARED_DATA_H
 
+// defines indicating what physical hardware is present
+#define SENSORAY626
+
 #include <qDebug>
+#include <iostream>
 #include "cMotorController.h"
+#include "c3dofdevice.h"
+
 
 
 typedef struct
 {
-    cMotorController* motor_1;
-    cMotorController* motor_2;
-    cMotorController* motor_3;
+    c3DOFDevice* wearableDelta;
 
 } shared_data;
 

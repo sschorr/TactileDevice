@@ -15,7 +15,8 @@ SOURCES += ./src/main.cpp\
            ./src/mainwindow.cpp\
            ./src/Win626.c \
            ./src/cMotorController.cpp \
-           ./src/haptics_thread.cpp
+           ./src/haptics_thread.cpp \
+           ./src/c3dofdevice.cpp \
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -24,6 +25,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/cMotorController.h \
             ./include/shared_data.h \
             ./include/haptics_thread.h \
+            ./include/c3dofdevice.h \
 
 FORMS    += ./mainwindow.ui
 

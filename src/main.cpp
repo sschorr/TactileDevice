@@ -1,6 +1,5 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include "cMotorController.h"
 #include "shared_data.h"
 #include "haptics_thread.h"
 
@@ -8,9 +7,9 @@
 shared_data shared; //create the shared_data structure for sharing
 
 // Function Declarations ============================================
-int Init_Motor_Controllers(int);
 
-// Create Threads
+
+// Create Threads ===================================================
 haptics_thread hapticsThread;
 
 
@@ -21,6 +20,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
+    shared.wearableDelta = new c3DOFDevice();
+    shared.wearableDelta->Init3DOFDevice();
 
 
     // Initialize and then start the haptics thread
@@ -33,7 +34,3 @@ int main(int argc, char *argv[])
 
 
 
-int Init_Motor_Controller(int number)
-{
-    return number;
-}

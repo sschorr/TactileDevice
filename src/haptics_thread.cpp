@@ -12,6 +12,10 @@ haptics_thread::~haptics_thread()
 
 void haptics_thread::run()
 {
+    forever
+    {
+        wait(1000);
+    }
 
 
 }

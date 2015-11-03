@@ -15,17 +15,24 @@ class cMotorController
 {
 public:
     // Constructor of cMotorControl
-    cMotorController();
+    cMotorController(int);
 
     // Open and Access Sensoray 626, configure for encoder
     int open();
-
     int close();
+    int MotorNumToCounterNum();
+    int InitEncoder();
+    int GetMotorAngle();
+
+    // Public variables
+    float motorAngle;
 
     // Destructor of cMotorControl
     virtual ~cMotorController();
 private:
-    int motorID;
+    int motorNum;
+    int counterNum;
+
 };
 
 
