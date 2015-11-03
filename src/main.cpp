@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "cMotorController.h"
 
+
 // Variable Declarations ============================================
 cMotorController* First_Controller;
 
@@ -17,11 +18,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-
     First_Controller = new cMotorController(0);
-
-
-
     First_Controller->open();
 
     delete First_Controller;
