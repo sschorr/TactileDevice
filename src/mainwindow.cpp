@@ -21,6 +21,7 @@ void MainWindow::Initialize()
 
 void MainWindow::UpdateGUIInfo()
 {
-    ui->MotorAngleLCDNumber->display(p_CommonData->testController->GetMotorAngle());
-
+    ui->MotorAngleLCDNumber1->display(p_CommonData->wearableDelta->GetMotorAngles()[0]);
+    ui->MotorAngleLCDNumber2->display(p_CommonData->wearableDelta->GetMotorAngles()[1]);
+    ui->MotorAngleLCDNumber3->display(p_CommonData->wearableDelta->GetMotorAngles()[2]);
 }

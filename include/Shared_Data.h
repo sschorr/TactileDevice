@@ -9,8 +9,11 @@
 
 #include <qDebug>
 #include <iostream>
+#include <QVector>
+#include <math.h>
 #include "cMotorController.h"
 #include "c3dofdevice.h"
+
 
 
 
@@ -18,10 +21,6 @@ typedef struct
 {
     // This is for any variables that are accessed from multiple threads
     c3DOFDevice* wearableDelta;
-
-    // Test variable to be removed later
-    cMotorController* testController1;
-    cMotorController* testController2;
 
 } shared_data;
 

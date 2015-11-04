@@ -21,17 +21,10 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow window;
 
-    // For testing, create a motorController
-    shared.testController1 = new cMotorController(1);
-    shared.testController1->InitEncoder();
-    shared.testController2 = new cMotorController(2);
-    shared.testController2->InitEncoder();
-
-
 
     // Create a haptic device
     shared.wearableDelta = new c3DOFDevice();
-    shared.wearableDelta->Init3DOFDevice();
+    shared.wearableDelta->Init3DOFDeviceEnc();
 
 
     // Initialize and then start the haptics thread

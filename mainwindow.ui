@@ -14,10 +14,30 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLCDNumber" name="MotorAngleLCDNumber">
+   <widget class="QLCDNumber" name="MotorAngleLCDNumber1">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>100</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="MotorAngleLCDNumber2">
     <property name="geometry">
      <rect>
       <x>140</x>
+      <y>100</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="MotorAngleLCDNumber3">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
       <y>100</y>
       <width>64</width>
       <height>23</height>

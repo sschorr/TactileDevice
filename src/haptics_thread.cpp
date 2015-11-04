@@ -14,7 +14,7 @@ void haptics_thread::run()
 {
     forever
     {
-        double motorAngle = p_CommonData->testController->GetMotorAngle();
+
     }
 }
 
