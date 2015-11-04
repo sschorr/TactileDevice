@@ -7,8 +7,9 @@
 // Variable Declarations ============================================
 shared_data shared; //create the shared_data structure for sharing
 
-// Function Declarations ============================================
+// Testing Variable Declaration =====================================
 
+// Function Declarations ============================================
 
 // Create Threads ===================================================
 haptics_thread hapticsThread;
@@ -18,9 +19,17 @@ haptics_thread hapticsThread;
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
+    MainWindow window;
 
+    // For testing, create a motorController
+    shared.testController1 = new cMotorController(1);
+    shared.testController1->InitEncoder();
+    shared.testController2 = new cMotorController(2);
+    shared.testController2->InitEncoder();
+
+
+
+    // Create a haptic device
     shared.wearableDelta = new c3DOFDevice();
     shared.wearableDelta->Init3DOFDevice();
 
@@ -29,7 +38,11 @@ int main(int argc, char *argv[])
     hapticsThread.p_CommonData = &shared; // set the haptics thread data pointer to the shared data
     hapticsThread.initialize();
     hapticsThread.start();
-    
+
+    window.p_CommonData = &shared;
+    window.Initialize();
+
+    window.show();
     return a.exec();
 }
 

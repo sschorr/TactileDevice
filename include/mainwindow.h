@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "shared_data.h"
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -14,9 +16,19 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+    void Initialize();
+
+    shared_data* p_CommonData;
     
 private:
     Ui::MainWindow *ui;
+
+    // a timer for updating the gui
+    QTimer GraphicsTimer;
+
+private slots:
+    void UpdateGUIInfo();
 };
 
 #endif // MAINWINDOW_H

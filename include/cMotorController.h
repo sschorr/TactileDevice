@@ -11,6 +11,8 @@
 // List all includes ==========================================
 #include "Win626.h"
 
+#include <QMutex>
+
 class cMotorController
 {
 public:
@@ -20,16 +22,14 @@ public:
     // Open and Access Sensoray 626, configure for encoder
     int open();
     int close();
-    int MotorNumToCounterNum();
+    int MotorNumToCounterNum(int);
     int InitEncoder();
-    int GetMotorAngle();
-
-    // Public variables
-    float motorAngle;
+    double GetMotorAngle();
 
     // Destructor of cMotorControl
     virtual ~cMotorController();
 private:
+    QMutex m_mutex;
     int motorNum;
     int counterNum;
 

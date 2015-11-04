@@ -12,3 +12,15 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::Initialize()
+{
+    connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
+    GraphicsTimer.start(20);
+}
+
+void MainWindow::UpdateGUIInfo()
+{
+    ui->MotorAngleLCDNumber->display(p_CommonData->testController->GetMotorAngle());
+
+}

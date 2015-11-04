@@ -8,6 +8,8 @@
 #include "cMotorController.h"
 #include "windows.h"
 
+// DEFINES =================================================================
+
 // Define used for max Sensoray Encoder Count
 #define MAX_COUNT 16777215
 
@@ -20,17 +22,28 @@
 // Define used for Encoder count to angle in radian
 #define ENCCOUNT_TO_RAD 2*3.1415926535897932384/((1539.0/65)*ENCODER_CPR*4.0)
 
+
+
+
+
 // Constructor of motor controller =========================================
 cMotorController::cMotorController(int inputMotorID)
 {
     motorNum = inputMotorID;
+    counterNum = MotorNumToCounterNum(motorNum);
 }
 
-// Get angle of motor
-int cMotorController::GetMotorAngle()
+
+
+
+// Get angle of motor ======================================================
+double cMotorController::GetMotorAngle()
 {
 #ifdef SENSORAY626
+    //Lock before we access Sensorarray stuff
+    m_mutex.lock();
     unsigned long EncoderRaw = S626_CounterReadLatch(0, counterNum);
+    m_mutex.unlock();
     // Change the raw encoder count into a double centered around 0
     double EncoderPos = 0;
     if (EncoderRaw < ((MAX_COUNT+1)/2))
@@ -39,8 +52,10 @@ int cMotorController::GetMotorAngle()
         EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
 #endif
 
-    return 0;
+    return EncoderPos;
 }
+
+
 
 
 // Destructor of motor controller ================================
@@ -67,7 +82,10 @@ int cMotorController::open()
 }
 
 
-// Write all outputs to 0 and then close 626 board
+
+
+
+// Write all outputs to 0 and then close 626 board =========================
 int cMotorController::close()
 {
 #ifdef SENSORAY626
@@ -90,23 +108,24 @@ int cMotorController::close()
 }
 
 
-// Convert the motor number to the encoder number that corresponds.
-int cMotorController::MotorNumToCounterNum()
+
+// Convert the motor number to the encoder number that corresponds======================
+int cMotorController::MotorNumToCounterNum(int motorNumArg)
 {
-    int counterNum;
-    switch(motorNum){
-    case 1: counterNum = 0;
+    int counterNumRet;
+    switch(motorNumArg){
+    case 1: counterNumRet = 0;
         break;
-    case 2: counterNum = 1;
+    case 2: counterNumRet = 1;
         break;
-    case 3: counterNum = 2;
+    case 3: counterNumRet = 2;
         break;
     }
 
-    return counterNum;
+    return counterNumRet;
 }
 
-// Init 626 encoder tracking and reading
+// Init 626 encoder tracking and reading ============================
 int cMotorController::InitEncoder()
 {
 #ifdef SENSORAY626

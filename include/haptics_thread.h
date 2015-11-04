@@ -18,7 +18,7 @@ public:
 
 
     // Public Variables ============================================
-    shared_data *p_CommonData; //create a pointer to a shared_data struct
+    shared_data* p_CommonData; //create a pointer to a shared_data struct
 
 
 
