@@ -17,11 +17,10 @@
 #define DAC_VSCALAR 819.1
 
 // Define the encoder counts per revolution
-#define ENCODER_CPR 50
+#define ENCODER_CPR 512 //50
 
 // Define used for Encoder count to angle in radian
-#define ENCCOUNT_TO_RAD 2*3.1415926535897932384/((1539.0/65)*ENCODER_CPR*4.0)
-
+#define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR*4.0) // 4 comes from edges counts per quadrature cycle
 
 
 
@@ -50,9 +49,11 @@ double cMotorController::GetMotorAngle()
         EncoderPos = EncoderRaw;
     else if (EncoderRaw >= ((MAX_COUNT+1)/2))
         EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
+
+    double motorAngle = ENCCOUNT_TO_RAD*EncoderPos;
 #endif
 
-    return EncoderPos;
+    return motorAngle;
 }
 
 
