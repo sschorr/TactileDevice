@@ -28,8 +28,11 @@ public:
     // returns the vector of all motor angles =============================
     QVector<double> GetMotorAngles();
 
-    // Determines the base joint angles based on the motor angles ===========
+    // Determines the base joint angles based on the motor angles =========
     QVector<double> MotAngToJointAng(QVector<double> JointAngles);
+
+    // zeros all of the encoders on each cMotorController =================
+    void ZeroEncoders();
 
 
 

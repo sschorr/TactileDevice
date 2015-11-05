@@ -23,7 +23,8 @@ public:
     int open();
     int close();
     int MotorNumToCounterNum(int);
-    int InitEncoder();
+    void InitEncoder();
+    void SetOffsetAngle();
     double GetMotorAngle();
 
     // Destructor of cMotorControl
@@ -32,6 +33,7 @@ private:
     QMutex m_mutex;
     int motorNum;
     int counterNum;
+    double offsetAngle;
 
 };
 

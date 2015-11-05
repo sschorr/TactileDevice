@@ -17,7 +17,7 @@
 #define DAC_VSCALAR 819.1
 
 // Define the encoder counts per revolution
-#define ENCODER_CPR 512 //50
+#define ENCODER_CPR 512 //360 (12*30 for Pololu motor)
 
 // Define used for Encoder count to angle in radian
 #define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR*4.0) // 4 comes from edges counts per quadrature cycle
@@ -38,6 +38,7 @@ cMotorController::cMotorController(int inputMotorID)
 // Get angle of motor ======================================================
 double cMotorController::GetMotorAngle()
 {
+    double motorAngle = 0;
 #ifdef SENSORAY626
     //Lock before we access Sensorarray stuff
     m_mutex.lock();
@@ -50,9 +51,9 @@ double cMotorController::GetMotorAngle()
     else if (EncoderRaw >= ((MAX_COUNT+1)/2))
         EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
 
-    double motorAngle = ENCCOUNT_TO_RAD*EncoderPos;
+    double rawMotorAngle = ENCCOUNT_TO_RAD*EncoderPos;
+    motorAngle = rawMotorAngle - offsetAngle;
 #endif
-
     return motorAngle;
 }
 
@@ -78,8 +79,8 @@ int cMotorController::open()
 
     if (S626_GetErrors(0) != 0)
         return S626_GetErrors(0);
-    return 0;
 #endif
+    return 0;
 }
 
 
@@ -104,7 +105,6 @@ int cMotorController::close()
     // close the DLL
     S626_DLLClose();
 #endif
-
     return 0;
 }
 
@@ -122,12 +122,11 @@ int cMotorController::MotorNumToCounterNum(int motorNumArg)
     case 3: counterNumRet = 2;
         break;
     }
-
     return counterNumRet;
 }
 
 // Init 626 encoder tracking and reading ============================
-int cMotorController::InitEncoder()
+void cMotorController::InitEncoder()
 {
 #ifdef SENSORAY626
     open();
@@ -162,7 +161,26 @@ int cMotorController::InitEncoder()
     S626_CounterSoftIndex(0, counterNum);
 #endif
 
-    return 0;
+    // Set initial condition of offset angle until funciton is called
+    offsetAngle = 0;
+}
+
+void cMotorController::SetOffsetAngle()
+{
+#ifdef SENSORAY626
+    //Lock before we access Sensorarray stuff
+    m_mutex.lock();
+    unsigned long EncoderRaw = S626_CounterReadLatch(0, counterNum);
+    m_mutex.unlock();
+    // Change the raw encoder count into a double centered around 0
+    double EncoderPos = 0;
+    if (EncoderRaw < ((MAX_COUNT+1)/2))
+        EncoderPos = EncoderRaw;
+    else if (EncoderRaw >= ((MAX_COUNT+1)/2))
+        EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
+
+     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
+#endif
 }
 
 

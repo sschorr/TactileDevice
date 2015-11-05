@@ -32,6 +32,13 @@ QVector<double> c3DOFDevice::GetMotorAngles()
     return returnAngles;
 }
 
+void c3DOFDevice::ZeroEncoders()
+{
+    motor_1->SetOffsetAngle();
+    motor_2->SetOffsetAngle();
+    motor_3->SetOffsetAngle();
+}
+
 
 
 QVector<double> c3DOFDevice::MotAngToJointAng(QVector<double> JointAngles)
