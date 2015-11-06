@@ -40,10 +40,29 @@ void c3DOFDevice::ZeroEncoders()
 }
 
 
-
-QVector<double> c3DOFDevice::MotAngToJointAng(QVector<double> JointAngles)
+QVector<double> c3DOFDevice::GetJointAngles()
 {
-    QVector<double> returnVal(3);
-    return returnVal;
+    // assumes we are post calibration (encoders zerod)
+    QVector<double> motorAngles = GetMotorAngles();
+    QVector<double> jointAngles(3);
+
+    double initialTethL = sqrt(pow((ATTACHL*sin(CALIBANGLE) - VERTOFFSET),2) + pow((HORIZOFFSET - ATTACHL*cos(CALIBANGLE)), 2));
+
+    //increment through each motorController
+    for (int i = 0; i <= 2; i = i+1)
+    {
+        double tethChange = MOTRAD*motorAngles[i];
+        double tethL = initialTethL + tethChange;
+
+        double a = (tethL*tethL - VERTOFFSET*VERTOFFSET - HORIZOFFSET*HORIZOFFSET - ATTACHL*ATTACHL)/((-2)*ATTACHL*sqrt(HORIZOFFSET*HORIZOFFSET+VERTOFFSET*VERTOFFSET));
+        double phi = atan2(VERTOFFSET, HORIZOFFSET);
+        double phiMinusTheta = acos(a);
+        double theta = -(-phiMinusTheta - phi);
+        jointAngles[i] = theta;
+
+        //qDebug() << theta*180/PI;
+    }
+    return jointAngles;
 }
+
 
