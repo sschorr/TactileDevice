@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QVector>
 #include <math.h>
+#include <QGenericMatrix>
 
 #define PI 3.14159265
 // Physical parameters of build =======================================
@@ -19,6 +20,14 @@
 #define ATTACHL 7.5 // [mm]
 // Base joint angles during calibration procedure
 #define CALIBANGLE 0.785398 //45 [deg] to rad
+// length upper arm
+#define L_UA 9
+// length lower arm
+#define L_LA 9
+// length of base (center to joint)
+#define L_BASE 15
+// length of end effector (center to joint)
+#define L_EE 15
 
 
 
@@ -37,10 +46,16 @@ public:
     QVector<double> GetMotorAngles();
 
     // Determines the base joint angles based on the motor angles =========
-    QVector<double> c3DOFDevice::GetJointAngles();
+    QVector<double> GetJointAngles();
 
     // zeros all of the encoders on each cMotorController =================
     void ZeroEncoders();
+
+    // gets the end effector position =====================================
+    QVector<double> GetCartesianPos();
+
+    // determine the required torques for a given force
+    QVector<double> GetDesiredTorques(QVector<double>);
 
 
 

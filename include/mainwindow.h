@@ -29,6 +29,7 @@ private:
 
 private slots:
     void UpdateGUIInfo();
+    void on_CalibratePushButton_clicked();
 };
 
 #endif // MAINWINDOW_H
