@@ -29,6 +29,9 @@ HEADERS  += ./include/mainwindow.h\
 
 FORMS    += ./mainwindow.ui
 
+#include path for Eigen
+INCLUDEPATH += "./External"
+
 # Include path for qwt
 INCLUDEPATH += "./include"
 INCLUDEPATH += "./External/qwt-6.0.1/src"

@@ -8,12 +8,10 @@
 //#define SENSORAY626
 
 #include <qDebug>
-#include <iostream>
 #include <QVector>
 #include <math.h>
 #include "cMotorController.h"
 #include "c3dofdevice.h"
-
 
 
 

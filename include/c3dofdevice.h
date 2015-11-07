@@ -6,6 +6,9 @@
 #include <QVector>
 #include <math.h>
 #include <QGenericMatrix>
+#include <QMatrix>
+#include <Eigen/dense>
+#include <iostream>
 
 #define PI 3.14159265
 // Physical parameters of build =======================================
