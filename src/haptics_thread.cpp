@@ -14,7 +14,8 @@ void haptics_thread::run()
 {
     forever
     {
-
+        Eigen::Vector3d desiredForce(p_CommonData->GUI_desiredX, p_CommonData->GUI_desiredY, p_CommonData->GUI_desiredZ);
+        p_CommonData->wearableDelta->SetDesiredForce(desiredForce);
     }
 }
 

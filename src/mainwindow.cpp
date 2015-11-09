@@ -34,14 +34,32 @@ void MainWindow::UpdateGUIInfo()
     ui->CartesianYLCDNumber->display(p_CommonData->wearableDelta->GetCartesianPos()[1]);
     ui->CartesianZLCDNumber->display(p_CommonData->wearableDelta->GetCartesianPos()[2]);
 
-    QVector<double> test(3);
-    test[0] = 0; test[1] = 0; test[1] = 1;
+    ui->DesiredForceX->display(p_CommonData->wearableDelta->ReadDesiredForce()[0]);
+    ui->DesiredForceY->display(p_CommonData->wearableDelta->ReadDesiredForce()[1]);
+    ui->DesiredForceZ->display(p_CommonData->wearableDelta->ReadDesiredForce()[2]);
 
-    p_CommonData->wearableDelta->GetDesiredTorques(test);
+    ui->MotorTorque1->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[0]));
+    ui->MotorTorque2->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[1]));
+    ui->MotorTorque3->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[2]));
 
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
+}
+
+void MainWindow::on_verticalSliderX_valueChanged(int value)
+{
+    p_CommonData->GUI_desiredX = double(value)/100.0;
+}
+
+void MainWindow::on_verticalSliderY_valueChanged(int value)
+{
+    p_CommonData->GUI_desiredY = double(value)/100.0;
+}
+
+void MainWindow::on_verticalSliderZ_valueChanged(int value)
+{
+    p_CommonData->GUI_desiredZ = double(value)/100.0;
 }

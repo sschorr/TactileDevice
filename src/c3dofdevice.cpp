@@ -106,9 +106,9 @@ QVector<double> c3DOFDevice::GetCartesianPos()
     return pos;
 }
 
-QVector<double> c3DOFDevice::GetDesiredTorques(QVector<double> DesiredForce)
+QVector<double> c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
 {
-    QVector<double> torque;
+    QVector<double> torque(3);
     QVector<double> motorAngles = GetJointAngles();
     QVector<double> eePos = GetCartesianPos();
 
@@ -147,14 +147,9 @@ QVector<double> c3DOFDevice::GetDesiredTorques(QVector<double> DesiredForce)
             0, 1, 0,
             -sin(-motorAngles[2]), 0, cos(-motorAngles[2]);
 
-    Eigen::Vector3d L_BASE_Vector;
-    L_BASE_Vector << L_BASE, 0, 0;
-
-    Eigen::Vector3d L_LA_Vector;
-    L_LA_Vector << L_LA, 0, 0;
-
-    Eigen::Vector3d L_EE_Vector;
-    L_EE_Vector <<  L_EE, 0, 0;
+    Eigen::Vector3d L_BASE_Vector(L_BASE, 0, 0);
+    Eigen::Vector3d L_LA_Vector(L_LA, 0, 0);
+    Eigen::Vector3d L_EE_Vector(L_EE, 0, 0);
 
     // base origin to joint base
     Eigen::Vector3d O_F1 = Rz1*L_BASE_Vector;
@@ -177,19 +172,15 @@ QVector<double> c3DOFDevice::GetDesiredTorques(QVector<double> DesiredForce)
     Eigen::Vector3d Q_P3 = Rz3*L_EE_Vector;
 
     // end effector position multipliable vector
-    Eigen::Vector3d eePosVector;
-    eePosVector << eePos[0], eePos[1], eePos[2];
+    Eigen::Vector3d eePosVector(eePos[0], eePos[1], eePos[2]);
 
     Eigen::Vector3d s1 = eePosVector + Q_P1 - O_E1;
     Eigen::Vector3d s2 = eePosVector + Q_P2 - O_E2;
     Eigen::Vector3d s3 = eePosVector + Q_P3 - O_E3;
 
-    Eigen::Vector3d vec1;
-    vec1 << -L_LA*sin(motorAngles[0]), 0, L_LA*cos(motorAngles[0]);
-    Eigen::Vector3d vec2;
-    vec2 << -L_LA*sin(motorAngles[1]), 0, L_LA*cos(motorAngles[1]);
-    Eigen::Vector3d vec3;
-    vec3 << -L_LA*sin(motorAngles[2]), 0, L_LA*cos(motorAngles[2]);
+    Eigen::Vector3d vec1(-L_LA*sin(motorAngles[0]), 0, L_LA*cos(motorAngles[0]));
+    Eigen::Vector3d vec2(-L_LA*sin(motorAngles[1]), 0, L_LA*cos(motorAngles[1]));
+    Eigen::Vector3d vec3(-L_LA*sin(motorAngles[2]), 0, L_LA*cos(motorAngles[2]));
 
     Eigen::Vector3d b1 = Rz1*vec1;
     Eigen::Vector3d b2 = Rz2*vec2;
@@ -197,13 +188,13 @@ QVector<double> c3DOFDevice::GetDesiredTorques(QVector<double> DesiredForce)
 
     Eigen::Matrix3d Jx;
     Jx << s1(0,0), s1(1,0), s1(2,0),
-            s2(0,0), s2(1,0), s2(2,0),
-            s3(0,0), s3(1,0), s3(2,0);
+          s2(0,0), s2(1,0), s2(2,0),
+          s3(0,0), s3(1,0), s3(2,0);
 
     Eigen::Matrix3d Jtheta;
     Jtheta << (s1.transpose()*b1), 0, 0,
-            0, (s2.transpose()*b2), 0,
-            0, 0, (s3.transpose()*b3);
+               0, (s2.transpose()*b2), 0,
+               0, 0, (s3.transpose()*b3);
 
     Eigen::Matrix3d J = Jx.inverse()*Jtheta;
 
@@ -213,14 +204,61 @@ QVector<double> c3DOFDevice::GetDesiredTorques(QVector<double> DesiredForce)
     ////////////////////////////////////////////////////////////////////
 
     // Specify torque needed about base joints for given forces
-    Eigen::Vector3d Fx; Eigen::Vector3d Fy; Eigen::Vector3d Fz;
-    Fx << DesiredForce[0], 0, 0; Fy << 0, DesiredForce[1], 0; Fz << 0, 0, DesiredForce[2];
+    Eigen::Vector3d Force = DesiredForce;
+
+    // Torque needed about joints = J'*F (positive in direction pushing "out", same as for joint angle measurement)
+    Eigen::Vector3d Torque_Needed_NoSpring = J.transpose()*Force;    
+
+    // Adjust the torque needed by the bias spring force
+    double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
+    Eigen::Vector3d Torque_Needed_WithSpring;
+    Torque_Needed_WithSpring << Torque_Needed_NoSpring[0]-springTorStiff*(PI-motorAngles[0]),
+                                Torque_Needed_NoSpring[1]-springTorStiff*(PI-motorAngles[1]),
+                                Torque_Needed_NoSpring[2]-springTorStiff*(PI-motorAngles[2]);
 
 
-    Eigen::Vector3d Torque_Needed_X = J.transpose()*Fx;
+    // Describe vector from joint to tether attachment point
+    Eigen::Vector3d vec_joint_teth1(ATTACHL*cos(motorAngles[0]), ATTACHL*sin(motorAngles[0]), 0);
+    Eigen::Vector3d vec_joint_teth2(ATTACHL*cos(motorAngles[1]), ATTACHL*sin(motorAngles[1]), 0);
+    Eigen::Vector3d vec_joint_teth3(ATTACHL*cos(motorAngles[2]), ATTACHL*sin(motorAngles[2]), 0);
 
+    // Describe vector from tether to motor pulley
+    Eigen::Vector3d vec_joint_mot1(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_joint_mot2(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_joint_mot3(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_teth_mot1 = vec_joint_mot1 - vec_joint_teth1;
+    Eigen::Vector3d vec_teth_mot2 = vec_joint_mot2 - vec_joint_teth2;
+    Eigen::Vector3d vec_teth_mot3 = vec_joint_mot3 - vec_joint_teth3;
+
+    // normalize that vector
+    vec_teth_mot1.normalize();
+    vec_teth_mot2.normalize();
+    vec_teth_mot3.normalize();
+
+    // find cross products in order to determine necessary motor torque (will be [0, 0, z] due to 2D cross product)
+    double cross1 = vec_joint_teth1.cross(vec_teth_mot1)[2];
+    double cross2 = vec_joint_teth2.cross(vec_teth_mot2)[2];
+    double cross3 = vec_joint_teth3.cross(vec_teth_mot3)[2];
+
+    // fill in torque needed by motors for desired force
+    torque[0] = Torque_Needed_WithSpring[0]*MOTRAD/cross1;
+    torque[1] = Torque_Needed_WithSpring[1]*MOTRAD/cross2;
+    torque[2] = Torque_Needed_WithSpring[2]*MOTRAD/cross3;
 
     return torque;
 }
+
+// Set the desired force
+void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
+{
+    desiredForce = desiredForceArg;
+}
+
+// read the desired force
+Eigen::Vector3d c3DOFDevice::ReadDesiredForce()
+{
+    return desiredForce;
+}
+
 
 

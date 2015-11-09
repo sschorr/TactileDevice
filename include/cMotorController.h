@@ -10,7 +10,6 @@
 
 // List all includes ==========================================
 #include "Win626.h"
-
 #include <QMutex>
 
 class cMotorController

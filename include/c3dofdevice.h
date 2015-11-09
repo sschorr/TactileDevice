@@ -10,6 +10,8 @@
 #include <Eigen/dense>
 #include <iostream>
 
+#include <QMutex>
+
 #define PI 3.14159265
 // Physical parameters of build =======================================
 
@@ -31,6 +33,8 @@
 #define L_BASE 15
 // length of end effector (center to joint)
 #define L_EE 15
+// Spring torque of spring at parallel
+#define SPRING_TORQUE .050
 
 
 
@@ -57,8 +61,14 @@ public:
     // gets the end effector position =====================================
     QVector<double> GetCartesianPos();
 
-    // determine the required torques for a given force
-    QVector<double> GetDesiredTorques(QVector<double>);
+    // determine the required torques for a given force (positive torque is pulling thread)
+    QVector<double> GetDesiredTorques(Eigen::Vector3d);
+
+    // Set the desired force
+    void SetDesiredForce(Eigen::Vector3d);
+
+    // read the desired force
+    Eigen::Vector3d ReadDesiredForce();
 
 
 
@@ -66,6 +76,9 @@ private:
     cMotorController* motor_1;
     cMotorController* motor_2;
     cMotorController* motor_3;
+    Eigen::Vector3d desiredForce;
+
+
 
 
 
