@@ -50,19 +50,19 @@ public:
     int Init3DOFDeviceEnc();
 
     // returns the vector of all motor angles =============================
-    QVector<double> GetMotorAngles();
+    Eigen::Vector3d GetMotorAngles();
 
     // Determines the base joint angles based on the motor angles =========
-    QVector<double> GetJointAngles();
+    Eigen::Vector3d GetJointAngles();
 
     // zeros all of the encoders on each cMotorController =================
     void ZeroEncoders();
 
     // gets the end effector position =====================================
-    QVector<double> GetCartesianPos();
+    Eigen::Vector3d GetCartesianPos();
 
     // determine the required torques for a given force (positive torque is pulling thread)
-    QVector<double> GetDesiredTorques(Eigen::Vector3d);
+    Eigen::Vector3d GetDesiredTorques(Eigen::Vector3d);
 
     // Set the desired force
     void SetDesiredForce(Eigen::Vector3d);
@@ -77,9 +77,7 @@ private:
     cMotorController* motor_2;
     cMotorController* motor_3;
     Eigen::Vector3d desiredForce;
-
-
-
+    Eigen::Vector3d desiredTorques;
 
 
 

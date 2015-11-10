@@ -21,26 +21,32 @@ void MainWindow::Initialize()
 
 void MainWindow::UpdateGUIInfo()
 {
-    ui->MotorAngleLCDNumber1->display(p_CommonData->wearableDelta->GetMotorAngles()[0]*180/PI);
-    ui->JointAngleLCDNumber1->display(p_CommonData->wearableDelta->GetJointAngles()[0]*180/PI);
+    Eigen::Vector3d localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
+    Eigen::Vector3d localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
+    Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
+    Eigen::Vector3d localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    Eigen::Vector3d localDesiredTorques = p_CommonData->wearableDelta->GetDesiredTorques(localDesiredForce);
 
-    ui->MotorAngleLCDNumber2->display(p_CommonData->wearableDelta->GetMotorAngles()[1]*180/PI);
-    ui->JointAngleLCDNumber2->display(p_CommonData->wearableDelta->GetJointAngles()[1]*180/PI);
 
-    ui->MotorAngleLCDNumber3->display(p_CommonData->wearableDelta->GetMotorAngles()[2]*180/PI);
-    ui->JointAngleLCDNumber3->display(p_CommonData->wearableDelta->GetJointAngles()[2]*180/PI);
+    ui->MotorAngleLCDNumber1->display(localMotorAngles[0]);
+    ui->MotorAngleLCDNumber2->display(localMotorAngles[1]);
+    ui->MotorAngleLCDNumber3->display(localMotorAngles[2]);
 
-    ui->CartesianXLCDNumber->display(p_CommonData->wearableDelta->GetCartesianPos()[0]);
-    ui->CartesianYLCDNumber->display(p_CommonData->wearableDelta->GetCartesianPos()[1]);
-    ui->CartesianZLCDNumber->display(p_CommonData->wearableDelta->GetCartesianPos()[2]);
+    ui->JointAngleLCDNumber1->display(localJointAngles[0]);
+    ui->JointAngleLCDNumber2->display(localJointAngles[1]);
+    ui->JointAngleLCDNumber3->display(localJointAngles[2]);
 
-    ui->DesiredForceX->display(p_CommonData->wearableDelta->ReadDesiredForce()[0]);
-    ui->DesiredForceY->display(p_CommonData->wearableDelta->ReadDesiredForce()[1]);
-    ui->DesiredForceZ->display(p_CommonData->wearableDelta->ReadDesiredForce()[2]);
+    ui->CartesianXLCDNumber->display(localCartesianPos[0]);
+    ui->CartesianYLCDNumber->display(localCartesianPos[1]);
+    ui->CartesianZLCDNumber->display(localCartesianPos[2]);
 
-    ui->MotorTorque1->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[0]));
-    ui->MotorTorque2->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[1]));
-    ui->MotorTorque3->display((p_CommonData->wearableDelta->GetDesiredTorques(p_CommonData->wearableDelta->ReadDesiredForce())[2]));
+    ui->DesiredForceX->display(localDesiredForce[0]);
+    ui->DesiredForceY->display(localDesiredForce[1]);
+    ui->DesiredForceZ->display(localDesiredForce[2]);
+
+    ui->MotorTorque1->display(localDesiredTorques[0]);
+    ui->MotorTorque2->display(localDesiredTorques[1]);
+    ui->MotorTorque3->display(localDesiredTorques[2]);
 
 }
 
@@ -51,15 +57,27 @@ void MainWindow::on_CalibratePushButton_clicked()
 
 void MainWindow::on_verticalSliderX_valueChanged(int value)
 {
-    p_CommonData->GUI_desiredX = double(value)/100.0;
+    double xSlider = value/100.0;
+    double ySlider = this->ui->verticalSliderY->value()/100.0;
+    double zSlider = this->ui->verticalSliderZ->value()/100.0;
+    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
 }
 
 void MainWindow::on_verticalSliderY_valueChanged(int value)
 {
-    p_CommonData->GUI_desiredY = double(value)/100.0;
+    double xSlider = this->ui->verticalSliderX->value()/100.0;
+    double ySlider = value/100.0;
+    double zSlider = this->ui->verticalSliderZ->value()/100.0;
+    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
 }
 
 void MainWindow::on_verticalSliderZ_valueChanged(int value)
 {
-    p_CommonData->GUI_desiredZ = double(value)/100.0;
+    double xSlider = this->ui->verticalSliderX->value()/100.0;
+    double ySlider = this->ui->verticalSliderY->value()/100.0;
+    double zSlider = value/100.0;
+    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
 }

@@ -23,12 +23,13 @@ int c3DOFDevice::Init3DOFDeviceEnc()
     return 0;
 }
 
-QVector<double> c3DOFDevice::GetMotorAngles()
+Eigen::Vector3d c3DOFDevice::GetMotorAngles()
 {
-    QVector<double> returnAngles(3);
-    returnAngles[0] = motor_1->GetMotorAngle();
-    returnAngles[1] = motor_2->GetMotorAngle();
-    returnAngles[2] = motor_3->GetMotorAngle();
+    Eigen::Vector3d returnAngles(3);
+    returnAngles << motor_1->GetMotorAngle(),
+                    motor_2->GetMotorAngle(),
+                    motor_3->GetMotorAngle();
+
     return returnAngles;
 }
 
@@ -40,11 +41,11 @@ void c3DOFDevice::ZeroEncoders()
 }
 
 
-QVector<double> c3DOFDevice::GetJointAngles()
+Eigen::Vector3d c3DOFDevice::GetJointAngles()
 {
     // assumes we are post calibration (encoders zerod)
-    QVector<double> motorAngles = GetMotorAngles();
-    QVector<double> jointAngles(3);
+    Eigen::Vector3d motorAngles = GetMotorAngles();
+    Eigen::Vector3d jointAngles(3);
 
     // sets the initial condition tether length based on device dimensions and calibration angle
     double initialTethL = sqrt(pow((ATTACHL*sin(CALIBANGLE) - VERTOFFSET),2) + pow((HORIZOFFSET - ATTACHL*cos(CALIBANGLE)), 2));
@@ -65,9 +66,9 @@ QVector<double> c3DOFDevice::GetJointAngles()
     return jointAngles;
 }
 
-QVector<double> c3DOFDevice::GetCartesianPos()
+Eigen::Vector3d c3DOFDevice::GetCartesianPos()
 {
-    QVector<double> pos(3);
+    Eigen::Vector3d pos(3);
 
     // base side length
     double base = L_BASE*1.7321;
@@ -101,16 +102,16 @@ QVector<double> c3DOFDevice::GetCartesianPos()
     double zQ = 0.5*(b+sqrt(d))/a;
     double xQ = (a2*zQ+b2)/dnm;
     double yQ = (a1*zQ+b1)/dnm;
-    pos[0] = xQ; pos[1] = yQ; pos[2] = zQ;
+    pos << xQ, yQ, zQ;
 
     return pos;
 }
 
-QVector<double> c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
+Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
 {
-    QVector<double> torque(3);
-    QVector<double> motorAngles = GetJointAngles();
-    QVector<double> eePos = GetCartesianPos();
+    Eigen::Vector3d torque(3);
+    Eigen::Vector3d motorAngles = GetJointAngles();
+    Eigen::Vector3d eePos = GetCartesianPos();
 
     //////////////////////////////////////////////////////////////////////
     /// Jacobian Calcs
