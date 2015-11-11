@@ -74,7 +74,7 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
     double base = L_BASE*1.7321;
     double ee = L_EE*1.7321;
 
-    double sqrt3 = sqrt(3); double tan60 = sqrt3; double sin30 = 0.5; double tan30 = 1/sqrt3;
+    double sqrt3 = sqrt(3.0); double tan60 = sqrt3; double sin30 = 0.5; double tan30 = 1/sqrt3;
 
     double t = (base-ee)*tan30/2;
     double y1 = -(t+L_LA*cos(GetJointAngles()[0])); double z1 = -L_LA*sin(GetJointAngles()[0]);

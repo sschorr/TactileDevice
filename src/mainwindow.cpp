@@ -28,13 +28,13 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localDesiredTorques = p_CommonData->wearableDelta->GetDesiredTorques(localDesiredForce);
 
 
-    ui->MotorAngleLCDNumber1->display(localMotorAngles[0]);
-    ui->MotorAngleLCDNumber2->display(localMotorAngles[1]);
-    ui->MotorAngleLCDNumber3->display(localMotorAngles[2]);
+    ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
+    ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
+    ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
 
-    ui->JointAngleLCDNumber1->display(localJointAngles[0]);
-    ui->JointAngleLCDNumber2->display(localJointAngles[1]);
-    ui->JointAngleLCDNumber3->display(localJointAngles[2]);
+    ui->JointAngleLCDNumber1->display(localJointAngles[0]*180/PI);
+    ui->JointAngleLCDNumber2->display(localJointAngles[1]*180/PI);
+    ui->JointAngleLCDNumber3->display(localJointAngles[2]*180/PI);
 
     ui->CartesianXLCDNumber->display(localCartesianPos[0]);
     ui->CartesianYLCDNumber->display(localCartesianPos[1]);
