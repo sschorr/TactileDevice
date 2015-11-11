@@ -252,13 +252,20 @@ Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
 // Set the desired force
 void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 {
-    desiredForce = desiredForceArg;
+    this->desiredForce = desiredForceArg;
 }
 
 // read the desired force
 Eigen::Vector3d c3DOFDevice::ReadDesiredForce()
 {
-    return desiredForce;
+    return this->desiredForce;
+}
+
+void c3DOFDevice::SetTorqueOutput(Eigen::Vector3d desiredTorqueOutput)
+{
+    this->motor_1->SetOutputTorque(desiredTorqueOutput[0]);
+    this->motor_2->SetOutputTorque(desiredTorqueOutput[1]);
+    this->motor_3->SetOutputTorque(desiredTorqueOutput[2]);
 }
 
 

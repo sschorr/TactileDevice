@@ -21,17 +21,19 @@ public:
     // Open and Access Sensoray 626, configure for encoder
     int open();
     int close();
-    int MotorNumToCounterNum(int);
+    int MotorNumToChannelNum(int);
     void InitEncoder();
     void SetOffsetAngle();
     double GetMotorAngle();
+    void SetOutputTorque(double);
 
     // Destructor of cMotorControl
     virtual ~cMotorController();
+
 private:
     QMutex m_mutex;
     int motorNum;
-    int counterNum;
+    int channelNum;
     double offsetAngle;
 
 };

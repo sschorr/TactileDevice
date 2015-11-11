@@ -70,6 +70,9 @@ public:
     // read the desired force
     Eigen::Vector3d ReadDesiredForce();
 
+    // set the output Torques
+    void SetTorqueOutput(Eigen::Vector3d torqueOutput);
+
 
 
 private:

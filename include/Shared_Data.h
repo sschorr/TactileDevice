@@ -22,11 +22,6 @@ typedef struct
     // This is for any variables that are accessed from multiple threads
     c3DOFDevice* wearableDelta;    
 
-    double GUI_desiredX;
-    double GUI_desiredY;
-    double GUI_desiredZ;
-
-
 } shared_data;
 
 #endif // SHARED_DATA_H

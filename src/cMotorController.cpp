@@ -17,10 +17,19 @@
 #define DAC_VSCALAR 819.1
 
 // Define the encoder counts per revolution
-#define ENCODER_CPR 512 //360 (12*30 for Pololu motor)
+#define ENCODER_CPR 360 // (12*30 for Pololu motor)
 
 // Define used for Encoder count to angle in radian
 #define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR*4.0) // 4 comes from edges counts per quadrature cycle
+
+// Define the torque constant torque = I*KT
+#define KT 78.44 //mNm/A
+
+// Define the amplifier output to voltage input ratio I = I_RATIO*V
+#define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
+
+// Define the max amperage of the motor
+#define MAX_AMPS .25
 
 
 
@@ -29,7 +38,7 @@
 cMotorController::cMotorController(int inputMotorID)
 {
     motorNum = inputMotorID;
-    counterNum = MotorNumToCounterNum(motorNum);
+    channelNum = MotorNumToChannelNum(motorNum);
 }
 
 
@@ -42,7 +51,7 @@ double cMotorController::GetMotorAngle()
 #ifdef SENSORAY626
     //Lock before we access Sensorarray stuff
     m_mutex.lock();
-    unsigned long EncoderRaw = S626_CounterReadLatch(0, counterNum);
+    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
     m_mutex.unlock();
     // Change the raw encoder count into a double centered around 0
     double EncoderPos = 0;
@@ -56,9 +65,6 @@ double cMotorController::GetMotorAngle()
 #endif
     return motorAngle;
 }
-
-
-
 
 // Destructor of motor controller ================================
 cMotorController::~cMotorController()
@@ -82,10 +88,6 @@ int cMotorController::open()
 #endif
     return 0;
 }
-
-
-
-
 
 // Write all outputs to 0 and then close 626 board =========================
 int cMotorController::close()
@@ -111,7 +113,7 @@ int cMotorController::close()
 
 
 // Convert the motor number to the encoder number that corresponds======================
-int cMotorController::MotorNumToCounterNum(int motorNumArg)
+int cMotorController::MotorNumToChannelNum(int motorNumArg)
 {
     int counterNumRet;
     switch(motorNumArg){
@@ -137,7 +139,7 @@ void cMotorController::InitEncoder()
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     // Set counter operating mode.
-    S626_CounterModeSet( 0, counterNum,
+    S626_CounterModeSet( 0, channelNum,
     //( LOADSRC_INDX << BF_LOADSRC ) | // Index causes preload.
     ( INDXSRC_SOFT << BF_INDXSRC ) | // Hardware index is disabled
     ( INDXPOL_POS << BF_INDXPOL ) | // Active high index.
@@ -148,17 +150,17 @@ void cMotorController::InitEncoder()
 
     // Initialize preload value to zero so that the counter core will be set
     // to zero upon the occurance of an Index.
-    S626_CounterPreload( 0, counterNum, 0 );
+    S626_CounterPreload( 0, channelNum, 0 );
 
     // Enable latching of accumulated counts on demand. This assumes that
     // there is no conflict with the latch source used by paired counter 2B.
-    S626_CounterLatchSourceSet( 0, counterNum, LATCHSRC_AB_READ );
+    S626_CounterLatchSourceSet( 0, channelNum, LATCHSRC_AB_READ );
 
     // Enable the counter to generate interrupt requests upon index.
-    S626_CounterIntSourceSet( 0, counterNum, INTSRC_INDX );
+    S626_CounterIntSourceSet( 0, channelNum, INTSRC_INDX );
 
     // Simulate Index Pulse to reset count at 0 on startup
-    S626_CounterSoftIndex(0, counterNum);
+    S626_CounterSoftIndex(0, channelNum);
 #endif
 
     // Set initial condition of offset angle until funciton is called
@@ -170,7 +172,7 @@ void cMotorController::SetOffsetAngle()
 #ifdef SENSORAY626
     //Lock before we access Sensorarray stuff
     m_mutex.lock();
-    unsigned long EncoderRaw = S626_CounterReadLatch(0, counterNum);
+    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
     m_mutex.unlock();
     // Change the raw encoder count into a double centered around 0
     double EncoderPos = 0;
@@ -180,6 +182,26 @@ void cMotorController::SetOffsetAngle()
         EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
 
      offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
+#endif
+}
+
+void cMotorController::SetOutputTorque(double desiredTorque)
+{
+#ifdef SENSORAY626
+
+    double VoltOut = 0;
+    // Set Maximum Voltage output to allow maximum amperage limit
+    double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS;
+
+    double desiredAmps = desiredTorque/KT;
+    VoltOut = desiredAmps*AMPS_TO_VOLTS;
+
+    // Write Voltage out to DAC 0 with software limits checked
+    if ( VoltOut > MaxVolt ) VoltOut = MaxVolt;
+    else if ( VoltOut < -MaxVolt ) VoltOut = -MaxVolt;
+
+    S626_WriteDAC(0,channelNum,VoltOut*DAC_VSCALAR);
+
 #endif
 }
 
