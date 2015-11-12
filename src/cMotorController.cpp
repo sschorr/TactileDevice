@@ -20,8 +20,7 @@
 #define ENCODER_CPR 360 // (12*30 for Pololu motor)
 
 // Define used for Encoder count to angle in radian
-#define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR*4.0) // 4 comes from edges counts per quadrature cycle
-
+#define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR)
 // Define the torque constant torque = I*KT
 #define KT 78.44 //mNm/A
 

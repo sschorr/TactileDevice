@@ -53,7 +53,7 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
     //increment through each motorController
     for (int i = 0; i <= 2; i = i+1)
     {
-        double tethChange = MOTRAD*motorAngles[i];
+        double tethChange = MOTRAD*(motorAngles[i]);
 
         // account for fact that third motor turns in the opposite direction
         if(i==2)
@@ -251,7 +251,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d jointTorque
     torque[0] = jointTorquesNeeded[0]*MOTRAD/cross1;
     torque[1] = jointTorquesNeeded[1]*MOTRAD/cross2;
 
-    // turning the 3rd motor in the negative direction pulls the cable
+    // turning the 3rd motor in the opposite direction pulls the cable
     torque[2] = -jointTorquesNeeded[2]*MOTRAD/cross3;
 
     return torque;
