@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>371</width>
-    <height>620</height>
+    <width>373</width>
+    <height>728</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -441,13 +441,82 @@
      </rect>
     </property>
    </widget>
+   <widget class="QLCDNumber" name="VoltageLCD3">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>580</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="VoltageLCD1">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>580</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="VoltageLCD2">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>580</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_16">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>560</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Voltage 2</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_17">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>560</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Voltage 3</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_18">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>560</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Voltage 1</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>371</width>
+     <width>373</width>
      <height>21</height>
     </rect>
    </property>

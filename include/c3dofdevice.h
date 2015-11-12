@@ -42,49 +42,48 @@ class c3DOFDevice
 {
 
 public:
-    // Constructor of c3DOFDevice =========================================
+    // Constructor of c3DOFDevice
     c3DOFDevice();
     ~c3DOFDevice();
 
-    // Instantiates all the motor controllers =============================
+    // Instantiates all the motor controllers
     int Init3DOFDeviceEnc();
 
-    // returns the vector of all motor angles =============================
+    // returns the vector of all motor angles (positive torque about joint pushes end effector, angle measured from plane)
     Eigen::Vector3d GetMotorAngles();
 
-    // Determines the base joint angles based on the motor angles =========
+    // Determines the base joint angles based on the motor angles (angle measured from plane up to link)
     Eigen::Vector3d GetJointAngles();
 
-    // zeros all of the encoders on each cMotorController =================
+    // zeros all of the encoders on each cMotorController
     void ZeroEncoders();
 
-    // gets the end effector position =====================================
+    // gets the end effector position
     Eigen::Vector3d GetCartesianPos();
 
-    // determine the required torques for a given force (positive torque is pulling thread)
-    Eigen::Vector3d GetDesiredTorques(Eigen::Vector3d);
+    // determine the required joint torques for a given force (positive torque about joint pushes end effector)
+    Eigen::Vector3d CalcDesiredJointTorques(Eigen::Vector3d);
 
-    // Set the desired force
+    // determine the required motor torques for a given force (positive torque pulls on tether)
+    Eigen::Vector3d CalcDesiredMotorTorques(Eigen::Vector3d);
+
+    // Set the desired forces
     void SetDesiredForce(Eigen::Vector3d);
 
-    // read the desired force
+    // read the desired forces
     Eigen::Vector3d ReadDesiredForce();
 
     // set the output Torques
-    void SetTorqueOutput(Eigen::Vector3d torqueOutput);
+    void SetMotorTorqueOutput(Eigen::Vector3d torqueOutput);
 
-
+    // read the output voltages
+    Eigen::Vector3d ReadVoltageOutput();
 
 private:
     cMotorController* motor_1;
     cMotorController* motor_2;
     cMotorController* motor_3;
     Eigen::Vector3d desiredForce;
-    Eigen::Vector3d desiredTorques;
-
-
-
-
 };
 
 #endif // C3DOFDEVICE_H

@@ -11,6 +11,7 @@
 // List all includes ==========================================
 #include "Win626.h"
 #include <QMutex>
+#include <Eigen/dense>
 
 class cMotorController
 {
@@ -29,6 +30,11 @@ public:
 
     // Destructor of cMotorControl
     virtual ~cMotorController();
+
+    // used to look at voltage output
+    double voltageOutput;
+
+
 
 private:
     QMutex m_mutex;

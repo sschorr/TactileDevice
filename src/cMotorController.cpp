@@ -187,8 +187,6 @@ void cMotorController::SetOffsetAngle()
 
 void cMotorController::SetOutputTorque(double desiredTorque)
 {
-#ifdef SENSORAY626
-
     double VoltOut = 0;
     // Set Maximum Voltage output to allow maximum amperage limit
     double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS;
@@ -200,9 +198,11 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     if ( VoltOut > MaxVolt ) VoltOut = MaxVolt;
     else if ( VoltOut < -MaxVolt ) VoltOut = -MaxVolt;
 
+#ifdef SENSORAY626
     S626_WriteDAC(0,channelNum,VoltOut*DAC_VSCALAR);
-
 #endif
+
+    this->voltageOutput = VoltOut;
 }
 
 

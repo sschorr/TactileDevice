@@ -25,8 +25,9 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
     Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
     Eigen::Vector3d localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    Eigen::Vector3d localDesiredTorques = p_CommonData->wearableDelta->GetDesiredTorques(localDesiredForce);
-
+    Eigen::Vector3d localDesiredJointTorques = p_CommonData->wearableDelta->CalcDesiredJointTorques(localDesiredForce);
+    Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredJointTorques);
+    Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
 
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
@@ -44,9 +45,13 @@ void MainWindow::UpdateGUIInfo()
     ui->DesiredForceY->display(localDesiredForce[1]);
     ui->DesiredForceZ->display(localDesiredForce[2]);
 
-    ui->MotorTorque1->display(localDesiredTorques[0]);
-    ui->MotorTorque2->display(localDesiredTorques[1]);
-    ui->MotorTorque3->display(localDesiredTorques[2]);
+    ui->MotorTorque1->display(localDesiredMotorTorques[0]);
+    ui->MotorTorque2->display(localDesiredMotorTorques[1]);
+    ui->MotorTorque3->display(localDesiredMotorTorques[2]);
+
+    ui->VoltageLCD1->display(localOutputVoltages[0]);
+    ui->VoltageLCD2->display(localOutputVoltages[1]);
+    ui->VoltageLCD3->display(localOutputVoltages[2]);
 
 }
 

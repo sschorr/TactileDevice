@@ -27,6 +27,8 @@ private:
     // a timer for updating the gui
     QTimer GraphicsTimer;
 
+
+
 private slots:
     void UpdateGUIInfo();
     void on_CalibratePushButton_clicked();

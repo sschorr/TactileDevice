@@ -3,7 +3,7 @@
 
 c3DOFDevice::c3DOFDevice()
 {
-
+    this->desiredForce << 0,0,0;
 }
 
 c3DOFDevice::~c3DOFDevice()
@@ -54,6 +54,12 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
     for (int i = 0; i <= 2; i = i+1)
     {
         double tethChange = MOTRAD*motorAngles[i];
+
+        // account for fact that third motor turns in the opposite direction
+        if(i==2)
+        {
+            tethChange = MOTRAD*(-motorAngles[i]);
+        }
         double tethL = initialTethL + tethChange;
 
         double a = (tethL*tethL - VERTOFFSET*VERTOFFSET - HORIZOFFSET*HORIZOFFSET - ATTACHL*ATTACHL)/((-2)*ATTACHL*sqrt(HORIZOFFSET*HORIZOFFSET+VERTOFFSET*VERTOFFSET));
@@ -107,15 +113,15 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
     return pos;
 }
 
-Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
+Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForceArg)
 {
-    Eigen::Vector3d torque(3);
     Eigen::Vector3d motorAngles = GetJointAngles();
     Eigen::Vector3d eePos = GetCartesianPos();
 
     //////////////////////////////////////////////////////////////////////
     /// Jacobian Calcs
     //////////////////////////////////////////////////////////////////////
+    ///
     double phi1 = 0; double phi2 = 2*PI/3; double phi3 = 4*PI/3;
 
     Eigen::Matrix3d Rz1;
@@ -199,16 +205,8 @@ Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
 
     Eigen::Matrix3d J = Jx.inverse()*Jtheta;
 
-
-    ////////////////////////////////////////////////////////////////////
-    /// Determine Motor Torques from Needed Joint Torques
-    ////////////////////////////////////////////////////////////////////
-
-    // Specify torque needed about base joints for given forces
-    Eigen::Vector3d Force = DesiredForce;
-
     // Torque needed about joints = J'*F (positive in direction pushing "out", same as for joint angle measurement)
-    Eigen::Vector3d Torque_Needed_NoSpring = J.transpose()*Force;    
+    Eigen::Vector3d Torque_Needed_NoSpring = J.transpose()*desiredForceArg;
 
     // Adjust the torque needed by the bias spring force
     double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
@@ -217,6 +215,13 @@ Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
                                 Torque_Needed_NoSpring[1]-springTorStiff*(PI-motorAngles[1]),
                                 Torque_Needed_NoSpring[2]-springTorStiff*(PI-motorAngles[2]);
 
+    return Torque_Needed_WithSpring;
+}
+
+Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d jointTorquesNeeded)
+{
+
+    Eigen::Vector3d motorAngles = GetJointAngles();
 
     // Describe vector from joint to tether attachment point
     Eigen::Vector3d vec_joint_teth1(ATTACHL*cos(motorAngles[0]), ATTACHL*sin(motorAngles[0]), 0);
@@ -242,9 +247,12 @@ Eigen::Vector3d c3DOFDevice::GetDesiredTorques(Eigen::Vector3d DesiredForce)
     double cross3 = vec_joint_teth3.cross(vec_teth_mot3)[2];
 
     // fill in torque needed by motors for desired force
-    torque[0] = Torque_Needed_WithSpring[0]*MOTRAD/cross1;
-    torque[1] = Torque_Needed_WithSpring[1]*MOTRAD/cross2;
-    torque[2] = Torque_Needed_WithSpring[2]*MOTRAD/cross3;
+    Eigen::Vector3d torque;
+    torque[0] = jointTorquesNeeded[0]*MOTRAD/cross1;
+    torque[1] = jointTorquesNeeded[1]*MOTRAD/cross2;
+
+    // turning the 3rd motor in the negative direction pulls the cable
+    torque[2] = -jointTorquesNeeded[2]*MOTRAD/cross3;
 
     return torque;
 }
@@ -261,11 +269,17 @@ Eigen::Vector3d c3DOFDevice::ReadDesiredForce()
     return this->desiredForce;
 }
 
-void c3DOFDevice::SetTorqueOutput(Eigen::Vector3d desiredTorqueOutput)
+void c3DOFDevice::SetMotorTorqueOutput(Eigen::Vector3d desiredTorqueOutput)
 {
     this->motor_1->SetOutputTorque(desiredTorqueOutput[0]);
     this->motor_2->SetOutputTorque(desiredTorqueOutput[1]);
     this->motor_3->SetOutputTorque(desiredTorqueOutput[2]);
+}
+
+Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
+{
+    Eigen::Vector3d returnVoltage(this->motor_1->voltageOutput, this->motor_2->voltageOutput, this->motor_3->voltageOutput);
+    return returnVoltage;
 }
 
 
