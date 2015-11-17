@@ -35,6 +35,7 @@ private slots:
     void on_verticalSliderX_valueChanged(int value);
     void on_verticalSliderY_valueChanged(int value);
     void on_verticalSliderZ_valueChanged(int value);
+    void on_ZeroSliders_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -16,6 +16,9 @@ public:
     ~haptics_thread();
     void initialize();
 
+    // Commands a position to the Mechanism
+    void PositionController(Eigen::Vector3d);
+
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct

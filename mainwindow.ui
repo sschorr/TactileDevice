@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>373</width>
-    <height>728</height>
+    <width>543</width>
+    <height>754</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,7 +224,7 @@
    <widget class="QPushButton" name="CalibratePushButton">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>80</x>
       <y>210</y>
       <width>75</width>
       <height>23</height>
@@ -510,13 +510,52 @@
      <string>Voltage 1</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="ZeroSliders">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>210</y>
+      <width>75</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Zero Sliders</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonPos">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>160</y>
+      <width>111</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Position Control</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="radioButtonForce">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>400</y>
+      <width>91</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Force Control</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>373</width>
+     <width>543</width>
      <height>21</height>
     </rect>
    </property>

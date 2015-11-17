@@ -17,6 +17,7 @@ void MainWindow::Initialize()
 {
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
     GraphicsTimer.start(20);
+    ui->radioButtonForce->click();
 }
 
 void MainWindow::UpdateGUIInfo()
@@ -26,7 +27,7 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
     Eigen::Vector3d localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
     Eigen::Vector3d localDesiredJointTorques = p_CommonData->wearableDelta->CalcDesiredJointTorques(localDesiredForce);
-    Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredJointTorques);
+    Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
     Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
 
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
@@ -61,28 +62,44 @@ void MainWindow::on_CalibratePushButton_clicked()
 }
 
 void MainWindow::on_verticalSliderX_valueChanged(int value)
-{
-    double xSlider = value/100.0;
-    double ySlider = this->ui->verticalSliderY->value()/100.0;
-    double zSlider = this->ui->verticalSliderZ->value()/100.0;
-    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+{    
+    if(ui->radioButtonForce->isChecked())
+    {
+        double xSlider = value/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0;
+        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
 }
 
 void MainWindow::on_verticalSliderY_valueChanged(int value)
 {
-    double xSlider = this->ui->verticalSliderX->value()/100.0;
-    double ySlider = value/100.0;
-    double zSlider = this->ui->verticalSliderZ->value()/100.0;
-    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    if(ui->radioButtonForce->isChecked())
+    {
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = value/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0;
+        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
 }
 
 void MainWindow::on_verticalSliderZ_valueChanged(int value)
 {
-    double xSlider = this->ui->verticalSliderX->value()/100.0;
-    double ySlider = this->ui->verticalSliderY->value()/100.0;
-    double zSlider = value/100.0;
-    Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-    p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    if(ui->radioButtonForce->isChecked())
+    {
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = value/100.0;
+        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
+}
+
+void MainWindow::on_ZeroSliders_clicked()
+{
+    ui->verticalSliderX->setValue(0);
+    ui->verticalSliderY->setValue(0);
+    ui->verticalSliderZ->setValue(0);
 }

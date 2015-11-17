@@ -29,7 +29,6 @@ Eigen::Vector3d c3DOFDevice::GetMotorAngles()
     returnAngles << motor_1->GetMotorAngle(),
                     motor_2->GetMotorAngle(),
                     motor_3->GetMotorAngle();
-
     return returnAngles;
 }
 
@@ -218,9 +217,9 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
     return Torque_Needed_WithSpring;
 }
 
-Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d jointTorquesNeeded)
+Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForceOutput)
 {
-
+    Eigen::Vector3d jointTorquesNeeded = CalcDesiredJointTorques(desiredForceOutput);
     Eigen::Vector3d motorAngles = GetJointAngles();
 
     // Describe vector from joint to tether attachment point
@@ -269,11 +268,13 @@ Eigen::Vector3d c3DOFDevice::ReadDesiredForce()
     return this->desiredForce;
 }
 
-void c3DOFDevice::SetMotorTorqueOutput(Eigen::Vector3d desiredTorqueOutput)
+void c3DOFDevice::SetMotorTorqueOutput(Eigen::Vector3d desiredForceOutput)
 {
-    this->motor_1->SetOutputTorque(desiredTorqueOutput[0]);
-    this->motor_2->SetOutputTorque(desiredTorqueOutput[1]);
-    this->motor_3->SetOutputTorque(desiredTorqueOutput[2]);
+    Eigen::Vector3d desiredMotorTorques = CalcDesiredMotorTorques(desiredForceOutput);
+
+    this->motor_1->SetOutputTorque(desiredMotorTorques[0]);
+    this->motor_2->SetOutputTorque(desiredMotorTorques[1]);
+    this->motor_3->SetOutputTorque(desiredMotorTorques[2]);
 }
 
 Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()

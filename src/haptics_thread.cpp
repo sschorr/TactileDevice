@@ -14,14 +14,16 @@ void haptics_thread::run()
 {
     forever
     {
-        Eigen::Vector3d desiredJointTorque = p_CommonData->wearableDelta->CalcDesiredJointTorques(p_CommonData->wearableDelta->ReadDesiredForce());
-        Eigen::Vector3d desiredMotorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(desiredJointTorque);
-        p_CommonData->wearableDelta->SetMotorTorqueOutput(desiredMotorTorque);
-
+        p_CommonData->wearableDelta->SetMotorTorqueOutput(p_CommonData->wearableDelta->ReadDesiredForce());
     }
 }
 
 void haptics_thread::initialize()
+{
+
+}
+
+void haptics_thread::PositionController(Eigen::Vector3d desiredPositionArg)
 {
 
 }
