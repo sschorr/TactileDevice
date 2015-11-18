@@ -214,7 +214,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
                                 Torque_Needed_NoSpring[1]-springTorStiff*(PI-motorAngles[1]),
                                 Torque_Needed_NoSpring[2]-springTorStiff*(PI-motorAngles[2]);
 
-    return Torque_Needed_WithSpring;
+    return Torque_Needed_NoSpring;//Torque_Needed_WithSpring;
 }
 
 Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForceOutput)
