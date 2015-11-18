@@ -15,9 +15,40 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
+    connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
+    connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
+    connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
+    connect(this->ui->radioButtonPos, SIGNAL(clicked()), this, SLOT(on_GUI_changed()));
+    connect(this->ui->radioButtonForce, SIGNAL(clicked()), this, SLOT(on_GUI_changed()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
+
     GraphicsTimer.start(20);
-    ui->radioButtonForce->click();
+    ui->radioButtonPos->click();
+}
+
+void MainWindow::on_GUI_changed()
+{
+    if(ui->radioButtonForce->isChecked())
+    {
+        p_CommonData->posControlMode = false;
+        p_CommonData->forceControlMode = true;
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0;
+        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
+    else if(ui->radioButtonPos->isChecked())
+    {
+        p_CommonData->forceControlMode = false;
+        p_CommonData->posControlMode = true;
+        double xSlider = this->ui->verticalSliderX->value()/50.0;
+        double ySlider = this->ui->verticalSliderY->value()/50.0;
+        double zSlider = this->ui->verticalSliderZ->value()/50.0+12.73;
+        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
+    }
+    UpdateGUIInfo();
 }
 
 void MainWindow::UpdateGUIInfo()
@@ -26,7 +57,6 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
     Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
     Eigen::Vector3d localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    Eigen::Vector3d localDesiredJointTorques = p_CommonData->wearableDelta->CalcDesiredJointTorques(localDesiredForce);
     Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
     Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
     Eigen::Vector3d localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
@@ -51,99 +81,33 @@ void MainWindow::UpdateGUIInfo()
     ui->MotorTorque2->display(localDesiredMotorTorques[1]);
     ui->MotorTorque3->display(localDesiredMotorTorques[2]);
 
-    ui->VoltageLCD1->display(localOutputVoltages[0]);
-    ui->VoltageLCD2->display(localOutputVoltages[1]);
-    ui->VoltageLCD3->display(localOutputVoltages[2]);
+    ui->VoltageLCD1->display((double)(localOutputVoltages[0]));
+    ui->VoltageLCD2->display((double)(localOutputVoltages[1]));
+    ui->VoltageLCD3->display((double)(localOutputVoltages[2]));
 
     ui->DesX->display(localDesiredPos[0]);
     ui->DesY->display(localDesiredPos[1]);
     ui->DesZ->display(localDesiredPos[2]);
-
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
-}
 
-void MainWindow::on_verticalSliderX_valueChanged()
-{    
-    if(ui->radioButtonForce->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0;
-        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
-    }
-
-    if(ui->radioButtonPos->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
-        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
-    }
-}
-
-void MainWindow::on_verticalSliderY_valueChanged()
-{
-    if(ui->radioButtonForce->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0;
-        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
-    }
-
-    if(ui->radioButtonPos->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
-        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
-    }
-}
-
-void MainWindow::on_verticalSliderZ_valueChanged()
-{
-    if(ui->radioButtonForce->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0;
-        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
-    }
-
-    if(ui->radioButtonPos->isChecked())
-    {
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
-        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
-    }
+    on_GUI_changed();
 }
 
 void MainWindow::on_ZeroSliders_clicked()
 {
+    ui->verticalSliderX->blockSignals(true);
+    ui->verticalSliderY->blockSignals(true);
+    ui->verticalSliderZ->blockSignals(true);
     ui->verticalSliderX->setValue(0);
     ui->verticalSliderY->setValue(0);
     ui->verticalSliderZ->setValue(0);
-}
+    ui->verticalSliderX->blockSignals(false);
+    ui->verticalSliderY->blockSignals(false);
+    ui->verticalSliderZ->blockSignals(false);
 
-void MainWindow::on_radioButtonPos_clicked()
-{
-    p_CommonData->forceControlMode = false;
-    p_CommonData->posControlMode = true;
-}
-
-void MainWindow::on_radioButtonForce_clicked()
-{
-    p_CommonData->posControlMode = false;
-    p_CommonData->forceControlMode = true;
+    on_GUI_changed();
 }

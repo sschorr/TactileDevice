@@ -27,8 +27,8 @@
 // Define the amplifier output to voltage input ratio I = I_RATIO*V
 #define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
 
-// Define the max amperage of the motor
-#define MAX_AMPS .25
+// Define the max amperage of the motor (for all 3 combined)
+#define MAX_AMPS 0.75
 
 
 
@@ -193,15 +193,27 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
 
-    // Write Voltage out to DAC 0 with software limits checked
-    if ( VoltOut > MaxVolt ) VoltOut = MaxVolt;
-    else if ( VoltOut < -MaxVolt ) VoltOut = -MaxVolt;
+
+    // Write Voltage out to DAC with software limits checked
+    if ( VoltOut > MaxVolt )
+    {
+        VoltOut = MaxVolt;
+    }
+    else if ( VoltOut < -MaxVolt )
+    {
+        VoltOut = -MaxVolt;
+    }
+
+    long writeData = (long)(VoltOut*DAC_VSCALAR);
 
 #ifdef SENSORAY626
-    S626_WriteDAC(0,channelNum,VoltOut*DAC_VSCALAR);
+    S626_WriteDAC(0,channelNum,writeData);
 #endif
 
+
+    //Setting for GUI
     this->voltageOutput = VoltOut;
+
 }
 
 

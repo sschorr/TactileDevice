@@ -23,6 +23,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="MotorAngleLCDNumber2">
     <property name="geometry">
@@ -33,6 +36,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="MotorAngleLCDNumber3">
     <property name="geometry">
@@ -42,6 +48,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -92,6 +101,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="JointAngleLCDNumber2">
     <property name="geometry">
@@ -102,6 +114,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="JointAngleLCDNumber3">
     <property name="geometry">
@@ -111,6 +126,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -161,6 +179,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="CartesianYLCDNumber">
     <property name="geometry">
@@ -171,6 +192,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="CartesianZLCDNumber">
     <property name="geometry">
@@ -180,6 +204,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
@@ -312,6 +339,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>7</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="MotorTorque2">
     <property name="geometry">
@@ -322,6 +352,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>7</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="MotorTorque3">
     <property name="geometry">
@@ -331,6 +364,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>7</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_10">
@@ -407,6 +443,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="DesiredForceY">
     <property name="geometry">
@@ -416,6 +455,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_15">
@@ -440,6 +482,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="VoltageLCD3">
     <property name="geometry">
@@ -449,6 +494,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLCDNumber" name="VoltageLCD1">
@@ -460,6 +508,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="VoltageLCD2">
     <property name="geometry">
@@ -469,6 +520,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_16">
@@ -558,6 +612,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="DesY">
     <property name="geometry">
@@ -568,6 +625,9 @@
       <height>23</height>
      </rect>
     </property>
+    <property name="numDigits">
+     <number>6</number>
+    </property>
    </widget>
    <widget class="QLCDNumber" name="DesX">
     <property name="geometry">
@@ -577,6 +637,9 @@
       <width>64</width>
       <height>23</height>
      </rect>
+    </property>
+    <property name="numDigits">
+     <number>6</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_19">

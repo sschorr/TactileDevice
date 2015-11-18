@@ -300,9 +300,8 @@ void c3DOFDevice::PositionController()
     Eigen::Vector3d currentPos = GetCartesianPos();
     Eigen::Vector3d desiredPos = ReadDesiredPos();
 
-    double K_p = .1;
+    double K_p = 30;
     //double K_d = 0.000001;
-
     Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);
     SetMotorTorqueOutput(controllerForce);
 

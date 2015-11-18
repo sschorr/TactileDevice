@@ -13,8 +13,8 @@
 #include <QMutex>
 
 #define PI 3.14159265
-// Physical parameters of build =======================================
 
+// Physical parameters of build =======================================
 // radius of motor pulley
 #define MOTRAD 2 // [mm]
 // horizontal offset of motorshaft from base joint
