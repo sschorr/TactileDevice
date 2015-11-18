@@ -262,10 +262,22 @@ void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
     this->desiredForce = desiredForceArg;
 }
 
+// Set the desired pos
+void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
+{
+    this->desiredPos = desiredPosArg;
+}
+
 // read the desired force
 Eigen::Vector3d c3DOFDevice::ReadDesiredForce()
 {
     return this->desiredForce;
+}
+
+// read the desired pos
+Eigen::Vector3d c3DOFDevice::ReadDesiredPos()
+{
+    return this->desiredPos;
 }
 
 void c3DOFDevice::SetMotorTorqueOutput(Eigen::Vector3d desiredForceOutput)
@@ -282,6 +294,28 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
     Eigen::Vector3d returnVoltage(this->motor_1->voltageOutput, this->motor_2->voltageOutput, this->motor_3->voltageOutput);
     return returnVoltage;
 }
+
+void c3DOFDevice::PositionController()
+{
+    Eigen::Vector3d currentPos = GetCartesianPos();
+    Eigen::Vector3d desiredPos = ReadDesiredPos();
+
+    double K_p = .1;
+    //double K_d = 0.000001;
+
+    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);
+    SetMotorTorqueOutput(controllerForce);
+
+
+    // doing this just so GUI can see the controller force for debugging
+    SetDesiredForce(controllerForce);
+}
+
+void c3DOFDevice::ForceController()
+{
+    SetMotorTorqueOutput(ReadDesiredForce());
+}
+
 
 
 

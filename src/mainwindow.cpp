@@ -29,6 +29,7 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localDesiredJointTorques = p_CommonData->wearableDelta->CalcDesiredJointTorques(localDesiredForce);
     Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
     Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
+    Eigen::Vector3d localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
 
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
@@ -54,6 +55,10 @@ void MainWindow::UpdateGUIInfo()
     ui->VoltageLCD2->display(localOutputVoltages[1]);
     ui->VoltageLCD3->display(localOutputVoltages[2]);
 
+    ui->DesX->display(localDesiredPos[0]);
+    ui->DesY->display(localDesiredPos[1]);
+    ui->DesZ->display(localDesiredPos[2]);
+
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
@@ -61,39 +66,66 @@ void MainWindow::on_CalibratePushButton_clicked()
     p_CommonData->wearableDelta->ZeroEncoders();
 }
 
-void MainWindow::on_verticalSliderX_valueChanged(int value)
+void MainWindow::on_verticalSliderX_valueChanged()
 {    
     if(ui->radioButtonForce->isChecked())
     {
-        double xSlider = value/100.0;
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
         double ySlider = this->ui->verticalSliderY->value()/100.0;
         double zSlider = this->ui->verticalSliderZ->value()/100.0;
         Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
     }
-}
 
-void MainWindow::on_verticalSliderY_valueChanged(int value)
-{
-    if(ui->radioButtonForce->isChecked())
+    if(ui->radioButtonPos->isChecked())
     {
         double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = value/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0;
-        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
+        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
 }
 
-void MainWindow::on_verticalSliderZ_valueChanged(int value)
+void MainWindow::on_verticalSliderY_valueChanged()
 {
     if(ui->radioButtonForce->isChecked())
     {
         double xSlider = this->ui->verticalSliderX->value()/100.0;
         double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = value/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0;
         Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
+
+    if(ui->radioButtonPos->isChecked())
+    {
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
+        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
+    }
+}
+
+void MainWindow::on_verticalSliderZ_valueChanged()
+{
+    if(ui->radioButtonForce->isChecked())
+    {
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0;
+        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
+    }
+
+    if(ui->radioButtonPos->isChecked())
+    {
+        double xSlider = this->ui->verticalSliderX->value()/100.0;
+        double ySlider = this->ui->verticalSliderY->value()/100.0;
+        double zSlider = this->ui->verticalSliderZ->value()/100.0+12.73;
+        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
+        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
 }
 
@@ -102,4 +134,16 @@ void MainWindow::on_ZeroSliders_clicked()
     ui->verticalSliderX->setValue(0);
     ui->verticalSliderY->setValue(0);
     ui->verticalSliderZ->setValue(0);
+}
+
+void MainWindow::on_radioButtonPos_clicked()
+{
+    p_CommonData->forceControlMode = false;
+    p_CommonData->posControlMode = true;
+}
+
+void MainWindow::on_radioButtonForce_clicked()
+{
+    p_CommonData->posControlMode = false;
+    p_CommonData->forceControlMode = true;
 }

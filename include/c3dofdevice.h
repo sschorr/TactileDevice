@@ -70,6 +70,12 @@ public:
     // Set the desired forces
     void SetDesiredForce(Eigen::Vector3d);
 
+    // Set the desired pos
+    void SetDesiredPos(Eigen::Vector3d);
+
+    // read the desired pos
+    Eigen::Vector3d ReadDesiredPos();
+
     // read the desired forces
     Eigen::Vector3d ReadDesiredForce();
 
@@ -79,11 +85,18 @@ public:
     // read the output voltages
     Eigen::Vector3d ReadVoltageOutput();
 
+    // Commands a position to the 3DOF device
+    void PositionController();
+
+    // Commands a force to the 3DOF device
+    void ForceController();
+
 private:
     cMotorController* motor_1;
     cMotorController* motor_2;
     cMotorController* motor_3;
     Eigen::Vector3d desiredForce;
+    Eigen::Vector3d desiredPos;
 };
 
 #endif // C3DOFDEVICE_H

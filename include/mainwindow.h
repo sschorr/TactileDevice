@@ -32,10 +32,12 @@ private:
 private slots:
     void UpdateGUIInfo();
     void on_CalibratePushButton_clicked();
-    void on_verticalSliderX_valueChanged(int value);
-    void on_verticalSliderY_valueChanged(int value);
-    void on_verticalSliderZ_valueChanged(int value);
+    void on_verticalSliderX_valueChanged();
+    void on_verticalSliderY_valueChanged();
+    void on_verticalSliderZ_valueChanged();
     void on_ZeroSliders_clicked();
+    void on_radioButtonPos_clicked();
+    void on_radioButtonForce_clicked();
 };
 
 #endif // MAINWINDOW_H

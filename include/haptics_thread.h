@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "shared_data.h"
+#include "c3dofdevice.h"
 
 class haptics_thread : public QThread
 {
@@ -16,8 +17,7 @@ public:
     ~haptics_thread();
     void initialize();
 
-    // Commands a position to the Mechanism
-    void PositionController(Eigen::Vector3d);
+
 
 
     // Public Variables ============================================

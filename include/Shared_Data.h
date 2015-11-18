@@ -5,7 +5,7 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
+//#define SENSORAY626
 
 #include <qDebug>
 #include <QVector>
@@ -20,7 +20,10 @@ typedef struct
 {
     QMutex sharedMutex;
     // This is for any variables that are accessed from multiple threads
-    c3DOFDevice* wearableDelta;    
+    c3DOFDevice* wearableDelta;
+
+    bool forceControlMode;
+    bool posControlMode;
 
 
 } shared_data;
