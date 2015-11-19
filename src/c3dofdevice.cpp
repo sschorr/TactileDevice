@@ -67,6 +67,13 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
         double phi = atan2(VERTOFFSET, HORIZOFFSET);
         double phiMinusTheta = acos(a);
         double theta = -(-phiMinusTheta - phi);
+
+        // restrict theta to possible range (0-90)
+        if(theta > 88)
+            theta = 88;
+        if(theta < 2)
+            theta = 2;
+
         jointAngles[i] = theta;
     }
 
