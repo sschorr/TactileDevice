@@ -251,7 +251,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForc
     torque[1] = jointTorquesNeeded[1]*MOTRAD/cross2;
 
     // turning the 3rd motor in the opposite direction pulls the cable
-    torque[2] = -jointTorquesNeeded[2]*MOTRAD/cross3;
+    torque[2] = -(jointTorquesNeeded[2]*MOTRAD/cross3);
 
     return torque;
 }
