@@ -296,18 +296,33 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
 }
 
 void c3DOFDevice::PositionController()
-{
+{    
+    double K_p = 30;
+    double K_d = 0.000001;
+
+    static bool firstTimeThrough = true;
+    static Eigen::Vector3d lastPos;
+    static Eigen::Vector3d lastVel;
+    Eigen::Vector3d desiredVel(0,0,0);
+    double alpha = 0.5;
+
     Eigen::Vector3d currentPos = GetCartesianPos();
     Eigen::Vector3d desiredPos = ReadDesiredPos();
+    if(firstTimeThrough)
+    {
+        lastPos = currentPos;
+        lastVel << 0,0,0;
+        firstTimeThrough = false;
+    }
 
-    double K_p = 30;
-    //double K_d = 0.000001;
-    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);
-    SetMotorTorqueOutput(controllerForce);
+    Eigen::Vector3d currentVel = currentPos-lastPos;
+    Eigen::Vector3d filteredVel = alpha*currentVel + (1-alpha)*lastVel;
 
 
+    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
     // doing this just so GUI can see the controller force for debugging
     SetDesiredForce(controllerForce);
+    SetMotorTorqueOutput(ReadDesiredForce());
 }
 
 void c3DOFDevice::ForceController()
