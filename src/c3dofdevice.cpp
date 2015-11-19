@@ -8,7 +8,9 @@ c3DOFDevice::c3DOFDevice()
 
 c3DOFDevice::~c3DOFDevice()
 {
-
+    this->motor_1->~cMotorController();
+    this->motor_2->~cMotorController();
+    this->motor_3->~cMotorController();
 }
 
 int c3DOFDevice::Init3DOFDeviceEnc()
