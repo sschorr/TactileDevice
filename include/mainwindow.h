@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "shared_data.h"
 #include <QTimer>
+#include <windows.h>
+
 
 namespace Ui {
 class MainWindow;

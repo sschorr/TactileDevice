@@ -24,6 +24,7 @@ typedef struct
 
     bool forceControlMode;
     bool posControlMode;
+    bool hapticsThreadActive;
 
 
 } shared_data;

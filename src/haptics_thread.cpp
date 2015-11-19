@@ -12,7 +12,7 @@ haptics_thread::~haptics_thread()
 
 void haptics_thread::run()
 {
-    forever
+    while(p_CommonData->hapticsThreadActive)
     {
         if(p_CommonData->forceControlMode == true)
         {
@@ -23,9 +23,10 @@ void haptics_thread::run()
         {
             p_CommonData->wearableDelta->PositionController();
         }
-
-
     }
+
+    // If we are terminating, delete the haptic device to set outputs to 0
+    delete p_CommonData->wearableDelta;
 }
 
 void haptics_thread::initialize()
@@ -36,6 +37,10 @@ void haptics_thread::initialize()
 
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
     p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180)));
+
+    // set flag that says haptics thread is running
+    p_CommonData->hapticsThreadActive = true;
+
 
 }
 
