@@ -8,7 +8,9 @@ c3DOFDevice::c3DOFDevice()
 
 c3DOFDevice::~c3DOFDevice()
 {
-
+    this->motor_1->~cMotorController();
+    this->motor_2->~cMotorController();
+    this->motor_3->~cMotorController();
 }
 
 int c3DOFDevice::Init3DOFDeviceEnc()
@@ -214,7 +216,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
                                 Torque_Needed_NoSpring[1]-springTorStiff*(PI-motorAngles[1]),
                                 Torque_Needed_NoSpring[2]-springTorStiff*(PI-motorAngles[2]);
 
-    return Torque_Needed_NoSpring;//Torque_Needed_WithSpring;
+    return Torque_Needed_WithSpring;//Torque_Needed_WithSpring;
 }
 
 Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForceOutput)
@@ -251,7 +253,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForc
     torque[1] = jointTorquesNeeded[1]*MOTRAD/cross2;
 
     // turning the 3rd motor in the opposite direction pulls the cable
-    torque[2] = -jointTorquesNeeded[2]*MOTRAD/cross3;
+    torque[2] = -(jointTorquesNeeded[2]*MOTRAD/cross3);
 
     return torque;
 }
@@ -315,9 +317,9 @@ void c3DOFDevice::PositionController()
         firstTimeThrough = false;
     }
 
+
     Eigen::Vector3d currentVel = currentPos-lastPos;
     Eigen::Vector3d filteredVel = alpha*currentVel + (1-alpha)*lastVel;
-
 
     Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
     // doing this just so GUI can see the controller force for debugging

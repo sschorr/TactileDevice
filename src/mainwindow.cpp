@@ -32,9 +32,9 @@ void MainWindow::on_GUI_changed()
     {
         p_CommonData->posControlMode = false;
         p_CommonData->forceControlMode = true;
-        double xSlider = this->ui->verticalSliderX->value()/100.0;
-        double ySlider = this->ui->verticalSliderY->value()/100.0;
-        double zSlider = this->ui->verticalSliderZ->value()/100.0;
+        double xSlider = this->ui->verticalSliderX->value()/10.0;
+        double ySlider = this->ui->verticalSliderY->value()/10.0;
+        double zSlider = this->ui->verticalSliderZ->value()/10.0;
         Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
     }
@@ -42,9 +42,9 @@ void MainWindow::on_GUI_changed()
     {
         p_CommonData->forceControlMode = false;
         p_CommonData->posControlMode = true;
-        double xSlider = this->ui->verticalSliderX->value()/50.0;
-        double ySlider = this->ui->verticalSliderY->value()/50.0;
-        double zSlider = this->ui->verticalSliderZ->value()/50.0+12.73;
+        double xSlider = this->ui->verticalSliderX->value()/10.0;
+        double ySlider = this->ui->verticalSliderY->value()/10.0;
+        double zSlider = this->ui->verticalSliderZ->value()/10.0+12.73;
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
