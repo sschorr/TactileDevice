@@ -42,9 +42,9 @@ void MainWindow::on_GUI_changed()
     {
         p_CommonData->forceControlMode = false;
         p_CommonData->posControlMode = true;
-        double xSlider = this->ui->verticalSliderX->value()/50.0;
-        double ySlider = this->ui->verticalSliderY->value()/50.0;
-        double zSlider = this->ui->verticalSliderZ->value()/50.0+12.73;
+        double xSlider = this->ui->verticalSliderX->value()/10.0;
+        double ySlider = this->ui->verticalSliderY->value()/10.0;
+        double zSlider = this->ui->verticalSliderZ->value()/10.0+12.73;
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }

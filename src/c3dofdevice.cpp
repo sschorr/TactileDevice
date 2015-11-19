@@ -214,7 +214,7 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
                                 Torque_Needed_NoSpring[1]-springTorStiff*(PI-motorAngles[1]),
                                 Torque_Needed_NoSpring[2]-springTorStiff*(PI-motorAngles[2]);
 
-    return Torque_Needed_NoSpring;//Torque_Needed_WithSpring;
+    return Torque_Needed_WithSpring;//Torque_Needed_WithSpring;
 }
 
 Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForceOutput)
@@ -300,7 +300,7 @@ void c3DOFDevice::PositionController()
     Eigen::Vector3d currentPos = GetCartesianPos();
     Eigen::Vector3d desiredPos = ReadDesiredPos();
 
-    double K_p = 30;
+    double K_p = 1;
     //double K_d = 0.000001;
     Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);
     SetMotorTorqueOutput(controllerForce);
