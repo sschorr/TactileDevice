@@ -14,8 +14,14 @@
 #include "c3dofdevice.h"
 #include <Eigen/Dense>
 
+// define the data structure that holds stored data
+typedef struct
+{
+    double test;
 
+} DataRecordStruct;
 
+// define the data structure that contains shared data
 typedef struct
 {
     QMutex sharedMutex;
@@ -28,8 +34,12 @@ typedef struct
 
     double hapticRateEstimate;
 
+    DataRecordStruct debugData;
 
 } shared_data;
+
+
+
 
 #endif // SHARED_DATA_H
 
