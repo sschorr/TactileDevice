@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>543</width>
-    <height>754</height>
+    <width>563</width>
+    <height>760</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -681,13 +681,39 @@
      <string>Des Z</string>
     </property>
    </widget>
+   <widget class="QLCDNumber" name="lcdNumberHapticRate">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>600</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="numDigits">
+     <number>7</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>580</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Haptic Rate</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>543</width>
+     <width>563</width>
      <height>21</height>
     </rect>
    </property>

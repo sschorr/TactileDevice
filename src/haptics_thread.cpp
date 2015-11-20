@@ -14,15 +14,33 @@ void haptics_thread::run()
 {
     while(p_CommonData->hapticsThreadActive)
     {
-        if(p_CommonData->forceControlMode == true)
+        // if clock controlling haptic rate times out
+        if(rateClock.timeoutOccurred())
         {
-            p_CommonData->wearableDelta->ForceController();
-        }
+            // stop clock while we perform haptic calcs
+            rateClock.stop();
+            if(p_CommonData->forceControlMode == true)
+            {
+                p_CommonData->wearableDelta->ForceController();
+            }
 
-        else if(p_CommonData->posControlMode == true)
-        {
-            p_CommonData->wearableDelta->PositionController();
-        }
+            else if(p_CommonData->posControlMode == true)
+            {
+                p_CommonData->wearableDelta->PositionController();
+            }
+
+            rateDisplayCounter++;
+            if(rateDisplayClock.timeoutOccurred())
+            {
+                rateDisplayClock.stop();
+                p_CommonData->hapticRateEstimate = rateDisplayCounter;
+                rateDisplayCounter = 0;
+                rateDisplayClock.start(true);
+            }
+
+            //restart the rateClock
+            rateClock.start(true);
+        }        
     }
 
     // If we are terminating, delete the haptic device to set outputs to 0
@@ -41,6 +59,16 @@ void haptics_thread::initialize()
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
 
+    // Set the clock that controls haptic rate
+    rateClock.reset();
+    rateClock.setTimeoutPeriodSeconds(0.0002);
+    rateClock.start(true);
 
+    // setup the clock that will enable display of the haptic rate
+    rateDisplayClock.reset();
+    rateDisplayClock.setTimeoutPeriodSeconds(1.0);
+    rateDisplayClock.start(true);
+
+    rateDisplayCounter = 0;
 }
 

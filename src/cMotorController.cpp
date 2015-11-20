@@ -60,7 +60,7 @@ double cMotorController::GetMotorAngle()
         EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
 
     double rawMotorAngle = ENCCOUNT_TO_RAD*EncoderPos;
-    motorAngle = rawMotorAngle - offsetAngle;
+    motorAngle = -(rawMotorAngle - offsetAngle);
 #endif
     return motorAngle;
 }

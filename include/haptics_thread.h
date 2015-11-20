@@ -5,6 +5,9 @@
 #include <QThread>
 #include "shared_data.h"
 #include "c3dofdevice.h"
+#include "chai3d.h"
+#include <stdio.h>
+
 
 class haptics_thread : public QThread
 {
@@ -17,11 +20,16 @@ public:
     ~haptics_thread();
     void initialize();
 
+    // clocks
+    chai3d::cPrecisionClock rateClock;
+    chai3d::cPrecisionClock rateDisplayClock;
 
 
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
+
+    int rateDisplayCounter;
 
 
 

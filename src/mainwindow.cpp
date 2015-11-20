@@ -43,9 +43,9 @@ void MainWindow::on_GUI_changed()
     {
         p_CommonData->forceControlMode = false;
         p_CommonData->posControlMode = true;
-        double xSlider = this->ui->verticalSliderX->value()/10.0;
-        double ySlider = this->ui->verticalSliderY->value()/10.0;
-        double zSlider = this->ui->verticalSliderZ->value()/10.0+12.73;
+        double xSlider = this->ui->verticalSliderX->value()/25.0;
+        double ySlider = this->ui->verticalSliderY->value()/25.0;
+        double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
@@ -89,6 +89,8 @@ void MainWindow::UpdateGUIInfo()
     ui->DesX->display(localDesiredPos[0]);
     ui->DesY->display(localDesiredPos[1]);
     ui->DesZ->display(localDesiredPos[2]);
+
+    ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
 }
 
 void MainWindow::on_CalibratePushButton_clicked()

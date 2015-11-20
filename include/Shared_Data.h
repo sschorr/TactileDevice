@@ -26,6 +26,8 @@ typedef struct
     bool posControlMode;
     bool hapticsThreadActive;
 
+    double hapticRateEstimate;
+
 
 } shared_data;
 

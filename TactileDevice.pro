@@ -7,6 +7,8 @@
 QT       += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+
+
 TARGET = TactileDevice
 TEMPLATE = app
 
@@ -37,18 +39,29 @@ INCLUDEPATH += "./include"
 INCLUDEPATH += "./External/qwt-6.0.1/src"
 
 # Include path for Chai3d and Openhaptics
-INCLUDEPATH += "./External/chai3d-2.3.0/src"
-INCLUDEPATH += "./External/chai3d-2.3.0/external/OpenGL/msvc"
-INCLUDEPATH += "./External/chai3d-2.3.0/external/freeglut/include"
-INCLUDEPATH += "./External/chai3d-2.3.0/external/BASS/include"
-INCLUDEPATH += "./External/OpenHaptics_AE_3.1_BETA_3/include"
-INCLUDEPATH += "./External/OpenHaptics_AE_3.1_BETA_3/utilities/include"
+INCLUDEPATH += "./External/chai3d-3.0.0/src"
+INCLUDEPATH += "./External/chai3d-3.0.0/external/glew/include"
+INCLUDEPATH += "./External/chai3d-3.0.0/external/freeglut/include"
+INCLUDEPATH += "./External/chai3d-3.0.0/external/BASS/include"
+INCLUDEPATH += "./External/chai3d-3.0.0/external/Eigen"
 
 # Libraries for Chai3d and Openhaptics
-LIBS += "./External/chai3d-2.3.0/lib/msvc10/debug/chai3d-debug.lib"
-LIBS += "./External/chai3d-2.3.0/external/freeglut/lib/Win32/freeglut.lib"
-LIBS += "./External/chai3d-2.3.0/external/BASS/lib/msvc/bass_msvc.lib"
-LIBS += "./External/OpenHaptics_AE_3.1_BETA_3/lib/Win32/DebugAcademicEdition/hd.lib"
-LIBS += "./External/OpenHaptics_AE_3.1_BETA_3/utilities/lib/Win32/Debug/hdu.lib"
-LIBS += "./External/OpenHaptics_AE_3.1_BETA_3/utilities/lib/Win32/Debug/SnapConstraints.lib"
-LIBS += "./External/OpenHaptics_AE_3.1_BETA_3/utilities/lib/Win32/Debug/glut32.lib"
+LIBS += "./External/chai3d-3.0.0/lib/Debug/Win32/chai3d.lib"
+LIBS += "./External/chai3d-3.0.0/extras/freeglut/lib/Debug/Win32/freeglut.lib"
+
+
+#LIBS += "atls.lib"
+#LIBS += "winmm.lib"
+#LIBS += "odbc32.lib"
+#LIBS += "odbccp32.lib"
+#LIBS += "user32.lib"
+#LIBS += "kernel32.lib"
+#LIBS += "gdi32.lib"
+#LIBS += "winspool.lib"
+#LIBS += "shell32.lib"
+#LIBS += "ole32.lib"
+#LIBS += "oleaut32.lib"
+#LIBS += "uuid.lib"
+#LIBS += "comdlg32.lib"
+#LIBS += "advapi32.lib"
+#LIBS += "../External/qwt-6.0.1/lib/qwtd.lib"
