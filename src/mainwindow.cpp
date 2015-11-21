@@ -14,19 +14,33 @@ MainWindow::~MainWindow()
 
     //write debugging data to file when we are done
     std::ofstream file;
-    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData5.txt");
+    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData3.txt");
     for (int i=0; i < p_CommonData->debugData.size(); i++)
 
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
         file << p_CommonData->debugData[i].time << "," << " "
-             << p_CommonData->debugData[i].pos << "," << " "
-             << p_CommonData->debugData[i].desiredPos << "," << " "
-             << p_CommonData->debugData[i].desiredForce << "," << " "
-             << p_CommonData->debugData[i].motorAngles << "," << " "
-             << p_CommonData->debugData[i].jointAngles << "," << " "
-             << p_CommonData->debugData[i].motorTorque << "," << " "
-             << p_CommonData->debugData[i].voltageOut << "," << " "
+             << p_CommonData->debugData[i].pos[0] << "," << " "
+             << p_CommonData->debugData[i].pos[1] << "," << " "
+             << p_CommonData->debugData[i].pos[2] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[2] << "," << " "
 
              << std::endl;
     }
