@@ -19,17 +19,21 @@ public:
     explicit haptics_thread(QObject *parent = 0);
     ~haptics_thread();
     void initialize();
+    void RecordData();
 
     // clocks
     chai3d::cPrecisionClock rateClock;
     chai3d::cPrecisionClock rateDisplayClock;
-
+    chai3d::cPrecisionClock overallClock;
 
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
 
     int rateDisplayCounter;
+    int recordDataCounter;
+
+    DataRecordStruct dataRecorder;
 
 
 

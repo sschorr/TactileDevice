@@ -38,6 +38,13 @@ void haptics_thread::run()
                 rateDisplayClock.start(true);
             }
 
+            recordDataCounter++;
+            // record only on every 10 haptic loops
+            if(recordDataCounter == 10)
+            {
+                RecordData();
+            }
+
             //restart the rateClock
             rateClock.start(true);
         }        
@@ -61,7 +68,7 @@ void haptics_thread::initialize()
 
     // Set the clock that controls haptic rate
     rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.0002);
+    rateClock.setTimeoutPeriodSeconds(0.000001);
     rateClock.start(true);
 
     // setup the clock that will enable display of the haptic rate
@@ -69,6 +76,28 @@ void haptics_thread::initialize()
     rateDisplayClock.setTimeoutPeriodSeconds(1.0);
     rateDisplayClock.start(true);
 
+    // setup the overall program time clock
+    overallClock.reset();
+    overallClock.start(true);
+
     rateDisplayCounter = 0;
+    recordDataCounter = 0;
+}
+
+void haptics_thread::RecordData()
+{
+    recordDataCounter = 0;
+
+    dataRecorder.time = overallClock.getCurrentTimeSeconds();
+    dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
+    dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
+    dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
+    dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredForce();
+    dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
+    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
+
+    p_CommonData->debugData.push_back(dataRecorder);
+
 }
 

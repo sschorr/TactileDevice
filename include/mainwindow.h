@@ -5,6 +5,13 @@
 #include "shared_data.h"
 #include <QTimer>
 #include <windows.h>
+#include <iostream>
+#include <sstream> // Required for stringstreams
+#include <string>
+#include <QString>
+#include <ostream>
+#include <istream>
+#include <fstream>
 
 
 namespace Ui {

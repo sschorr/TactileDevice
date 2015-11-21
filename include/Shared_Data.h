@@ -5,7 +5,7 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define SENSORAY626
+#define SENSORAY626
 
 #include <qDebug>
 #include <QVector>
@@ -17,7 +17,14 @@
 // define the data structure that holds stored data
 typedef struct
 {
-    double test;
+    double time;
+    Eigen::Vector3d pos;
+    Eigen::Vector3d desiredPos;
+    Eigen::Vector3d motorAngles;
+    Eigen::Vector3d jointAngles;
+    Eigen::Vector3d motorTorque;
+    Eigen::Vector3d voltageOut;
+    Eigen::Vector3d desiredForce;
 
 } DataRecordStruct;
 
@@ -34,7 +41,7 @@ typedef struct
 
     double hapticRateEstimate;
 
-    DataRecordStruct debugData;
+    std::vector<DataRecordStruct> debugData;
 
 } shared_data;
 

@@ -9,8 +9,28 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow()
-{
+{    
     p_CommonData->hapticsThreadActive = false;
+
+    //write debugging data to file when we are done
+    std::ofstream file;
+    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData5.txt");
+    for (int i=0; i < p_CommonData->debugData.size(); i++)
+
+    {
+        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+        file << p_CommonData->debugData[i].time << "," << " "
+             << p_CommonData->debugData[i].pos << "," << " "
+             << p_CommonData->debugData[i].desiredPos << "," << " "
+             << p_CommonData->debugData[i].desiredForce << "," << " "
+             << p_CommonData->debugData[i].motorAngles << "," << " "
+             << p_CommonData->debugData[i].jointAngles << "," << " "
+             << p_CommonData->debugData[i].motorTorque << "," << " "
+             << p_CommonData->debugData[i].voltageOut << "," << " "
+
+             << std::endl;
+    }
+    file.close();
     delete ui;
 }
 
