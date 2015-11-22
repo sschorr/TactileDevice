@@ -95,6 +95,7 @@ void haptics_thread::RecordData()
     dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
     dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
 
 
     p_CommonData->debugData.push_back(dataRecorder);
