@@ -188,18 +188,18 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 {
     double VoltOut = 0;
     // Set Maximum Voltage output to allow maximum amperage limit
-    double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS;
+    double MaxVolt = 5.5; //MAX_AMPS*AMPS_TO_VOLTS;
 
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
 
 
     // Write Voltage out to DAC with software limits checked
-    if ( VoltOut > MaxVolt )
+    if (VoltOut > MaxVolt)
     {
         VoltOut = MaxVolt;
     }
-    else if ( VoltOut < -MaxVolt )
+    else if (VoltOut < (-MaxVolt))
     {
         VoltOut = -MaxVolt;
     }
@@ -212,7 +212,7 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 
 
     //Setting for GUI
-    this->voltageOutput = VoltOut;
+    this->voltageOutput = VoltOut*DAC_VSCALAR;
 
 }
 

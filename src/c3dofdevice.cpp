@@ -300,7 +300,7 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
 
 void c3DOFDevice::PositionController()
 {    
-    double K_p = 2;
+    double K_p = 5;
     double K_d = 0;
 
     static bool firstTimeThrough = true;
