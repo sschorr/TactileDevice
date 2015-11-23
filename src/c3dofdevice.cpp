@@ -120,6 +120,15 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
     Eigen::Vector3d jointAngles = GetJointAngles();
     Eigen::Vector3d eePos = GetCartesianPos();
 
+    /*static int torqueCounter = 0;
+
+    torqueCounter++;
+    if((torqueCounter == 20))
+    {
+        torqueCounter = 0;
+        qDebug() << "desiredForceArg " << desiredForceArg[0] << "jointAngles" << jointAngles[0]*180/PI << jointAngles[1]*180/PI << jointAngles[2]*180/PI << "pos " << eePos[0] << eePos[1] << eePos[2];
+    }*/
+
     //////////////////////////////////////////////////////////////////////
     /// Jacobian Calcs
     //////////////////////////////////////////////////////////////////////
@@ -224,6 +233,8 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForc
 {
     Eigen::Vector3d jointTorquesNeeded = CalcDesiredJointTorques(desiredForceOutput);
     Eigen::Vector3d jointAngles = GetJointAngles();
+
+
 
     // Describe vector from joint to tether attachment point
     Eigen::Vector3d vec_joint_teth1(ATTACHL*cos(jointAngles[0]), ATTACHL*sin(jointAngles[0]), 0);
@@ -332,6 +343,24 @@ void c3DOFDevice::PositionController()
 void c3DOFDevice::ForceController()
 {
     SetMotorTorqueOutput(ReadDesiredForce());
+}
+
+void c3DOFDevice::TestMotorTorqueController()
+{
+    static double hapticTime = 0;
+
+    // we gain about .001 second ever time through loop
+    hapticTime = hapticTime + 0.001;
+
+    double amp = 15;
+
+    double torque1 = amp*sin(2*PI*.2*hapticTime);
+    double torque2 = amp*sin(2*PI*.2*hapticTime);
+    double torque3 = amp*sin(2*PI*.2*hapticTime);
+
+    motor_1->SetOutputTorque(torque1);
+    motor_2->SetOutputTorque(torque2);
+    motor_3->SetOutputTorque(torque3);
 }
 
 

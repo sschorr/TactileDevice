@@ -26,9 +26,10 @@ void haptics_thread::run()
 
             else if(p_CommonData->posControlMode == true)
             {
-                p_CommonData->wearableDelta->PositionController();
+                p_CommonData->wearableDelta->TestMotorTorqueController();
             }
 
+            // update our rate estimate every second
             rateDisplayCounter++;
             if(rateDisplayClock.timeoutOccurred())
             {
@@ -38,12 +39,14 @@ void haptics_thread::run()
                 rateDisplayClock.start(true);
             }
 
-            recordDataCounter++;
+
             // record only on every 10 haptic loops
+            recordDataCounter++;            
             if(recordDataCounter == 10)
             {
                 RecordData();
             }
+
 
             //restart the rateClock
             rateClock.start(true);

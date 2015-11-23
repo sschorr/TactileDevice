@@ -91,6 +91,10 @@ public:
     // Commands a force to the 3DOF device
     void ForceController();
 
+    // Test torque output of motors
+    void TestMotorTorqueController();
+
+
 private:
     cMotorController* motor_1;
     cMotorController* motor_2;

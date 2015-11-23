@@ -28,7 +28,7 @@
 #define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
 
 // Define the max amperage of the motor (for all 3 combined)
-#define MAX_AMPS 0.75
+#define MAX_AMPS 0.30
 
 
 
@@ -184,11 +184,12 @@ void cMotorController::SetOffsetAngle()
 #endif
 }
 
+
 void cMotorController::SetOutputTorque(double desiredTorque)
 {
     double VoltOut = 0;
-    // Set Maximum Voltage output to allow maximum amperage limit
-    double MaxVolt = 5.5; //MAX_AMPS*AMPS_TO_VOLTS;
+    // we are limiting current output by railing power supply at nominal voltage;
+    double MaxVolt = 10; //MAX_AMPS*AMPS_TO_VOLTS;
 
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
@@ -211,8 +212,18 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 #endif
 
 
+    /*static int voltageCounter = 0;
+
+    voltageCounter++;
+    if((voltageCounter == 21))
+    {
+        voltageCounter = 0;
+        qDebug() << "desiredTorque " << desiredTorque << " writeData " << writeData << " channelNum " << channelNum;
+    }*/
+
     //Setting for GUI
-    this->voltageOutput = VoltOut*DAC_VSCALAR;
+    this->voltageOutput = VoltOut;
+
 
 }
 
