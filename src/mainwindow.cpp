@@ -14,7 +14,7 @@ MainWindow::~MainWindow()
 
     //write debugging data to file when we are done
     std::ofstream file;
-    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData2.txt");
+    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData3.txt");
     for (int i=0; i < p_CommonData->debugData.size(); i++)
 
     {
