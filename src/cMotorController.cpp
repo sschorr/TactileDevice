@@ -49,9 +49,9 @@ double cMotorController::GetMotorAngle()
     double motorAngle = 0;
 #ifdef SENSORAY626
     //Lock before we access Sensorarray stuff
-    m_mutex.lock();
+    //m_mutex.lock();
     unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
-    m_mutex.unlock();
+    //m_mutex.unlock();
     // Change the raw encoder count into a double centered around 0
     double EncoderPos = 0;
     if (EncoderRaw < ((MAX_COUNT+1)/2))

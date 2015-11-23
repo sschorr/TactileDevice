@@ -68,12 +68,6 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
         double phiMinusTheta = acos(a);
         double theta = -(-phiMinusTheta - phi);
 
-        // restrict theta to possible range (0-90)
-        /*if(theta > 88)
-            theta = 88;
-        if(theta < 2)
-            theta = 2;*/
-
         jointAngles[i] = theta;
     }
 
@@ -306,8 +300,8 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
 
 void c3DOFDevice::PositionController()
 {    
-    double K_p = 4;
-    double K_d = 0.5;
+    double K_p = 2;
+    double K_d = 0;
 
     static bool firstTimeThrough = true;
     static Eigen::Vector3d lastPos;
@@ -327,7 +321,7 @@ void c3DOFDevice::PositionController()
     Eigen::Vector3d currentVel = currentPos-lastPos;
     Eigen::Vector3d filteredVel = alpha*currentVel + (1-alpha)*lastVel;
 
-    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
+    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);// + K_d*(desiredVel-filteredVel);
     SetDesiredForce(controllerForce);
     SetMotorTorqueOutput(ReadDesiredForce());
 
