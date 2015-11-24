@@ -92,13 +92,13 @@ void haptics_thread::RecordData()
     recordDataCounter = 0;
 
     dataRecorder.time = overallClock.getCurrentTimeSeconds();
-    dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
+    //dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
     dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
-    dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
-    dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
+    //dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
+    //dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
-    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
+    //dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    //dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
 
 
     p_CommonData->debugData.push_back(dataRecorder);
