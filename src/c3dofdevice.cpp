@@ -311,8 +311,8 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
 
 void c3DOFDevice::PositionController()
 {    
-    double K_p = 5;
-    double K_d = 0;
+    double K_p = 20;
+    double K_d = .3;
 
     static bool firstTimeThrough = true;
     static Eigen::Vector3d lastPos;
@@ -332,7 +332,7 @@ void c3DOFDevice::PositionController()
     Eigen::Vector3d currentVel = currentPos-lastPos;
     Eigen::Vector3d filteredVel = alpha*currentVel + (1-alpha)*lastVel;
 
-    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos);// + K_d*(desiredVel-filteredVel);
+    Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
     SetDesiredForce(controllerForce);
     SetMotorTorqueOutput(ReadDesiredForce());
 
@@ -352,11 +352,11 @@ void c3DOFDevice::TestMotorTorqueController()
     // we gain about .001 second ever time through loop
     hapticTime = hapticTime + 0.001;
 
-    double amp = 15;
+    double amp = 25;
 
-    double torque1 = amp*sin(2*PI*.2*hapticTime);
-    double torque2 = amp*sin(2*PI*.2*hapticTime);
-    double torque3 = amp*sin(2*PI*.2*hapticTime);
+    double torque1 = amp*sin(2*PI*.1*hapticTime);
+    double torque2 = amp*sin(2*PI*.1*hapticTime);
+    double torque3 = amp*sin(2*PI*.1*hapticTime);
 
     motor_1->SetOutputTorque(torque1);
     motor_2->SetOutputTorque(torque2);

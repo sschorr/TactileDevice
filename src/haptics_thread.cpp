@@ -26,7 +26,7 @@ void haptics_thread::run()
 
             else if(p_CommonData->posControlMode == true)
             {
-                p_CommonData->wearableDelta->TestMotorTorqueController();
+                p_CommonData->wearableDelta->PositionController();
             }
 
             // update our rate estimate every second

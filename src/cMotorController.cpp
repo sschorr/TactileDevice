@@ -189,7 +189,7 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 {
     double VoltOut = 0;
     // we are limiting current output by railing power supply at nominal voltage;
-    double MaxVolt = 10; //MAX_AMPS*AMPS_TO_VOLTS;
+    double MaxVolt = 3; //MAX_AMPS*AMPS_TO_VOLTS;
 
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
@@ -222,7 +222,7 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     }*/
 
     //Setting for GUI
-    this->voltageOutput = VoltOut;
+    this->voltageOutput = writeData;
 
 
 }
