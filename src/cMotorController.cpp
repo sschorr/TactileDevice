@@ -212,7 +212,7 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 #endif
 
     //Setting for GUI
-    this->voltageOutput = writeData;
+    this->voltageOutput = VoltOut;
 
 
 }
