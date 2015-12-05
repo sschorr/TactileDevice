@@ -120,15 +120,6 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredJointTorques(Eigen::Vector3d desiredForc
     Eigen::Vector3d jointAngles = GetJointAngles();
     Eigen::Vector3d eePos = GetCartesianPos();
 
-    /*static int torqueCounter = 0;
-
-    torqueCounter++;
-    if((torqueCounter == 20))
-    {
-        torqueCounter = 0;
-        qDebug() << "desiredForceArg " << desiredForceArg[0] << "jointAngles" << jointAngles[0]*180/PI << jointAngles[1]*180/PI << jointAngles[2]*180/PI << "pos " << eePos[0] << eePos[1] << eePos[2];
-    }*/
-
     //////////////////////////////////////////////////////////////////////
     /// Jacobian Calcs
     //////////////////////////////////////////////////////////////////////

@@ -211,16 +211,6 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     S626_WriteDAC(0,channelNum,writeData);
 #endif
 
-
-    /*static int voltageCounter = 0;
-
-    voltageCounter++;
-    if((voltageCounter == 21))
-    {
-        voltageCounter = 0;
-        qDebug() << "desiredTorque " << desiredTorque << " writeData " << writeData << " channelNum " << channelNum;
-    }*/
-
     //Setting for GUI
     this->voltageOutput = writeData;
 
