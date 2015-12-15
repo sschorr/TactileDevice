@@ -3,6 +3,8 @@
 #include "shared_data.h"
 #include "haptics_thread.h"
 
+// This code runs the pololu motor driven device stably
+
 
 // Variable Declarations ============================================
 shared_data shared; //create the shared_data structure for sharing
