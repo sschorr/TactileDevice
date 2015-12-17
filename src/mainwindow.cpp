@@ -12,7 +12,7 @@ MainWindow::~MainWindow()
 {    
     p_CommonData->hapticsThreadActive = false;
 
-    //write debugging data to file when we are done
+    /*//write debugging data to file when we are done
     std::ofstream file;
     file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData.txt");
     for (int i=0; i < p_CommonData->debugData.size(); i++)
@@ -44,7 +44,7 @@ MainWindow::~MainWindow()
 
              << std::endl;
     }
-    file.close();
+    file.close();*/
     delete ui;
 }
 
