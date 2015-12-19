@@ -50,18 +50,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
-    connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
-    connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
-    connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(on_GUI_changed()));
-    connect(this->ui->radioButtonPos, SIGNAL(clicked()), this, SLOT(on_GUI_changed()));
-    connect(this->ui->radioButtonForce, SIGNAL(clicked()), this, SLOT(on_GUI_changed()));
+    // Initialize shared memory for OpenGL widget
+    ui->DisplayWidget->p_CommonData = p_CommonData;
+
+    connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->radioButtonPos, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->radioButtonForce, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     GraphicsTimer.start(20);
     ui->radioButtonPos->click();
 }
 
-void MainWindow::on_GUI_changed()
+void MainWindow::onGUIchanged()
 {
     if(ui->radioButtonForce->isChecked())
     {
@@ -131,7 +134,7 @@ void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
 
-    on_GUI_changed();
+    onGUIchanged();
 }
 
 void MainWindow::on_ZeroSliders_clicked()
@@ -146,5 +149,5 @@ void MainWindow::on_ZeroSliders_clicked()
     ui->verticalSliderY->blockSignals(false);
     ui->verticalSliderZ->blockSignals(false);
 
-    on_GUI_changed();
+    onGUIchanged();
 }

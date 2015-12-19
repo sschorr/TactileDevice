@@ -17,6 +17,9 @@ void haptics_thread::run()
         // if clock controlling haptic rate times out
         if(rateClock.timeoutOccurred())
         {
+            //update Chai3D parameters
+            m_tool->setLocalPos(0, 0, 0.05*sin(overallClock.getCurrentTimeSeconds())+0.02);
+
             // stop clock while we perform haptic calcs
             rateClock.stop();
             if(p_CommonData->forceControlMode == true)
@@ -59,6 +62,58 @@ void haptics_thread::run()
 
 void haptics_thread::initialize()
 {    
+    //-----------------------------------------------------------------------
+    // 3D - SCENEGRAPH
+    //-----------------------------------------------------------------------
+
+    // Create a new world
+    world = new chai3d::cWorld();
+
+    // create a camera and insert it into the virtual world
+    world->setBackgroundColor(0, 0, 0);
+
+    // create a camera and insert it into the virtual world
+    p_CommonData->p_camera = new chai3d::cCamera(world);
+    world->addChild(p_CommonData->p_camera);
+
+    // Position and orientate the camera
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, .1),    // camera position (eye)
+                                 chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
+                                 chai3d::cVector3d (0.0, 0.0, 1.0));   // direction of the "up" vector
+
+    // X is toward camera, pos y is to right, pos z is up
+
+    // set the near and far clipping planes of the camera
+    // anything in front/behind these clipping planes will not be rendered
+    //p_CommonData->p_camera->setClippingPlanes(0.01, 10.0);
+
+    // create a light source and attach it to the camera
+    light = new chai3d::cDirectionalLight(world);
+    world->addChild(light);   // insert light source inside world
+    light->setEnabled(true);                   // enable light source
+    light->setDir(chai3d::cVector3d(-2.0, 0.5, 1.0));  // define the direction of the light beam
+
+    // create a 3D tool and add it to the world
+    m_tool = new chai3d::cToolCursor(world);
+    world->addChild(m_tool);
+    m_tool->setRadius(0.003);
+    m_tool->setLocalPos(0.0, 0.0, .05);
+
+    // create a 3D box and add it to the world
+    m_box = new chai3d::cShapeBox(.1,.1,.1);
+    world->addChild(m_box);
+    m_box->setLocalPos(0,0,-0.05);
+    m_box->m_material->setStiffness(3.0);
+
+    // create a haptic effect for the box so that the user can feel its surface
+    newEffect = new chai3d::cEffectSurface(m_box);
+    m_box->addEffect(newEffect);
+
+
+
+
+    // GENERAL HAPTICS INITS=================================
+
     // Ensure the device is not controlling to start
     p_CommonData->forceControlMode = false;
     p_CommonData->posControlMode = false;

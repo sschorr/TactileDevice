@@ -29,15 +29,17 @@ int main(int argc, char *argv[])
     shared.wearableDelta->Init3DOFDeviceEnc();
 
 
-    // Initialize and then start the haptics thread
-    hapticsThread.p_CommonData = &shared; // set the haptics thread data pointer to the shared data
+    // Initialize and set the haptics thread data pointer to the shared data
+    hapticsThread.p_CommonData = &shared;
     hapticsThread.initialize();
-    hapticsThread.start();
 
+    // Initialize and set the window thread data pointer to the shared data
     window.p_CommonData = &shared;
     window.Initialize();
 
+    hapticsThread.start();
     window.show();
+
     return a.exec();
 }
 

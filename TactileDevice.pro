@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = TactileDevice
@@ -16,6 +16,7 @@ SOURCES += ./src/main.cpp\
            ./src/cMotorController.cpp \
            ./src/haptics_thread.cpp \
            ./src/c3dofdevice.cpp \
+           ./src/Widget_OpenGLDisplay.cpp \
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -25,6 +26,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/shared_data.h \
             ./include/haptics_thread.h \
             ./include/c3dofdevice.h \
+            ./include/Widget_OpenGLDisplay.h \
 
 FORMS    += ./mainwindow.ui
 

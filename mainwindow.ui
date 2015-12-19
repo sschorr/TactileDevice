@@ -23,7 +23,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -36,7 +36,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -49,7 +49,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -101,7 +101,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -114,7 +114,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -127,7 +127,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -179,7 +179,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -192,7 +192,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -205,7 +205,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -339,7 +339,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>7</number>
     </property>
    </widget>
@@ -352,7 +352,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>7</number>
     </property>
    </widget>
@@ -365,7 +365,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>7</number>
     </property>
    </widget>
@@ -443,7 +443,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -456,7 +456,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -482,7 +482,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -495,7 +495,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -508,7 +508,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -521,7 +521,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -612,7 +612,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -625,7 +625,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -638,7 +638,7 @@
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>6</number>
     </property>
    </widget>
@@ -684,27 +684,37 @@
    <widget class="QLCDNumber" name="lcdNumberHapticRate">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>600</y>
+      <x>350</x>
+      <y>610</y>
       <width>64</width>
       <height>23</height>
      </rect>
     </property>
-    <property name="numDigits">
+    <property name="digitCount">
      <number>7</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>410</x>
-      <y>580</y>
+      <x>360</x>
+      <y>590</y>
       <width>81</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
      <string>Haptic Rate</string>
+    </property>
+   </widget>
+   <widget class="Widget_OpenGLDisplay" name="DisplayWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>30</y>
+      <width>551</width>
+      <height>591</height>
+     </rect>
     </property>
    </widget>
   </widget>
@@ -729,6 +739,14 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Widget_OpenGLDisplay</class>
+   <extends>QWidget</extends>
+   <header>Widget_OpenGLDisplay.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

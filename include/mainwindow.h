@@ -28,6 +28,7 @@ public:
 
     void Initialize();
 
+
     shared_data* p_CommonData;
 
 private:
@@ -36,13 +37,11 @@ private:
     // a timer for updating the gui
     QTimer GraphicsTimer;
 
-
-
 private slots:
     void UpdateGUIInfo();
     void on_CalibratePushButton_clicked();
     void on_ZeroSliders_clicked();
-    void on_GUI_changed();
+    void onGUIchanged();
 };
 
 #endif // MAINWINDOW_H

@@ -16,8 +16,14 @@ class haptics_thread : public QThread
 
 public:
     // Public Functions ============================================
+
+    // CONSTRUCTOR
     explicit haptics_thread(QObject *parent = 0);
+
+    // DESTRUCTOR
     ~haptics_thread();
+
+    // METHODS
     void initialize();
     void RecordData();
 
@@ -29,6 +35,14 @@ public:
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
+
+    // chai3D objects
+    chai3d::cWorld* world;
+    chai3d::cDirectionalLight* light;
+    chai3d::cToolCursor* m_tool;
+    chai3d::cShapeBox* m_box;
+    chai3d::cEffectSurface* newEffect;
+
 
     int rateDisplayCounter;
     int recordDataCounter;

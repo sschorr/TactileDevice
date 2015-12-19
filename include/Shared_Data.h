@@ -13,6 +13,16 @@
 #include "cMotorController.h"
 #include "c3dofdevice.h"
 #include <Eigen/Dense>
+#include "chai3d.h"
+
+#define POS_SCALE 6
+#define HAPTIC_X_TRANSLATE 0 //.12
+#define HAPTIC_Y_TRANSLATE 0
+#define HAPTIC_Z_TRANSLATE 0 // -0.05
+
+#define CAMERA_X_TRANSLATE 0 //0.15
+#define CAMERA_Y_TRANSLATE 0.00
+#define CAMERA_Z_TRANSLATE 0
 
 // define the data structure that holds stored data
 typedef struct
@@ -31,6 +41,9 @@ typedef struct
 // define the data structure that contains shared data
 typedef struct
 {
+    //Chai3D variables
+    chai3d::cCamera* p_camera;
+
     QMutex sharedMutex;
     // This is for any variables that are accessed from multiple threads
     c3DOFDevice* wearableDelta;
