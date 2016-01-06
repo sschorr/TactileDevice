@@ -46,7 +46,6 @@ void haptics_thread::initialize()
     //--------------------------------------------------------------------------
     // HAPTIC DEVICES / TOOLS
     //--------------------------------------------------------------------------
-
     m_tool = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool); //insert the tool into the world
     toolRadius = 0.003; // set tool radius
@@ -67,8 +66,8 @@ void haptics_thread::initialize()
 
     // give the box physical properties
     meshBox->m_material->setStiffness(0.03);
-    meshBox->m_material->setStaticFriction(0.5);
-    meshBox->m_material->setDynamicFriction(0.5);
+    meshBox->m_material->setStaticFriction(0.1);
+    meshBox->m_material->setDynamicFriction(0.1);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a haptic effect for the box so that the user can feel its surface
@@ -76,10 +75,7 @@ void haptics_thread::initialize()
     meshBox->addEffect(newEffect);
 
 
-
-
     // GENERAL HAPTICS INITS=================================
-
     // Ensure the device is not controlling to start
     p_CommonData->forceControlMode = false;
     p_CommonData->posControlMode = false;

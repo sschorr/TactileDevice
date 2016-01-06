@@ -29,6 +29,8 @@ HEADERS  += ./include/mainwindow.h\
             ./include/c3dofdevice.h \
             ./include/Widget_OpenGLDisplay.h \
             ./include/c3dofChaiDevice.h \
+            ./include/TrakSTAR.h \
+            ./include/ATC3DG.h \
 
 FORMS    += ./mainwindow.ui
 
@@ -49,6 +51,9 @@ INCLUDEPATH += "./External/chai3d-3.0.0/external/Eigen"
 # Libraries for Chai3d and Openhaptics
 LIBS += "./External/chai3d-3.0.0/lib/Debug/Win32/chai3d.lib"
 LIBS += "./External/chai3d-3.0.0/extras/freeglut/lib/Debug/Win32/freeglut.lib"
+
+# Library for Ascension trackewr
+LIBS += "./lib/ATC3DG.lib"
 
 
 #LIBS += "atls.lib"
