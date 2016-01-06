@@ -41,7 +41,9 @@ public:
     chai3d::cDirectionalLight* light;
     chai3d::cToolCursor* m_tool;
     chai3d::cShapeBox* m_box;
+    chai3d::cMesh* meshBox;
     chai3d::cEffectSurface* newEffect;
+    double toolRadius;
 
 
     int rateDisplayCounter;

@@ -17,6 +17,7 @@ SOURCES += ./src/main.cpp\
            ./src/haptics_thread.cpp \
            ./src/c3dofdevice.cpp \
            ./src/Widget_OpenGLDisplay.cpp \
+           ./src/c3dofChaiDevice.cpp \
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -27,6 +28,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/haptics_thread.h \
             ./include/c3dofdevice.h \
             ./include/Widget_OpenGLDisplay.h \
+            ./include/c3dofChaiDevice.h \
 
 FORMS    += ./mainwindow.ui
 

@@ -11,6 +11,7 @@
 #include <QVector>
 #include <math.h>
 #include "cMotorController.h"
+#include "c3dofChaiDevice.h"
 #include "c3dofdevice.h"
 #include <Eigen/Dense>
 #include "chai3d.h"
@@ -45,8 +46,9 @@ typedef struct
     chai3d::cCamera* p_camera;
 
     QMutex sharedMutex;
-    // This is for any variables that are accessed from multiple threads
+
     c3DOFDevice* wearableDelta;
+    chai3d::cGenericHapticDevicePtr chaiDevice; // a pointer to the current haptic device
 
     bool forceControlMode;
     bool posControlMode;

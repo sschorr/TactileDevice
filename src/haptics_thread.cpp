@@ -10,6 +10,103 @@ haptics_thread::~haptics_thread()
 
 }
 
+void haptics_thread::initialize()
+{
+    //--------------------------------------------------------------------------
+    // WORLD - CAMERA - LIGHTING
+    //--------------------------------------------------------------------------
+    // Create a new world
+    world = new chai3d::cWorld();
+
+    // create a camera and insert it into the virtual world
+    world->setBackgroundColor(0, 0, 0);
+    world->m_backgroundColor.setWhite();
+
+    // create a camera and insert it into the virtual world
+    p_CommonData->p_camera = new chai3d::cCamera(world);
+    world->addChild(p_CommonData->p_camera);
+
+    // Position and orientate the camera
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, .03),    // camera position (eye)
+                                 chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
+                                 chai3d::cVector3d (0.0, 0.0, 1.0));   // direction of the "up" vector
+
+    // X is toward camera, pos y is to right, pos z is up
+
+    // set the near and far clipping planes of the camera
+    // anything in front/behind these clipping planes will not be rendered
+    //p_CommonData->p_camera->setClippingPlanes(0.01, 10.0);
+
+    // create a light source and attach it to the camera
+    light = new chai3d::cDirectionalLight(world);
+    world->addChild(light);   // insert light source inside world
+    light->setEnabled(true);                   // enable light source
+    light->setDir(chai3d::cVector3d(-2.0, 0.5, -1.0));  // define the direction of the light beam
+
+    //--------------------------------------------------------------------------
+    // HAPTIC DEVICES / TOOLS
+    //--------------------------------------------------------------------------
+
+    m_tool = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool); //insert the tool into the world
+    toolRadius = 0.003; // set tool radius
+    m_tool->setRadius(toolRadius); // set tool position
+    m_tool->setHapticDevice(p_CommonData->chaiDevice); // connect the haptic device to the tool
+    m_tool->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool->start();
+
+
+    //--------------------------------------------------------------------------
+    // CREATING OBJECTS
+    //--------------------------------------------------------------------------
+    meshBox = new chai3d::cMesh();  // create a mesh for a box
+    cCreateBox(meshBox, .1, .1, .001); // make mesh a box
+    meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
+    world->addChild(meshBox); // add to world
+    meshBox->setLocalPos(0,0,0); // set the position
+
+    // give the box physical properties
+    meshBox->m_material->setStiffness(0.03);
+    meshBox->m_material->setStaticFriction(0.5);
+    meshBox->m_material->setDynamicFriction(0.5);
+    meshBox->m_material->setUseHapticFriction(true);
+
+    // create a haptic effect for the box so that the user can feel its surface
+    newEffect = new chai3d::cEffectSurface(m_box);
+    meshBox->addEffect(newEffect);
+
+
+
+
+    // GENERAL HAPTICS INITS=================================
+
+    // Ensure the device is not controlling to start
+    p_CommonData->forceControlMode = false;
+    p_CommonData->posControlMode = false;
+    p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
+    p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
+
+    // set flag that says haptics thread is running
+    p_CommonData->hapticsThreadActive = true;
+
+    // Set the clock that controls haptic rate
+    rateClock.reset();
+    rateClock.setTimeoutPeriodSeconds(0.000001);
+    rateClock.start(true);
+
+    // setup the clock that will enable display of the haptic rate
+    rateDisplayClock.reset();
+    rateDisplayClock.setTimeoutPeriodSeconds(1.0);
+    rateDisplayClock.start(true);
+
+    // setup the overall program time clock
+    overallClock.reset();
+    overallClock.start(true);
+
+    rateDisplayCounter = 0;
+    recordDataCounter = 0;
+}
+
 void haptics_thread::run()
 {
     while(p_CommonData->hapticsThreadActive)
@@ -18,7 +115,16 @@ void haptics_thread::run()
         if(rateClock.timeoutOccurred())
         {
             //update Chai3D parameters
-            m_tool->setLocalPos(0, 0, 0.05*sin(overallClock.getCurrentTimeSeconds())+0.02);
+            // compute global reference frames for each object
+            world->computeGlobalPositions(true);
+
+            // update position and orientation of tool
+            m_tool->updatePose();
+
+            //Locks up running without a connected haptic device
+            m_tool->computeInteractionForces();
+
+
 
             // stop clock while we perform haptic calcs
             rateClock.stop();
@@ -43,12 +149,13 @@ void haptics_thread::run()
             }
 
 
+
             // record only on every 10 haptic loops
-            recordDataCounter++;            
+            /*recordDataCounter++;
             if(recordDataCounter == 10)
             {
                 RecordData();
-            }
+            }*/
 
 
             //restart the rateClock
@@ -60,87 +167,10 @@ void haptics_thread::run()
     delete p_CommonData->wearableDelta;
 }
 
-void haptics_thread::initialize()
-{    
-    //-----------------------------------------------------------------------
-    // 3D - SCENEGRAPH
-    //-----------------------------------------------------------------------
-
-    // Create a new world
-    world = new chai3d::cWorld();
-
-    // create a camera and insert it into the virtual world
-    world->setBackgroundColor(0, 0, 0);
-
-    // create a camera and insert it into the virtual world
-    p_CommonData->p_camera = new chai3d::cCamera(world);
-    world->addChild(p_CommonData->p_camera);
-
-    // Position and orientate the camera
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, .1),    // camera position (eye)
-                                 chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
-                                 chai3d::cVector3d (0.0, 0.0, 1.0));   // direction of the "up" vector
-
-    // X is toward camera, pos y is to right, pos z is up
-
-    // set the near and far clipping planes of the camera
-    // anything in front/behind these clipping planes will not be rendered
-    //p_CommonData->p_camera->setClippingPlanes(0.01, 10.0);
-
-    // create a light source and attach it to the camera
-    light = new chai3d::cDirectionalLight(world);
-    world->addChild(light);   // insert light source inside world
-    light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(-2.0, 0.5, 1.0));  // define the direction of the light beam
-
-    // create a 3D tool and add it to the world
-    m_tool = new chai3d::cToolCursor(world);
-    world->addChild(m_tool);
-    m_tool->setRadius(0.003);
-    m_tool->setLocalPos(0.0, 0.0, .05);
-
-    // create a 3D box and add it to the world
-    m_box = new chai3d::cShapeBox(.1,.1,.1);
-    world->addChild(m_box);
-    m_box->setLocalPos(0,0,-0.05);
-    m_box->m_material->setStiffness(3.0);
-
-    // create a haptic effect for the box so that the user can feel its surface
-    newEffect = new chai3d::cEffectSurface(m_box);
-    m_box->addEffect(newEffect);
 
 
 
 
-    // GENERAL HAPTICS INITS=================================
-
-    // Ensure the device is not controlling to start
-    p_CommonData->forceControlMode = false;
-    p_CommonData->posControlMode = false;
-
-    p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
-    p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180)));
-
-    // set flag that says haptics thread is running
-    p_CommonData->hapticsThreadActive = true;
-
-    // Set the clock that controls haptic rate
-    rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.000001);
-    rateClock.start(true);
-
-    // setup the clock that will enable display of the haptic rate
-    rateDisplayClock.reset();
-    rateDisplayClock.setTimeoutPeriodSeconds(1.0);
-    rateDisplayClock.start(true);
-
-    // setup the overall program time clock
-    overallClock.reset();
-    overallClock.start(true);
-
-    rateDisplayCounter = 0;
-    recordDataCounter = 0;
-}
 
 void haptics_thread::RecordData()
 {
