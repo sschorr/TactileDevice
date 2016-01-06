@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
     int transmitterID;
     short id;
     int numberBytes;
+    int i = 0;
 
     DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record, *pRecord = &record;
 
@@ -51,6 +52,24 @@ int main(int argc, char *argv[])
     if(errorCode==BIRD_ERROR_SUCCESS){
         qDebug("Initialized ATC3DG system\n");
     }
+    // get configurations
+    errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
+    pSensor = new CSensor[ATC3DG.m_config.numberSensors];
+    for(i=0;i<ATC3DG.m_config.numberSensors;i++)
+    {
+        errorCode = GetSensorConfiguration(i, &pSensor[i].m_config);
+        if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
+        qDebug("Got sensors configuration\n");
+    }
+    /*pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
+    for(i=0;i<ATC3DG.m_config.numberTransmitters;i++)
+    {
+        errorCode = GetTransmitterConfiguration(i, &pXmtr[i].m_config);
+        if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
+        qDebug("Got transmitters configuration\n");
+    }*/
+
+
 
 
 

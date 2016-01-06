@@ -18,6 +18,7 @@ SOURCES += ./src/main.cpp\
            ./src/c3dofdevice.cpp \
            ./src/Widget_OpenGLDisplay.cpp \
            ./src/c3dofChaiDevice.cpp \
+           ./src/trakSTAR.cpp \
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -31,6 +32,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/c3dofChaiDevice.h \
             ./include/TrakSTAR.h \
             ./include/ATC3DG.h \
+            ./include/stdafx.h \
 
 FORMS    += ./mainwindow.ui
 
