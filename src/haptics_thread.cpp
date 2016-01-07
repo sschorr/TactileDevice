@@ -66,8 +66,8 @@ void haptics_thread::initialize()
 
     // give the box physical properties
     meshBox->m_material->setStiffness(0.03);
-    meshBox->m_material->setStaticFriction(0.1);
-    meshBox->m_material->setDynamicFriction(0.1);
+    meshBox->m_material->setStaticFriction(0.5);
+    meshBox->m_material->setDynamicFriction(0.5);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a haptic effect for the box so that the user can feel its surface
