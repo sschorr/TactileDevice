@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 
+
 class haptics_thread : public QThread
 {
     Q_OBJECT
@@ -44,9 +45,11 @@ public:
     chai3d::cMesh* meshBox;
     chai3d::cEffectSurface* newEffect;
     double toolRadius;
-
     chai3d::cVector3d lastComputedForce;
 
+
+
+    // ints for display counters
     int rateDisplayCounter;
     int recordDataCounter;
 
