@@ -1,3 +1,7 @@
+/* This file reads in position from the magnetic tracker and treats the
+ * information as a CHAI device */
+
+
 //==============================================================================
 /*
     Software License Agreement (BSD License)
@@ -49,6 +53,7 @@
 #if defined(C_ENABLE_CUSTOM_DEVICE_SUPPORT)
 //------------------------------------------------------------------------------
 #include "devices/CGenericHapticDevice.h"
+#include "c3DOFdevice.h"
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -186,7 +191,11 @@ public:
     */
     ////////////////////////////////////////////////////////////////////////////
 
+
 protected:
+
+    // the chai device has a 3dofdevice
+    //c3DOFDevice* wearableDelta;
 
     //! a short description of my variable
     int m_MyVariable;

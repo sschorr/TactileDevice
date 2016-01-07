@@ -65,7 +65,7 @@ void MainWindow::Initialize()
 }
 
 void MainWindow::onGUIchanged()
-{
+{/*
     if(ui->radioButtonForce->isChecked())
     {
         p_CommonData->posControlMode = false;
@@ -86,11 +86,11 @@ void MainWindow::onGUIchanged()
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
-    UpdateGUIInfo();
+    UpdateGUIInfo();*/
 }
 
 void MainWindow::UpdateGUIInfo()
-{
+{/*
     Eigen::Vector3d localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
     Eigen::Vector3d localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
     Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
@@ -125,16 +125,16 @@ void MainWindow::UpdateGUIInfo()
 
     ui->DesX->display(localDesiredPos[0]);
     ui->DesY->display(localDesiredPos[1]);
-    ui->DesZ->display(localDesiredPos[2]);
+    ui->DesZ->display(localDesiredPos[2]);*/
 
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
-{
+{/*
     p_CommonData->wearableDelta->ZeroEncoders();
 
-    onGUIchanged();
+    onGUIchanged();*/
 }
 
 void MainWindow::on_ZeroSliders_clicked()

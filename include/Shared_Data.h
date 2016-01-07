@@ -12,7 +12,7 @@
 #include <math.h>
 #include "cMotorController.h"
 #include "c3dofChaiDevice.h"
-#include "c3dofdevice.h"
+#include "c3DOFdevice.h"
 #include <Eigen/Dense>
 #include "chai3d.h"
 
@@ -50,7 +50,6 @@ typedef struct
     c3DOFDevice* wearableDelta;
     chai3d::cGenericHapticDevicePtr chaiDevice; // a pointer to the current haptic device
 
-    bool forceControlMode;
     bool posControlMode;
     bool hapticsThreadActive;
 

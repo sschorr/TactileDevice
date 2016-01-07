@@ -15,7 +15,7 @@ SOURCES += ./src/main.cpp\
            ./src/Win626.c \
            ./src/cMotorController.cpp \
            ./src/haptics_thread.cpp \
-           ./src/c3dofdevice.cpp \
+           ./src/c3DOFdevice.cpp \
            ./src/Widget_OpenGLDisplay.cpp \
            ./src/c3dofChaiDevice.cpp \
            ./src/trakSTAR.cpp \
@@ -27,7 +27,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/cMotorController.h \
             ./include/shared_data.h \
             ./include/haptics_thread.h \
-            ./include/c3dofdevice.h \
+            ./include/c3DOFdevice.h \
             ./include/Widget_OpenGLDisplay.h \
             ./include/c3dofChaiDevice.h \
             ./include/TrakSTAR.h \

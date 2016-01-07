@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include "shared_data.h"
-#include "c3dofdevice.h"
+#include "c3DOFdevice.h"
 #include "chai3d.h"
 #include <stdio.h>
 
@@ -45,6 +45,7 @@ public:
     chai3d::cEffectSurface* newEffect;
     double toolRadius;
 
+    chai3d::cVector3d lastComputedForce;
 
     int rateDisplayCounter;
     int recordDataCounter;

@@ -217,6 +217,7 @@ c3dofChaiDevice::c3dofChaiDevice(unsigned int a_deviceNumber)
 
     m_deviceAvailable = false; // this value should become 'true' when the device is available.
 
+
     m_deviceAvailable = true; // my code making device available
 }
 
@@ -434,12 +435,9 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
 
-    // update positiona and orientation of tool
-    //m_tool->setLocalPos(0, 0, -0.05*sin(overallClock.getCurrentTimeSeconds())+0.02);
-
     x = 0.0;    // x = getMyDevicePositionX()
-    y = -0.05*sin(0.0001*counter)+0.02;;    // y = getMyDevicePositionY()
-    z = -0.05*sin(0.0001*counter)+0.02;    // z = getMyDevicePositionZ()
+    y = -0.05*sin(0.00001*counter)+0.02;;    // y = getMyDevicePositionY()
+    z = -0.05*sin(0.00001*counter)+0.02;    // z = getMyDevicePositionZ()
 
     // store new position values
     a_position.set(x, y, z);

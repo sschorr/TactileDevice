@@ -1,4 +1,4 @@
-#include "c3dofdevice.h"
+#include "c3DOFdevice.h"
 
 
 c3DOFDevice::c3DOFDevice()

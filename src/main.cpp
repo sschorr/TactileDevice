@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     shared.wearableDelta->Init3DOFDeviceEnc();
 
     // TESTING WITH MAGNETIC TRACKER
-    CSystem ATC3DG; // a pointer to a single instance of the system class
+    /*CSystem ATC3DG; // a pointer to a single instance of the system class
     CSensor *pSensor; // a pointer to an array of sensor objects
     CXmtr *pXmtr; // a pointer to an array of transmitter objects
     CBoard *pBoard; // a pointer to an array of board objects
@@ -61,17 +61,13 @@ int main(int argc, char *argv[])
         if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
         qDebug("Got sensors configuration\n");
     }
-    /*pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
+    pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
     for(i=0;i<ATC3DG.m_config.numberTransmitters;i++)
     {
         errorCode = GetTransmitterConfiguration(i, &pXmtr[i].m_config);
         if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
         qDebug("Got transmitters configuration\n");
     }*/
-
-
-
-
 
 
     // Initialize and set the haptics thread data pointer to the shared data

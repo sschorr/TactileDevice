@@ -1,3 +1,6 @@
+/* This file controls the 3-DOF wearable device based on the "interaction force" from the
+ * CHAI computed device */
+
 #ifndef C3DOFDEVICE_H
 #define C3DOFDEVICE_H
 

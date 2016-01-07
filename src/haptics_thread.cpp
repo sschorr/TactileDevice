@@ -77,7 +77,6 @@ void haptics_thread::initialize()
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
-    p_CommonData->forceControlMode = false;
     p_CommonData->posControlMode = false;
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
     p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
@@ -120,16 +119,22 @@ void haptics_thread::run()
             //Locks up running without a connected haptic device
             m_tool->computeInteractionForces();
 
+            // send forces to haptic device
+            //m_tool->applyForces();
+
+            // get device forces
+            lastComputedForce = m_tool->m_lastComputedGlobalForce;
+
+
+
+
+
 
 
             // stop clock while we perform haptic calcs
             rateClock.stop();
-            if(p_CommonData->forceControlMode == true)
-            {
-                p_CommonData->wearableDelta->ForceController();
-            }
 
-            else if(p_CommonData->posControlMode == true)
+            if(p_CommonData->posControlMode == true)
             {
                 p_CommonData->wearableDelta->PositionController();
             }
@@ -147,11 +152,11 @@ void haptics_thread::run()
 
 
             // record only on every 10 haptic loops
-            /*recordDataCounter++;
+            recordDataCounter++;
             if(recordDataCounter == 10)
             {
-                RecordData();
-            }*/
+                //RecordData();
+            }
 
 
             //restart the rateClock
@@ -159,8 +164,7 @@ void haptics_thread::run()
         }        
     }
 
-    // If we are terminating, delete the haptic device to set outputs to 0
-    delete p_CommonData->wearableDelta;
+    // If we are terminating, delete the haptic device to set outputs to 0   
 }
 
 
@@ -170,19 +174,19 @@ void haptics_thread::run()
 
 void haptics_thread::RecordData()
 {
-    recordDataCounter = 0;
+    //recordDataCounter = 0;
 
-    dataRecorder.time = overallClock.getCurrentTimeSeconds();
+    //dataRecorder.time = overallClock.getCurrentTimeSeconds();
     //dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
-    dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
+    //dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
     //dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
     //dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-    dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
+    //dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
     //dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
     //dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
 
 
-    p_CommonData->debugData.push_back(dataRecorder);
+    //p_CommonData->debugData.push_back(dataRecorder);
 
 }
 
