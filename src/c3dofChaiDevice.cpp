@@ -515,6 +515,15 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
     // test the reading of the magnetic tracker
     errorCode = GetAsynchronousRecord(0, pRecord, sizeof(record));
+    if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
+    // get the status of the last data record
+    // only report the data if everything is okay
+    unsigned int status = GetSensorStatus( sensorID);
+    if( status == VALID_STATUS)
+    {
+        qDebug() << record.x;
+    }
+
 
     bool result = C_SUCCESS;
     double x,y,z;
