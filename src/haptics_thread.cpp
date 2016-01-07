@@ -119,9 +119,6 @@ void haptics_thread::run()
             //Locks up running without a connected haptic device
             m_tool->computeInteractionForces();
 
-            // send forces to haptic device
-            //m_tool->applyForces();
-
             // get device forces
             lastComputedForce = m_tool->m_lastComputedGlobalForce;
 
