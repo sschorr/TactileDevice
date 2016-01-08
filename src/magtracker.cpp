@@ -86,3 +86,13 @@ chai3d::cVector3d magTracker::CheckPos(){
 
     return returnVec;
 }
+
+chai3d::cMatrix3d magTracker::CheckRot(){
+    chai3d::cMatrix3d returnMatrix;
+
+    returnMatrix.set(record.s[0][0], record.s[0][1], record.s[0][2],
+                     record.s[1][0], record.s[1][1], record.s[1][2],
+                     record.s[2][0], record.s[2][1], record.s[2][2]);
+
+    return returnMatrix;
+}

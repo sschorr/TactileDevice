@@ -216,8 +216,6 @@ c3dofChaiDevice::c3dofChaiDevice(unsigned int a_deviceNumber)
     m_MyVariable = 0;
 
     m_deviceAvailable = false; // this value should become 'true' when the device is available.
-
-
     m_deviceAvailable = true; // my code making device available
 }
 
@@ -514,6 +512,11 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     r20 = 0.0;  r21 = 0.0;  r22 = 1.0;
 
     frame.set(r00, r01, r02, r10, r11, r12, r20, r21, r22);
+    frame.rotateAboutGlobalAxisDeg(0,0,1, 30);
+#ifdef MAGTRACKER
+    // try setting rotation from mag tracker
+    frame = ourMagTracker.CheckRot();
+#endif
 
     // store new rotation matrix
     a_rotation = frame;

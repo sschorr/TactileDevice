@@ -49,10 +49,12 @@ void haptics_thread::initialize()
     m_tool = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool); //insert the tool into the world
     toolRadius = 0.003; // set tool radius
-    m_tool->setRadius(toolRadius); // set tool position
+    m_tool->setRadius(toolRadius);
     m_tool->setHapticDevice(p_CommonData->chaiDevice); // connect the haptic device to the tool
     m_tool->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool->start();
+    m_tool->setShowFrame(true);
+    m_tool->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------
@@ -74,18 +76,20 @@ void haptics_thread::initialize()
     newEffect = new chai3d::cEffectSurface(m_box);
     meshBox->addEffect(newEffect);
 
-    // create a solidworks object
+    // create a finger object
     finger = new chai3d::cMultiMesh(); // create a virtual mesh
     world->addChild(finger); // add object to world
     finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,0,1), 90);
     finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,1,0), 90);
     finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(1,0,0), 180);
+    finger->setShowFrame(false);
+    finger->setFrameSize(0.05);
     finger->setLocalPos(0,0,0);
     // load an object file
     if(cLoadFileOBJ(finger, "FingerModel.obj")){
         qDebug() << "kidney file loaded";
     }
-    finger->setShowEnabled(true);
+    finger->setShowEnabled(false);
     finger->setUseTransparency(false);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
@@ -155,10 +159,6 @@ void haptics_thread::run()
 
             // get device forces
             lastComputedForce = m_tool->m_lastComputedGlobalForce;
-
-
-
-
 
 
 
