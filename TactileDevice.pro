@@ -19,6 +19,7 @@ SOURCES += ./src/main.cpp\
            ./src/Widget_OpenGLDisplay.cpp \
            ./src/c3dofChaiDevice.cpp \
            ./src/trakSTAR.cpp \
+           ./src/magtracker.cpp \
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -33,6 +34,7 @@ HEADERS  += ./include/mainwindow.h\
             ./include/TrakSTAR.h \
             ./include/ATC3DG.h \
             ./include/stdafx.h \
+            ./include/magtracker.h \
 
 FORMS    += ./mainwindow.ui
 

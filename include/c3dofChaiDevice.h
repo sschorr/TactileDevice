@@ -53,8 +53,8 @@
 #if defined(C_ENABLE_CUSTOM_DEVICE_SUPPORT)
 //------------------------------------------------------------------------------
 #include "devices/CGenericHapticDevice.h"
-#include "TrakSTAR.h"
-#include <qDebug>
+#include "magtracker.h"
+#include "shared_data.h"
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -178,21 +178,6 @@ public:
     //! Returns the number of devices available from this class of device.
     static unsigned int getNumDevices();
 
-    // magnetic tracker variables
-    CSystem ATC3DG; // a pointer to a single instance of the system class
-    CSensor *pSensor; // a pointer to an array of sensor objects
-    CXmtr *pXmtr; // a pointer to an array of transmitter objects
-    CBoard *pBoard; // a pointer to an array of board objects
-    int errorCode;
-    int sensorID;
-    int transmitterID;
-    short id;
-    int numberBytes;
-    int i;
-    double measFreq;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord;
-
 
     //--------------------------------------------------------------------------
     // PROTECTED MEMBERS:
@@ -207,6 +192,7 @@ public:
     */
     ////////////////////////////////////////////////////////////////////////////
 
+    magTracker ourMagTracker;
 
 protected:
 

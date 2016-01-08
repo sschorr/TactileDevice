@@ -15,6 +15,7 @@
 #include "stdio.h"
 #include "string.h"
 #include <Windows.h>
+#include <qDebug.h>
 
 void errorHandler(int error)
 {
@@ -55,7 +56,7 @@ void errorHandler(int error)
 //
 		numberBytes = strlen(buffer);
 		buffer[numberBytes] = '\n';		// append a newline to buffer
-		printf("%s", buffer);
+        qDebug("%s", buffer);
 
 		currentError = nextError;
 	}while(currentError!=BIRD_ERROR_SUCCESS);

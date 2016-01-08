@@ -273,83 +273,7 @@ bool c3dofChaiDevice::open()
     // MAGNETIC TRACKER SETUP
     //--------------------------------------------------------------------------
 
-    // variable declarations
-    pRecord = &record;
-    measFreq = 40.0;
 
-    // initialize the magnetic tracker
-    qDebug("Initializing the ATC3DG system...\n");
-    errorCode = InitializeBIRDSystem();
-    if(errorCode==BIRD_ERROR_SUCCESS){
-        qDebug("Initialized ATC3DG system\n");
-    }
-
-    // get configurations
-    errorCode = GetBIRDSystemConfiguration(&ATC3DG.m_config);
-    pSensor = new CSensor[ATC3DG.m_config.numberSensors];
-    for(i=0;i<ATC3DG.m_config.numberSensors;i++)
-    {
-        errorCode = GetSensorConfiguration(i, &pSensor[i].m_config);
-        if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
-        qDebug("Got sensors configuration\n");
-    }
-    pXmtr = new CXmtr[ATC3DG.m_config.numberTransmitters];
-    for(i=0;i<ATC3DG.m_config.numberTransmitters;i++)
-    {
-        errorCode = GetTransmitterConfiguration(i, &pXmtr[i].m_config);
-        if(errorCode!=BIRD_ERROR_SUCCESS) errorHandler(errorCode);
-        qDebug("Got transmitters configuration\n");
-    }
-
-    // set parameters for recording
-    SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER,	0);
-    SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY,	60.0);
-    SET_SYSTEM_PARAMETER(AGC_MODE,				SENSOR_AGC_ONLY);
-    SET_SYSTEM_PARAMETER(MEASUREMENT_RATE,		measFreq);
-    SET_SYSTEM_PARAMETER(MAXIMUM_RANGE,			72.0);
-    SET_SYSTEM_PARAMETER(METRIC,				true);
-
-    for(sensorID=0;sensorID<ATC3DG.m_config.numberSensors;sensorID++){
-        SET_SENSOR_PARAMETER(sensorID, DATA_FORMAT, DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON);
-        {
-            // initialize a structure of angles
-            DOUBLE_ANGLES_RECORD anglesRecord = {0, 0, 0};
-            SET_SENSOR_PARAMETER(sensorID, ANGLE_ALIGN, anglesRecord);
-        }
-        SET_SENSOR_PARAMETER(sensorID, HEMISPHERE, FRONT);
-        SET_SENSOR_PARAMETER(sensorID, FILTER_AC_WIDE_NOTCH, false);
-        SET_SENSOR_PARAMETER(sensorID, FILTER_AC_NARROW_NOTCH, false);
-        SET_SENSOR_PARAMETER(sensorID, FILTER_DC_ADAPTIVE, 0.0);
-        //{
-        //	// initialize the alpha parameters
-        //	ADAPTIVE_PARAMETERS adaptiveRecord = {
-        //		500, 500, 500, 500, 500, 500, 500,
-        //		20000, 20000, 20000, 20000, 20000, 20000, 20000,
-        //		2, 4, 8, 16, 32, 32, 32,
-        //		true
-        //	};
-        //	SET_SENSOR_PARAMETER(sensorID, FILTER_ALPHA_PARAMETERS, adaptiveRecord);
-        //}
-        //SET_SENSOR_PARAMETER(sensorID, FILTER_LARGE_CHANGE, false);
-        //{
-        //	// initialize the quality parameter structure
-        //	QUALITY_PARAMETERS qualityParameters = { 0, 0, 2, 12 };
-        //	SET_SENSOR_PARAMETER(sensorID, QUALITY, qualityParameters);
-        //}
-    }
-
-    /*SET_SENSOR_PARAMETER(4, FILTER_AC_WIDE_NOTCH, false);
-    SET_SENSOR_PARAMETER(5, FILTER_AC_WIDE_NOTCH, true);
-    SET_SENSOR_PARAMETER(2, FILTER_AC_WIDE_NOTCH, false);
-    SET_SENSOR_PARAMETER(0, FILTER_AC_WIDE_NOTCH, true);*/
-
-    transmitterID = 0;
-    {
-        // initialize a structure of angles
-        DOUBLE_ANGLES_RECORD anglesRecord = {0, 0, 0};
-        SET_TRANSMITTER_PARAMETER(transmitterID, REFERENCE_FRAME, anglesRecord);
-    }
-    SET_TRANSMITTER_PARAMETER(transmitterID, XYZ_REFERENCE_FRAME, false);
 
 
 
@@ -357,6 +281,10 @@ bool c3dofChaiDevice::open()
 
     // *** INSERT YOUR CODE HERE ***
     // result = openConnectionToMyDevice();
+
+#ifdef MAGTRACKER
+    ourMagTracker.InitMagTracker();
+#endif
 
     result = C_SUCCESS; // my code saying connection success
 
@@ -513,28 +441,19 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     ////////////////////////////////////////////////////////////////////////////
 
 
-    // test the reading of the magnetic tracker
-    errorCode = GetAsynchronousRecord(0, pRecord, sizeof(record));
-    if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
-    // get the status of the last data record
-    // only report the data if everything is okay
-    unsigned int status = GetSensorStatus( sensorID);
-    if( status == VALID_STATUS)
-    {
-        qDebug() << record.x;
-    }
-
 
     bool result = C_SUCCESS;
     double x,y,z;
     static double counter = 0;
     counter = counter ++;
+    x = 0; y = 0; z = 0.01 + .05*sin(.0001*counter);
 
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
-
-    x = 0.0;    // x = getMyDevicePositionX()
-    y = -0.05*sin(0.00001*counter)+0.02;;    // y = getMyDevicePositionY()
-    z = -0.05*sin(0.00001*counter)+0.02;    // z = getMyDevicePositionZ()
+    // these axes align assuming the box is facing you and the chord of the tracker faces the box.
+#ifdef MAGTRACKER
+    chai3d::cVector3d pos = ourMagTracker.CheckPos();
+    x = pos.x(); y = pos.y(); z = pos.z();
+#endif
 
     // store new position values
     a_position.set(x, y, z);
