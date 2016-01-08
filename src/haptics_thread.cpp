@@ -74,6 +74,40 @@ void haptics_thread::initialize()
     newEffect = new chai3d::cEffectSurface(m_box);
     meshBox->addEffect(newEffect);
 
+    // create a solidworks object
+    finger = new chai3d::cMultiMesh(); // create a virtual mesh
+    world->addChild(finger); // add object to world
+    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,0,1), 90);
+    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,1,0), 90);
+    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(1,0,0), 180);
+    finger->setLocalPos(0,0,0);
+    // load an object file
+    if(cLoadFileOBJ(finger, "FingerModel.obj")){
+        qDebug() << "kidney file loaded";
+    }
+    finger->setShowEnabled(true);
+    finger->setUseTransparency(false);
+    finger->computeBoundaryBox(true); //compute a boundary box
+    finger->setUseVertexColors(true);
+    chai3d::cColorf fingerColor;
+    fingerColor.setBrownSandy();
+    finger->setVertexColor(fingerColor);
+    finger->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    finger->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    finger->m_material->m_specular.set(1.0, 1.0, 1.0);
+    finger->setUseMaterial(true);
+    finger->setHapticEnabled(false);
+
+    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
+    if (size > 0)
+    {
+        finger->scale(2.0 * m_tool->getWorkspaceRadius() / (size*20));
+        qDebug() << m_tool->getWorkspaceRadius() << " " << size;
+    }
+
+
+
+
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start

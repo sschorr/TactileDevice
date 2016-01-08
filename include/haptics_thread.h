@@ -7,6 +7,8 @@
 #include "c3DOFdevice.h"
 #include "chai3d.h"
 #include <stdio.h>
+#include <QDir>
+#include <QCoreApplication>
 
 
 
@@ -43,6 +45,7 @@ public:
     chai3d::cToolCursor* m_tool;
     chai3d::cShapeBox* m_box;
     chai3d::cMesh* meshBox;
+    chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;
     double toolRadius;
     chai3d::cVector3d lastComputedForce;
