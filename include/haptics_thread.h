@@ -44,6 +44,7 @@ public:
     chai3d::cDirectionalLight* light;
     chai3d::cToolCursor* m_tool;
     chai3d::cShapeBox* m_box;
+    chai3d::cShapeSphere* m_curSphere;  // sphere to hover over tool and enable frames
     chai3d::cMesh* meshBox;
     chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;

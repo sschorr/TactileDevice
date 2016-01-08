@@ -444,7 +444,7 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     double x,y,z;
     static double counter = 0;
     counter = counter ++;
-    x = 0; y = 0; z = 0.01 + .05*sin(.0001*counter);
+    x = 0; y = 0.01 + .04*sin(.0001*counter);; z = 0.01 + .03*sin(.0001*counter);
 
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // these axes align assuming the box is facing you and the chord of the tracker faces the box.
@@ -512,7 +512,6 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     r20 = 0.0;  r21 = 0.0;  r22 = 1.0;
 
     frame.set(r00, r01, r02, r10, r11, r12, r20, r21, r22);
-    frame.rotateAboutGlobalAxisDeg(0,0,1, 30);
 #ifdef MAGTRACKER
     // try setting rotation from mag tracker
     frame = ourMagTracker.CheckRot();

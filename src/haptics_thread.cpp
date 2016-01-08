@@ -27,15 +27,10 @@ void haptics_thread::initialize()
     world->addChild(p_CommonData->p_camera);
 
     // Position and orientate the camera
+    // X is toward camera, pos y is to right, pos z is up
     p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, .03),    // camera position (eye)
                                  chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
                                  chai3d::cVector3d (0.0, 0.0, 1.0));   // direction of the "up" vector
-
-    // X is toward camera, pos y is to right, pos z is up
-
-    // set the near and far clipping planes of the camera
-    // anything in front/behind these clipping planes will not be rendered
-    //p_CommonData->p_camera->setClippingPlanes(0.01, 10.0);
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -53,44 +48,45 @@ void haptics_thread::initialize()
     m_tool->setHapticDevice(p_CommonData->chaiDevice); // connect the haptic device to the tool
     m_tool->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool->start();
-    m_tool->setShowFrame(true);
-    m_tool->setFrameSize(0.05);
+
+    //create a sphere to represent the tool
+    m_curSphere = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere);
+    m_curSphere->m_material->setGrayDarkSlate();
+    m_curSphere->setShowFrame(true);
+    m_curSphere->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------
     // CREATING OBJECTS
     //--------------------------------------------------------------------------
+
+    // create a box and give it physical properties
     meshBox = new chai3d::cMesh();  // create a mesh for a box
     cCreateBox(meshBox, .1, .1, .001); // make mesh a box
     meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
     world->addChild(meshBox); // add to world
     meshBox->setLocalPos(0,0,0); // set the position
-
     // give the box physical properties
     meshBox->m_material->setStiffness(0.03);
     meshBox->m_material->setStaticFriction(0.5);
     meshBox->m_material->setDynamicFriction(0.5);
     meshBox->m_material->setUseHapticFriction(true);
 
-    // create a haptic effect for the box so that the user can feel its surface
-    newEffect = new chai3d::cEffectSurface(m_box);
-    meshBox->addEffect(newEffect);
-
     // create a finger object
     finger = new chai3d::cMultiMesh(); // create a virtual mesh
     world->addChild(finger); // add object to world
-    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,0,1), 90);
-    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,1,0), 90);
-    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(1,0,0), 180);
-    finger->setShowFrame(false);
+//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,0,1), 90);
+//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,1,0), 90);
+//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(1,0,0), 180);
+    finger->setShowFrame(true);
     finger->setFrameSize(0.05);
     finger->setLocalPos(0,0,0);
     // load an object file
     if(cLoadFileOBJ(finger, "FingerModel.obj")){
-        qDebug() << "kidney file loaded";
+        qDebug() << "finger file loaded";
     }
-    finger->setShowEnabled(false);
-    finger->setUseTransparency(false);
+    finger->setShowEnabled(true);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
@@ -105,7 +101,7 @@ void haptics_thread::initialize()
     double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
     if (size > 0)
     {
-        finger->scale(2.0 * m_tool->getWorkspaceRadius() / (size*20));
+        finger->scale(1.0);
         qDebug() << m_tool->getWorkspaceRadius() << " " << size;
     }
 
@@ -147,14 +143,29 @@ void haptics_thread::run()
         // if clock controlling haptic rate times out
         if(rateClock.timeoutOccurred())
         {
+
             //update Chai3D parameters
             // compute global reference frames for each object
             world->computeGlobalPositions(true);
 
-            // update position and orientation of tool
+            // update position and orientation of tool (and sphere)
             m_tool->updatePose();
+            chai3d::cVector3d position; chai3d::cMatrix3d rotation;
+            p_CommonData->chaiDevice->getPosition(position);
+            p_CommonData->chaiDevice->getRotation(rotation);
+            m_curSphere->setLocalPos(position);
+            m_curSphere->setLocalRot(rotation);
 
-            //Locks up running without a connected haptic device
+            // update position of finger to stay on proxy point
+            finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy());
+            rotation.rotateAboutLocalAxisDeg(0,0,1,-90);
+            rotation.rotateAboutLocalAxisDeg(1,0,0,-90);
+            finger->setLocalRot(rotation);
+
+
+
+
+            //Locks computes the interaction force for the haptic device
             m_tool->computeInteractionForces();
 
             // get device forces
