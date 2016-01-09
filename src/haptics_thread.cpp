@@ -28,21 +28,21 @@ void haptics_thread::initialize()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, .03),    // camera position (eye)
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, -.03),    // camera position (eye)
                                  chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
-                                 chai3d::cVector3d (0.0, 0.0, 1.0));   // direction of the "up" vector
+                                 chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
     world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(-2.0, 0.5, -1.0));  // define the direction of the light beam
+    light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
 
     //--------------------------------------------------------------------------
     // HAPTIC DEVICES / TOOLS
     //--------------------------------------------------------------------------
     m_tool = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool); //insert the tool into the world
+    world->addChild(m_tool); //insert the tool into the world    
     toolRadius = 0.003; // set tool radius
     m_tool->setRadius(toolRadius);
     m_tool->setHapticDevice(p_CommonData->chaiDevice); // connect the haptic device to the tool
@@ -68,18 +68,15 @@ void haptics_thread::initialize()
     world->addChild(meshBox); // add to world
     meshBox->setLocalPos(0,0,0); // set the position
     // give the box physical properties
-    meshBox->m_material->setStiffness(0.03);
-    meshBox->m_material->setStaticFriction(0.5);
-    meshBox->m_material->setDynamicFriction(0.5);
+    meshBox->m_material->setStiffness(0.3);
+    meshBox->m_material->setStaticFriction(0);
+    meshBox->m_material->setDynamicFriction(0);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a finger object
     finger = new chai3d::cMultiMesh(); // create a virtual mesh
     world->addChild(finger); // add object to world
-//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,0,1), 90);
-//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(0,1,0), 90);
-//    finger->rotateAboutGlobalAxisDeg(chai3d::cVector3d(1,0,0), 180);
-    finger->setShowFrame(true);
+    finger->setShowFrame(false);
     finger->setFrameSize(0.05);
     finger->setLocalPos(0,0,0);
     // load an object file
@@ -151,6 +148,7 @@ void haptics_thread::run()
             // update position and orientation of tool (and sphere)
             m_tool->updatePose();
             chai3d::cVector3d position; chai3d::cMatrix3d rotation;
+            chai3d::cMatrix3d fingerRotation; chai3d::cMatrix3d deviceRotation;
             p_CommonData->chaiDevice->getPosition(position);
             p_CommonData->chaiDevice->getRotation(rotation);
             m_curSphere->setLocalPos(position);
@@ -158,18 +156,31 @@ void haptics_thread::run()
 
             // update position of finger to stay on proxy point
             finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy());
-            rotation.rotateAboutLocalAxisDeg(0,0,1,-90);
-            rotation.rotateAboutLocalAxisDeg(1,0,0,-90);
-            finger->setLocalRot(rotation);
-
-
-
+            fingerRotation = rotation;
+            fingerRotation.rotateAboutLocalAxisDeg(0,0,1,90);
+            fingerRotation.rotateAboutLocalAxisDeg(1,0,0,90);
+            finger->setLocalRot(fingerRotation);
 
             //Locks computes the interaction force for the haptic device
             m_tool->computeInteractionForces();
 
             // get device forces
             lastComputedForce = m_tool->m_lastComputedGlobalForce;
+            rotation.trans();
+            deviceRotation.identity();
+            deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
+            deviceRotation.trans();
+
+            magTrackerLastComputedForce = rotation*lastComputedForce;
+            deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
+
+            qDebug() << deviceLastComputedForce.x() << deviceLastComputedForce.y() << deviceLastComputedForce.z();
+            //qDebug() << magTrackerLastComputedForce.x() << magTrackerLastComputedForce.y() << magTrackerLastComputedForce.z();
+
+
+
+
+
 
 
 

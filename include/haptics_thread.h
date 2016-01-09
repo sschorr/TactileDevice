@@ -50,6 +50,8 @@ public:
     chai3d::cEffectSurface* newEffect;
     double toolRadius;
     chai3d::cVector3d lastComputedForce;
+    chai3d::cVector3d magTrackerLastComputedForce;
+    chai3d::cVector3d deviceLastComputedForce;
 
 
 
