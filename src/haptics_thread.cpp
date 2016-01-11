@@ -68,9 +68,9 @@ void haptics_thread::initialize()
     world->addChild(meshBox); // add to world
     meshBox->setLocalPos(0,0,0); // set the position
     // give the box physical properties
-    meshBox->m_material->setStiffness(2);
-    meshBox->m_material->setStaticFriction(0.3);
-    meshBox->m_material->setDynamicFriction(0.3);
+    meshBox->m_material->setStiffness(200);
+    meshBox->m_material->setStaticFriction(0.5);
+    meshBox->m_material->setDynamicFriction(0.5);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a finger object
@@ -170,11 +170,21 @@ void haptics_thread::run()
             deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
 
             //convert device "force" to a mapped position
-            double forceToPosMult = 10;
+            double forceToPosMult = 0.6;
             chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce;
             Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
             Eigen::Vector3d desiredPos(3);
+
             desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
+
+            // limit workspace motion (plus or minus)
+            double xLimit = 4; double yLimit = 4; double zLimit = 4;
+            if (desiredPos[0] > xLimit) desiredPos[0] = xLimit;
+            if (desiredPos[0] < -xLimit) desiredPos[0] = -xLimit;
+            if (desiredPos[1] > yLimit) desiredPos[1] = yLimit;
+            if (desiredPos[1] < -yLimit) desiredPos[1] = -yLimit;
+            if (desiredPos[2] > (neutralPos[2] + zLimit)) desiredPos[2] = neutralPos[2] + zLimit;
+            if (desiredPos[2] < (neutralPos[2] - zLimit)) desiredPos[2] = neutralPos[2] - zLimit;
 
             p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 
@@ -217,7 +227,8 @@ void haptics_thread::run()
         }        
     }
 
-    // If we are terminating, delete the haptic device to set outputs to 0   
+    // If we are terminating, delete the haptic device to set outputs to 0
+    delete p_CommonData->wearableDelta;
 }
 
 
