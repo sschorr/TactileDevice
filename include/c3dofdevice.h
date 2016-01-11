@@ -12,12 +12,13 @@
 #include <QMatrix>
 #include <Eigen/dense>
 #include <iostream>
+#include "chai3d.h"
 
 #include <QMutex>
 
 #define PI 3.14159265
 
-// Physical parameters of build =======================================
+// Physical parameters of build [mm] =======================================
 // radius of motor pulley
 #define MOTRAD 2 // [mm]
 // horizontal offset of motorshaft from base joint
@@ -73,7 +74,7 @@ public:
     // Set the desired forces
     void SetDesiredForce(Eigen::Vector3d);
 
-    // Set the desired pos
+    // Set the desired pos (in mm)
     void SetDesiredPos(Eigen::Vector3d);
 
     // read the desired pos
@@ -98,12 +99,17 @@ public:
     void TestMotorTorqueController();
 
 
+    // Public Vars ==========================================
+    Eigen::Vector3d neutralPos;
+
+
 private:
     cMotorController* motor_1;
     cMotorController* motor_2;
     cMotorController* motor_3;
     Eigen::Vector3d desiredForce;
     Eigen::Vector3d desiredPos;
+
 };
 
 #endif // C3DOFDEVICE_H

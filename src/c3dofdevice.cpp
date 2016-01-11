@@ -4,6 +4,7 @@
 c3DOFDevice::c3DOFDevice()
 {
     this->desiredForce << 0,0,0;
+    this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
 }
 
 c3DOFDevice::~c3DOFDevice()
@@ -77,6 +78,7 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
 Eigen::Vector3d c3DOFDevice::GetCartesianPos()
 {
     Eigen::Vector3d pos(3);
+    Eigen::Vector3d jointAngles = GetJointAngles();
 
     // base side length
     double base = L_BASE*1.7321;
@@ -85,9 +87,9 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
     double sqrt3 = sqrt(3.0); double tan60 = sqrt3; double sin30 = 0.5; double tan30 = 1/sqrt3;
 
     double t = (base-ee)*tan30/2;
-    double y1 = -(t+L_LA*cos(GetJointAngles()[0])); double z1 = -L_LA*sin(GetJointAngles()[0]);
-    double y2 = (t+L_LA*cos(GetJointAngles()[2]))*sin30; double x2 = y2*tan60; double z2 = -L_LA*sin(GetJointAngles()[2]);
-    double y3 = (t+L_LA*cos(GetJointAngles()[1]))*sin30; double x3 = -y3*tan60; double z3 = -L_LA*sin(GetJointAngles()[1]);
+    double y1 = -(t+L_LA*cos(jointAngles[0])); double z1 = -L_LA*sin(jointAngles[0]);
+    double y2 = (t+L_LA*cos(jointAngles[2]))*sin30; double x2 = y2*tan60; double z2 = -L_LA*sin(jointAngles[2]);
+    double y3 = (t+L_LA*cos(jointAngles[1]))*sin30; double x3 = -y3*tan60; double z3 = -L_LA*sin(jointAngles[1]);
 
     double dnm = (y2-y1)*x3-(y3-y1)*x2;
     double w1 = y1*y1 + z1*z1; double w2 = x2*x2 + y2*y2 + z2*z2; double w3 = x3*x3 + y3*y3 + z3*z3;
@@ -224,8 +226,6 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForc
 {
     Eigen::Vector3d jointTorquesNeeded = CalcDesiredJointTorques(desiredForceOutput);
     Eigen::Vector3d jointAngles = GetJointAngles();
-
-
 
     // Describe vector from joint to tether attachment point
     Eigen::Vector3d vec_joint_teth1(ATTACHL*cos(jointAngles[0]), ATTACHL*sin(jointAngles[0]), 0);

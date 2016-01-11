@@ -57,7 +57,6 @@ void MainWindow::Initialize()
     connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->radioButtonPos, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->radioButtonForce, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     GraphicsTimer.start(20);
@@ -66,17 +65,7 @@ void MainWindow::Initialize()
 
 void MainWindow::onGUIchanged()
 {
-    if(ui->radioButtonForce->isChecked())
-    {
-        p_CommonData->posControlMode = false;
-        //p_CommonData->forceControlMode = true;
-        double xSlider = this->ui->verticalSliderX->value()/10.0;
-        double ySlider = this->ui->verticalSliderY->value()/10.0;
-        double zSlider = this->ui->verticalSliderZ->value()/10.0;
-        Eigen::Vector3d tempDesiredForce(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredForce(tempDesiredForce);
-    }
-    else if(ui->radioButtonPos->isChecked())
+    if(ui->radioButtonPos->isChecked())
     {
         //p_CommonData->forceControlMode = false;
         p_CommonData->posControlMode = true;

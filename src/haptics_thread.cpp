@@ -68,9 +68,9 @@ void haptics_thread::initialize()
     world->addChild(meshBox); // add to world
     meshBox->setLocalPos(0,0,0); // set the position
     // give the box physical properties
-    meshBox->m_material->setStiffness(0.3);
-    meshBox->m_material->setStaticFriction(0);
-    meshBox->m_material->setDynamicFriction(0);
+    meshBox->m_material->setStiffness(2);
+    meshBox->m_material->setStaticFriction(0.3);
+    meshBox->m_material->setDynamicFriction(0.3);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a finger object
@@ -94,16 +94,12 @@ void haptics_thread::initialize()
     finger->m_material->m_specular.set(1.0, 1.0, 1.0);
     finger->setUseMaterial(true);
     finger->setHapticEnabled(false);
-
     double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
     if (size > 0)
     {
         finger->scale(1.0);
         qDebug() << m_tool->getWorkspaceRadius() << " " << size;
     }
-
-
-
 
 
     // GENERAL HAPTICS INITS=================================
@@ -145,7 +141,7 @@ void haptics_thread::run()
             // compute global reference frames for each object
             world->computeGlobalPositions(true);
 
-            // update position and orientation of tool (and sphere)
+            // update position and orientation of tool (and sphere that represents tool)
             m_tool->updatePose();
             chai3d::cVector3d position; chai3d::cMatrix3d rotation;
             chai3d::cMatrix3d fingerRotation; chai3d::cMatrix3d deviceRotation;
@@ -164,21 +160,25 @@ void haptics_thread::run()
             //Locks computes the interaction force for the haptic device
             m_tool->computeInteractionForces();
 
-            // get device forces
+            //perform transformation to get device "forces"
             lastComputedForce = m_tool->m_lastComputedGlobalForce;
             rotation.trans();
             deviceRotation.identity();
             deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
             deviceRotation.trans();
-
             magTrackerLastComputedForce = rotation*lastComputedForce;
             deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
 
-            qDebug() << deviceLastComputedForce.x() << deviceLastComputedForce.y() << deviceLastComputedForce.z();
-            //qDebug() << magTrackerLastComputedForce.x() << magTrackerLastComputedForce.y() << magTrackerLastComputedForce.z();
+            //convert device "force" to a mapped position
+            double forceToPosMult = 10;
+            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce;
+            Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
+            Eigen::Vector3d desiredPos(3);
+            desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
 
+            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 
-
+            //qDebug() << deviceLastComputedForce.x() << deviceLastComputedForce.y() << deviceLastComputedForce.z();
 
 
 
