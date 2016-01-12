@@ -270,6 +270,16 @@ void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 // Set the desired pos
 void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
 {
+    // limit workspace motion (plus or minus)
+    double xLimit = 4; double yLimit = 4; double zLimit = 4;
+    if (desiredPosArg[0] > xLimit) desiredPosArg[0] = xLimit;
+    if (desiredPosArg[0] < -xLimit) desiredPosArg[0] = -xLimit;
+    if (desiredPosArg[1] > yLimit) desiredPosArg[1] = yLimit;
+    if (desiredPosArg[1] < -yLimit) desiredPosArg[1] = -yLimit;
+    if (desiredPosArg[2] > (neutralPos[2] + zLimit)) desiredPosArg[2] = neutralPos[2] + zLimit;
+    if (desiredPosArg[2] < (neutralPos[2] - zLimit)) desiredPosArg[2] = neutralPos[2] - zLimit;
+
+
     this->desiredPos = desiredPosArg;
 }
 
@@ -322,8 +332,8 @@ void c3DOFDevice::PositionController()
 
     Eigen::Vector3d currentVel = currentPos-lastPos;
     Eigen::Vector3d filteredVel = alpha*currentVel + (1-alpha)*lastVel;
-
     Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
+
     SetDesiredForce(controllerForce);
     SetMotorTorqueOutput(ReadDesiredForce());
 

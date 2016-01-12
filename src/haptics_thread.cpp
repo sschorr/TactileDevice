@@ -151,13 +151,15 @@ void haptics_thread::run()
             m_curSphere->setLocalRot(rotation);
 
             // update position of finger to stay on proxy point
-            finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy());
+            // finger axis are not at fingerpad, so we want a translation along fingertip z axis
+            chai3d::cVector3d fingerOffset(0,-0.006,0);
             fingerRotation = rotation;
-            fingerRotation.rotateAboutLocalAxisDeg(0,0,1,90);
+            fingerRotation.rotateAboutLocalAxisDeg(0,0,1,90);            
             fingerRotation.rotateAboutLocalAxisDeg(1,0,0,90);
             finger->setLocalRot(fingerRotation);
+            finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy() + fingerRotation*fingerOffset);
 
-            //Locks computes the interaction force for the haptic device
+            //computes the interaction force for the haptic device
             m_tool->computeInteractionForces();
 
             //perform transformation to get device "forces"
@@ -170,33 +172,15 @@ void haptics_thread::run()
             deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
 
             //convert device "force" to a mapped position
-            double forceToPosMult = 0.6;
+            double forceToPosMult = 1;
             chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce;
             Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
             Eigen::Vector3d desiredPos(3);
-
             desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
-
-            // limit workspace motion (plus or minus)
-            double xLimit = 4; double yLimit = 4; double zLimit = 4;
-            if (desiredPos[0] > xLimit) desiredPos[0] = xLimit;
-            if (desiredPos[0] < -xLimit) desiredPos[0] = -xLimit;
-            if (desiredPos[1] > yLimit) desiredPos[1] = yLimit;
-            if (desiredPos[1] < -yLimit) desiredPos[1] = -yLimit;
-            if (desiredPos[2] > (neutralPos[2] + zLimit)) desiredPos[2] = neutralPos[2] + zLimit;
-            if (desiredPos[2] < (neutralPos[2] - zLimit)) desiredPos[2] = neutralPos[2] - zLimit;
-
             p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
-
-            //qDebug() << deviceLastComputedForce.x() << deviceLastComputedForce.y() << deviceLastComputedForce.z();
-
-
-
-
 
             // stop clock while we perform haptic calcs
             rateClock.stop();
-
             if(p_CommonData->posControlMode == true)
             {
                 p_CommonData->wearableDelta->PositionController();
