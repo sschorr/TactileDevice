@@ -26,6 +26,9 @@
 #define CAMERA_Y_TRANSLATE 0.00
 #define CAMERA_Z_TRANSLATE 0
 
+#define E_VALUE 2.718
+#define PI 3.14159
+
 // define the data structure that holds stored data
 typedef struct
 {

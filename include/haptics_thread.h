@@ -52,6 +52,19 @@ public:
     chai3d::cVector3d lastComputedForce;
     chai3d::cVector3d magTrackerLastComputedForce;
     chai3d::cVector3d deviceLastComputedForce;
+    chai3d::cVector3d deviceLastLastComputedForce;
+    chai3d::cVector3d estimatedVel;
+
+    //vars for contact vibration
+    bool firstTouch;
+    double decaySinTime;
+    double decaySinExp;
+    double decaySinAmp;
+    double decaySinScale;
+    double decaySinAmpMax;
+    double decaySinFreq;
+    double computedPosAdd;
+
 
 
 

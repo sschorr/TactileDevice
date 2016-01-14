@@ -127,6 +127,14 @@ void haptics_thread::initialize()
 
     rateDisplayCounter = 0;
     recordDataCounter = 0;
+
+    // init first contact variables
+    decaySinAmpMax = 2;
+    decaySinFreq = 150;
+    decaySinExp = -20;
+    decaySinScale = 1;
+    firstTouch = true;
+    decaySinAmp = 0;
 }
 
 void haptics_thread::run()
@@ -136,6 +144,8 @@ void haptics_thread::run()
         // if clock controlling haptic rate times out
         if(rateClock.timeoutOccurred())
         {
+            // stop clock while we perform haptic calcs
+            rateClock.stop();
 
             //update Chai3D parameters
             // compute global reference frames for each object
@@ -159,16 +169,17 @@ void haptics_thread::run()
             finger->setLocalRot(fingerRotation);
             finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy() + fingerRotation*fingerOffset);
 
-            //computes the interaction force for the haptic device
+            //computes the interaction force for the tool proxy point
             m_tool->computeInteractionForces();
 
-            //perform transformation to get device "forces"
+            //perform transformation to get "device forces"
             lastComputedForce = m_tool->m_lastComputedGlobalForce;
             rotation.trans();
             deviceRotation.identity();
             deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
             deviceRotation.trans();
             magTrackerLastComputedForce = rotation*lastComputedForce;
+            deviceLastLastComputedForce = deviceLastComputedForce;
             deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
 
             //convert device "force" to a mapped position
@@ -177,10 +188,63 @@ void haptics_thread::run()
             Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
             Eigen::Vector3d desiredPos(3);
             desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
-            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 
-            // stop clock while we perform haptic calcs
-            rateClock.stop();
+
+            //create a contact vibration that depends on position or velocity
+
+            // if we are registering a contact
+            if (abs(deviceLastComputedForce.z()) > 0.00001)
+            {
+                // if this is the first time in contact
+                if (firstTouch)
+                {
+                    // start the time ticking
+                    decaySinTime = 0;
+                    decaySinTime += 0.001;
+
+                    // get the sinusoid amplitude based last velocity
+                    p_CommonData->chaiDevice->getLinearVelocity(estimatedVel);
+                    this->decaySinAmp = this->decaySinScale*estimatedVel.z();
+
+                    //check if amplitude exceeds desired amount
+                    if (decaySinAmp > decaySinAmpMax)
+                    {
+                        decaySinAmp = decaySinAmpMax;
+                    }
+
+                    // calculate contributed force
+                    computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+                    qDebug() << computedPosAdd;
+
+                    // set next force to not be "first touch"
+                    firstTouch = false;
+                }
+                else
+                {
+                    //still inside wall with "contact"
+                    computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+
+                    //increment decay time counter
+                    decaySinTime += 0.001;
+                }
+            }
+            else
+            {
+                if (!firstTouch)
+                {
+                    // just came out of contact, reset that next one will be "first touch"
+                    firstTouch = true;
+
+                    // reset the decay time, amplitude, and added "pos"
+                    decaySinTime = 0;
+                    decaySinAmp = 0;
+                    computedPosAdd = 0;
+                }
+            }
+
+            desiredPos[2] = desiredPos[2]+computedPosAdd;
+            // Perform position controller based on desired position
+            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
             if(p_CommonData->posControlMode == true)
             {
                 p_CommonData->wearableDelta->PositionController();
@@ -195,17 +259,12 @@ void haptics_thread::run()
                 rateDisplayCounter = 0;
                 rateDisplayClock.start(true);
             }
-
-
-
             // record only on every 10 haptic loops
             recordDataCounter++;
             if(recordDataCounter == 10)
             {
                 //RecordData();
             }
-
-
             //restart the rateClock
             rateClock.start(true);
         }        
