@@ -12,8 +12,8 @@ public:
     ~magTracker();
 
     void InitMagTracker();
-    chai3d::cVector3d CheckPos();
-    chai3d::cMatrix3d CheckRot();
+    chai3d::cVector3d CheckPos(int);
+    chai3d::cMatrix3d CheckRot(int);
 
     // magnetic tracker variables
     CSystem     ATC3DG; // a pointer to a single instance of the system class
@@ -26,9 +26,12 @@ public:
     short       id;
     int         numberBytes;
     int         i;
-    double measFreq;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord;
+    int         trackerNum;
+    double      measFreq;
+    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record0;
+    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord0;
+    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record1;
+    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord1;
 };
 
 #endif // MAGTRACKER_H
