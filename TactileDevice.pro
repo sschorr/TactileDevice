@@ -51,10 +51,15 @@ INCLUDEPATH += "./External/chai3d-3.0.0/external/glew/include"
 INCLUDEPATH += "./External/chai3d-3.0.0/external/freeglut/include"
 INCLUDEPATH += "./External/chai3d-3.0.0/external/BASS/include"
 INCLUDEPATH += "./External/chai3d-3.0.0/external/Eigen"
+INCLUDEPATH += "./External/chai3d-3.0.0/modules/ODE"
+INCLUDEPATH += "./External/chai3d-3.0.0/modules/ODE/src"
+INCLUDEPATH += "./External/chai3d-3.0.0/modules/ODE/external/ODE/include"
+INCLUDEPATH += "./External/chai3d-3.0.0/modules/ODE/obj/Debug/Win32"
 
 # Libraries for Chai3d and Openhaptics
 LIBS += "./External/chai3d-3.0.0/lib/Debug/Win32/chai3d.lib"
 LIBS += "./External/chai3d-3.0.0/extras/freeglut/lib/Debug/Win32/freeglut.lib"
+LIBS += "./External/chai3d-3.0.0/modules/ODE/lib/Debug/Win32/CODE.lib"
 
 # Library for Ascension trackewr
 LIBS += "./lib/ATC3DG.lib"
