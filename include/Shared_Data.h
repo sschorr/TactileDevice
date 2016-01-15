@@ -54,7 +54,6 @@ typedef struct
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
     chai3d::cGenericHapticDevicePtr chaiMagDevice1;
 
-
     bool posControlMode;
     bool hapticsThreadActive;
 

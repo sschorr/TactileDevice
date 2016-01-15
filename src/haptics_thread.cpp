@@ -41,20 +41,35 @@ void haptics_thread::initialize()
     //--------------------------------------------------------------------------
     // HAPTIC DEVICES / TOOLS
     //--------------------------------------------------------------------------
-    m_tool = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool); //insert the tool into the world    
+    m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool0); //insert the tool into the world
     toolRadius = 0.003; // set tool radius
-    m_tool->setRadius(toolRadius);
-    m_tool->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool->start();
+    m_tool0->setRadius(toolRadius);
+    m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
+    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->start();
+
+    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool1); //insert the tool into the world
+    m_tool1->setRadius(toolRadius);
+    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
+    m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool1->start();
 
     //create a sphere to represent the tool
-    m_curSphere = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere);
-    m_curSphere->m_material->setGrayDarkSlate();
-    m_curSphere->setShowFrame(true);
-    m_curSphere->setFrameSize(0.05);
+    m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere0);
+    m_curSphere0->m_material->setGrayDarkSlate();
+    m_curSphere0->setShowFrame(true);
+    m_curSphere0->setFrameSize(0.05);
+
+    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere1);
+    m_curSphere1->m_material->setGrayDarkSlate();
+    m_curSphere1->setShowFrame(true);
+    m_curSphere1->setFrameSize(0.05);
+
+
 
 
     //--------------------------------------------------------------------------
@@ -98,7 +113,7 @@ void haptics_thread::initialize()
     if (size > 0)
     {
         finger->scale(1.0);
-        qDebug() << m_tool->getWorkspaceRadius() << " " << size;
+        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
     }
 
 
@@ -152,46 +167,57 @@ void haptics_thread::run()
             world->computeGlobalPositions(true);
 
             // update position and orientation of tool (and sphere that represents tool)
-            m_tool->updatePose();
-            chai3d::cVector3d position; chai3d::cMatrix3d rotation;
-            chai3d::cMatrix3d fingerRotation; chai3d::cMatrix3d deviceRotation;
-            p_CommonData->chaiMagDevice0->getPosition(position);
-            p_CommonData->chaiMagDevice0->getRotation(rotation);
-            m_curSphere->setLocalPos(position);
-            m_curSphere->setLocalRot(rotation);
+            m_tool0->updatePose();
+            chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
+            chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+            chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
+            chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
+            p_CommonData->chaiMagDevice0->getPosition(position0);
+            p_CommonData->chaiMagDevice0->getRotation(rotation0);
+            m_curSphere0->setLocalPos(position0);
+            m_curSphere0->setLocalRot(rotation0);
+
+            m_tool1->updatePose();
+            p_CommonData->chaiMagDevice1->getPosition(position1);
+            p_CommonData->chaiMagDevice1->getRotation(rotation1);
+            m_curSphere1->setLocalPos(position1);
+            m_curSphere1->setLocalRot(rotation1);
+
+            // update position of second sphere/tool
 
             // update position of finger to stay on proxy point
             // finger axis are not at fingerpad, so we want a translation along fingertip z axis
             chai3d::cVector3d fingerOffset(0,-0.006,0);
-            fingerRotation = rotation;
-            fingerRotation.rotateAboutLocalAxisDeg(0,0,1,90);            
-            fingerRotation.rotateAboutLocalAxisDeg(1,0,0,90);
-            finger->setLocalRot(fingerRotation);
-            finger->setLocalPos(m_tool->m_hapticPoint->getGlobalPosProxy() + fingerRotation*fingerOffset);
+            fingerRotation0 = rotation0;
+            fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
+            fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
+            finger->setLocalRot(fingerRotation0);
+            finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
             //computes the interaction force for the tool proxy point
-            m_tool->computeInteractionForces();
+            m_tool0->computeInteractionForces();
+            m_tool1->computeInteractionForces();
 
             //perform transformation to get "device forces"
-            lastComputedForce = m_tool->m_lastComputedGlobalForce;
-            rotation.trans();
-            deviceRotation.identity();
-            deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
-            deviceRotation.trans();
-            magTrackerLastComputedForce = rotation*lastComputedForce;
-            deviceLastLastComputedForce = deviceLastComputedForce;
-            deviceLastComputedForce = deviceRotation*rotation*lastComputedForce;
+            lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
+            rotation0.trans();
+            deviceRotation0.identity();
+            deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
+            deviceRotation0.trans();
+            magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
+            deviceLastLastComputedForce0 = deviceLastComputedForce0;
+            deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
 
             //convert device "force" to a mapped position
             double forceToPosMult = 1;
-            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce;
+            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
             Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
             Eigen::Vector3d desiredPos(3);
             desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
 
             //create a contact vibration that depends on position or velocity
             // if we are registering a contact
-            if (abs(deviceLastComputedForce.z()) > 0.00001)
+            if (abs(deviceLastComputedForce0.z()) > 0.00001)
             {
                 // if this is the first time in contact
                 if (firstTouch)
@@ -201,8 +227,8 @@ void haptics_thread::run()
                     decaySinTime += 0.001;
 
                     // get the sinusoid amplitude based last velocity
-                    p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel);
-                    this->decaySinAmp = this->decaySinScale*estimatedVel.z();
+                    p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
+                    this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
 
                     //check if amplitude exceeds desired amount
                     if (decaySinAmp > decaySinAmpMax)

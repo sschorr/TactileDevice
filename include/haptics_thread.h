@@ -42,18 +42,20 @@ public:
     // chai3D objects
     chai3d::cWorld* world;
     chai3d::cDirectionalLight* light;
-    chai3d::cToolCursor* m_tool;
+    chai3d::cToolCursor* m_tool0;
+    chai3d::cToolCursor* m_tool1;
     chai3d::cShapeBox* m_box;
-    chai3d::cShapeSphere* m_curSphere;  // sphere to hover over tool and enable frames
+    chai3d::cShapeSphere* m_curSphere0;  // sphere to hover over tool and enable frames
+    chai3d::cShapeSphere* m_curSphere1;
     chai3d::cMesh* meshBox;
     chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;
     double toolRadius;
-    chai3d::cVector3d lastComputedForce;
-    chai3d::cVector3d magTrackerLastComputedForce;
-    chai3d::cVector3d deviceLastComputedForce;
-    chai3d::cVector3d deviceLastLastComputedForce;
-    chai3d::cVector3d estimatedVel;
+    chai3d::cVector3d lastComputedForce0;
+    chai3d::cVector3d magTrackerLastComputedForce0;
+    chai3d::cVector3d deviceLastComputedForce0;
+    chai3d::cVector3d deviceLastLastComputedForce0;
+    chai3d::cVector3d estimatedVel0;
 
     //vars for contact vibration
     bool firstTouch;
