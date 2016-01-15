@@ -45,7 +45,7 @@ void haptics_thread::initialize()
     world->addChild(m_tool); //insert the tool into the world    
     toolRadius = 0.003; // set tool radius
     m_tool->setRadius(toolRadius);
-    m_tool->setHapticDevice(p_CommonData->chaiDevice); // connect the haptic device to the tool
+    m_tool->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     m_tool->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool->start();
 
@@ -155,8 +155,8 @@ void haptics_thread::run()
             m_tool->updatePose();
             chai3d::cVector3d position; chai3d::cMatrix3d rotation;
             chai3d::cMatrix3d fingerRotation; chai3d::cMatrix3d deviceRotation;
-            p_CommonData->chaiDevice->getPosition(position);
-            p_CommonData->chaiDevice->getRotation(rotation);
+            p_CommonData->chaiMagDevice0->getPosition(position);
+            p_CommonData->chaiMagDevice0->getRotation(rotation);
             m_curSphere->setLocalPos(position);
             m_curSphere->setLocalRot(rotation);
 
@@ -189,9 +189,7 @@ void haptics_thread::run()
             Eigen::Vector3d desiredPos(3);
             desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
 
-
             //create a contact vibration that depends on position or velocity
-
             // if we are registering a contact
             if (abs(deviceLastComputedForce.z()) > 0.00001)
             {
@@ -203,7 +201,7 @@ void haptics_thread::run()
                     decaySinTime += 0.001;
 
                     // get the sinusoid amplitude based last velocity
-                    p_CommonData->chaiDevice->getLinearVelocity(estimatedVel);
+                    p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel);
                     this->decaySinAmp = this->decaySinScale*estimatedVel.z();
 
                     //check if amplitude exceeds desired amount

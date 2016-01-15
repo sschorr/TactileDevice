@@ -25,7 +25,8 @@ int main(int argc, char *argv[])
     MainWindow window;
 
     // Create a chai device
-    shared.chaiDevice = chai3d::cGenericHapticDevicePtr((chai3d::cGenericHapticDevice *)(new chai3d::c3dofChaiDevice()));
+    shared.chaiMagDevice0 = chai3d::cGenericHapticDevicePtr((chai3d::cGenericHapticDevice *)(new chai3d::c3dofChaiDevice(0)));
+    shared.chaiMagDevice1 = chai3d::cGenericHapticDevicePtr((chai3d::cGenericHapticDevice *)(new chai3d::c3dofChaiDevice(1)));
 
     // Create a haptic device
     shared.wearableDelta = new c3DOFDevice();

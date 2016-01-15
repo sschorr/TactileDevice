@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define SENSORAY626
-//#define MAGTRACKER
+#define SENSORAY626
+#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -27,7 +27,6 @@
 #define CAMERA_Z_TRANSLATE 0
 
 #define E_VALUE 2.718
-#define PI 3.14159
 
 // define the data structure that holds stored data
 typedef struct
@@ -52,7 +51,9 @@ typedef struct
     QMutex sharedMutex;
 
     c3DOFDevice* wearableDelta;
-    chai3d::cGenericHapticDevicePtr chaiDevice; // a pointer to the current haptic device
+    chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
+    chai3d::cGenericHapticDevicePtr chaiMagDevice1;
+
 
     bool posControlMode;
     bool hapticsThreadActive;
