@@ -63,10 +63,10 @@ void haptics_thread::initialize()
 
     // create a box and give it physical properties
     meshBox = new chai3d::cMesh();  // create a mesh for a box
-    cCreateBox(meshBox, .1, .1, .001); // make mesh a box
+    cCreateBox(meshBox, .07, .07, .035); // make mesh a box
     meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
     world->addChild(meshBox); // add to world
-    meshBox->setLocalPos(0,0,0); // set the position
+    meshBox->setLocalPos(0,0,.02); // set the position
     // give the box physical properties
     meshBox->m_material->setStiffness(200);
     meshBox->m_material->setStaticFriction(0.5);
@@ -132,7 +132,7 @@ void haptics_thread::initialize()
     decaySinAmpMax = 2;
     decaySinFreq = 150;
     decaySinExp = -20;
-    decaySinScale = 1;
+    decaySinScale = 2;
     firstTouch = true;
     decaySinAmp = 0;
 }
