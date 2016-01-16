@@ -159,10 +159,8 @@ void haptics_thread::initialize()
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
-
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
 
     //create ground
     ground = new chai3d::cMesh();
@@ -186,11 +184,6 @@ void haptics_thread::initialize()
 
     // setup collision detector
     ground->createAABBCollisionDetector(toolRadius);
-
-
-
-
-
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
