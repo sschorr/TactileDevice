@@ -174,6 +174,9 @@ void haptics_thread::run()
                 p_CommonData->wearableDelta->PositionController();
             }
             else
+            {
+                p_CommonData->wearableDelta->TurnOffControl();
+            }
 
             // update our rate estimate every second
             rateDisplayCounter++;
