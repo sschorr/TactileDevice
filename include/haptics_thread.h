@@ -33,6 +33,7 @@ public:
     double ComputeContactVibration();
     void SimulateDynamicBodies();
     void InitDynamicBodies();
+    void ComputeVRDevicePos();
 
     // clocks
     chai3d::cPrecisionClock rateClock;

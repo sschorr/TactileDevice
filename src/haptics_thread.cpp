@@ -120,7 +120,8 @@ void haptics_thread::initialize()
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
-    p_CommonData->posControlMode = false;
+    p_CommonData->sliderControlMode = false;
+    p_CommonData->VRControlMode = false;
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
     p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
 
@@ -163,65 +164,16 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
-            //update Chai3D parameters
-            // compute global reference frames for each object
-            world->computeGlobalPositions(true);
-
-            // update position and orientation of tool (and sphere that represents tool)
-            m_tool0->updatePose();
-            chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
-            chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
-            p_CommonData->chaiMagDevice0->getPosition(position0);
-            p_CommonData->chaiMagDevice0->getRotation(rotation0);
-            //m_curSphere0->setLocalPos(position0);
-            //m_curSphere0->setLocalRot(rotation0);
-
-            // update position of second sphere/tool
-            // update position of finger to stay on proxy point
-            // finger axis are not at fingerpad, so we want a translation along fingertip z axis
-            chai3d::cVector3d fingerOffset(0,-0.006,0);
-            fingerRotation0 = rotation0;
-            fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
-            fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
-            finger->setLocalRot(fingerRotation0);
-            finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
-
-            //computes the interaction force for the tool proxy point
-            m_tool0->computeInteractionForces();
-
-            /* use this if two tools (haptic proxies) are desired
-            m_tool1->updatePose();
-            chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
-            chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
-            p_CommonData->chaiMagDevice1->getPosition(position1);
-            p_CommonData->chaiMagDevice1->getRotation(rotation1);
-            //m_curSphere1->setLocalPos(position1);
-            //m_curSphere1->setLocalRot(rotation1);
-            m_tool1->computeInteractionForces();*/
-
-            //perform transformation to get "device forces"
-            lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
-            rotation0.trans();
-            deviceRotation0.identity();
-            deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
-            deviceRotation0.trans();
-            magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
-            deviceLastLastComputedForce0 = deviceLastComputedForce0;
-            deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
-
-            //convert device "force" to a mapped position
-            double forceToPosMult = 1;
-            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
-            Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
-            Eigen::Vector3d desiredPos(3);
-            desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
-
-            // Perform position controller based on desired position
-            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
-            if(p_CommonData->posControlMode == true)
+            if(p_CommonData->sliderControlMode == true)
             {
                 p_CommonData->wearableDelta->PositionController();
             }
+            else if (p_CommonData->VRControlMode == true)
+            {
+                ComputeVRDevicePos();
+                p_CommonData->wearableDelta->PositionController();
+            }
+            else
 
             // update our rate estimate every second
             rateDisplayCounter++;
@@ -249,6 +201,66 @@ void haptics_thread::run()
 
     // If we are terminating, delete the haptic device to set outputs to 0
     delete p_CommonData->wearableDelta;
+}
+
+void haptics_thread::ComputeVRDevicePos()
+{
+    //update Chai3D parameters
+    // compute global reference frames for each object
+    world->computeGlobalPositions(true);
+
+    // update position and orientation of tool (and sphere that represents tool)
+    m_tool0->updatePose();
+    chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
+    chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+    p_CommonData->chaiMagDevice0->getPosition(position0);
+    p_CommonData->chaiMagDevice0->getRotation(rotation0);
+    //m_curSphere0->setLocalPos(position0);
+    //m_curSphere0->setLocalRot(rotation0);
+
+    // update position of second sphere/tool
+    // update position of finger to stay on proxy point
+    // finger axis are not at fingerpad, so we want a translation along fingertip z axis
+    chai3d::cVector3d fingerOffset(0,-0.006,0);
+    fingerRotation0 = rotation0;
+    fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
+    fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
+    finger->setLocalRot(fingerRotation0);
+    finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
+
+    //computes the interaction force for the tool proxy point
+    m_tool0->computeInteractionForces();
+
+    /* use this if two tools (haptic proxies) are desired
+    m_tool1->updatePose();
+    chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
+    chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
+    p_CommonData->chaiMagDevice1->getPosition(position1);
+    p_CommonData->chaiMagDevice1->getRotation(rotation1);
+    //m_curSphere1->setLocalPos(position1);
+    //m_curSphere1->setLocalRot(rotation1);
+    m_tool1->computeInteractionForces();*/
+
+    //perform transformation to get "device forces"
+    lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
+    rotation0.trans();
+    deviceRotation0.identity();
+    deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
+    deviceRotation0.trans();
+    magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
+    deviceLastLastComputedForce0 = deviceLastComputedForce0;
+    deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
+
+    //convert device "force" to a mapped position
+    double forceToPosMult = 1;
+    chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
+    Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
+    Eigen::Vector3d desiredPos(3);
+    desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
+
+    // Perform position controller based on desired position
+    p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
+
 }
 
 double haptics_thread::ComputeContactVibration(){

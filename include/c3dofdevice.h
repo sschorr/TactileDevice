@@ -98,6 +98,9 @@ public:
     // Test torque output of motors
     void TestMotorTorqueController();
 
+    // Set motors to stop outputting
+    void TurnOffControl();
+
 
     // Public Vars ==========================================
     Eigen::Vector3d neutralPos;

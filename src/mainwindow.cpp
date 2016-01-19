@@ -56,24 +56,31 @@ void MainWindow::Initialize()
     connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
-    connect(this->ui->radioButtonPos, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     GraphicsTimer.start(20);
-    ui->radioButtonPos->click();
+    UpdateGUIInfo();
 }
 
 void MainWindow::onGUIchanged()
 {
-    if(ui->radioButtonPos->isChecked())
+    if(ui->sliderControl->isChecked())
     {
-        //p_CommonData->forceControlMode = false;
-        p_CommonData->posControlMode = true;
+        p_CommonData->sliderControlMode = true;
+        p_CommonData->VRControlMode = false;
         double xSlider = this->ui->verticalSliderX->value()/25.0;
         double ySlider = this->ui->verticalSliderY->value()/25.0;
         double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
+    }
+
+    if(ui->VRControl->isChecked())
+    {
+        p_CommonData->sliderControlMode = false;
+        p_CommonData->VRControlMode = true;
     }
     UpdateGUIInfo();
 }
@@ -140,3 +147,4 @@ void MainWindow::on_ZeroSliders_clicked()
 
     onGUIchanged();
 }
+
