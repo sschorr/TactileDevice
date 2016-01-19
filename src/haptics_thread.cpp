@@ -49,13 +49,16 @@ void haptics_thread::initialize()
     m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool0->start();
 
+    /* uncomment this if we want to use 2 tools
     m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool1); //insert the tool into the world
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
     m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool1->start();
+    m_tool1->start(); */
 
+
+    // Can use this to show frames on tool if so desired
     /*//create a sphere to represent the tool
     m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_curSphere0);
@@ -114,6 +117,263 @@ void haptics_thread::initialize()
         qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
     }
 
+
+    // GENERAL HAPTICS INITS=================================
+    // Ensure the device is not controlling to start
+    p_CommonData->posControlMode = false;
+    p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
+    p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
+
+    // set flag that says haptics thread is running
+    p_CommonData->hapticsThreadActive = true;
+
+    // Set the clock that controls haptic rate
+    rateClock.reset();
+    rateClock.setTimeoutPeriodSeconds(0.000001);
+    rateClock.start(true);
+
+    // setup the clock that will enable display of the haptic rate
+    rateDisplayClock.reset();
+    rateDisplayClock.setTimeoutPeriodSeconds(1.0);
+    rateDisplayClock.start(true);
+
+    // setup the overall program time clock
+    overallClock.reset();
+    overallClock.start(true);
+
+    rateDisplayCounter = 0;
+    recordDataCounter = 0;
+
+    // init first contact variables
+    decaySinAmpMax = 2;
+    decaySinFreq = 150;
+    decaySinExp = -20;
+    decaySinScale = 2;
+    firstTouch = true;
+    decaySinAmp = 0;
+}
+
+void haptics_thread::run()
+{
+    while(p_CommonData->hapticsThreadActive)
+    {
+        // if clock controlling haptic rate times out
+        if(rateClock.timeoutOccurred())
+        {
+            // stop clock while we perform haptic calcs
+            rateClock.stop();
+
+            //update Chai3D parameters
+            // compute global reference frames for each object
+            world->computeGlobalPositions(true);
+
+            // update position and orientation of tool (and sphere that represents tool)
+            m_tool0->updatePose();
+            chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
+            chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+            p_CommonData->chaiMagDevice0->getPosition(position0);
+            p_CommonData->chaiMagDevice0->getRotation(rotation0);
+            //m_curSphere0->setLocalPos(position0);
+            //m_curSphere0->setLocalRot(rotation0);
+
+            // update position of second sphere/tool
+            // update position of finger to stay on proxy point
+            // finger axis are not at fingerpad, so we want a translation along fingertip z axis
+            chai3d::cVector3d fingerOffset(0,-0.006,0);
+            fingerRotation0 = rotation0;
+            fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
+            fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
+            finger->setLocalRot(fingerRotation0);
+            finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
+
+            //computes the interaction force for the tool proxy point
+            m_tool0->computeInteractionForces();
+
+            /* use this if two tools (haptic proxies) are desired
+            m_tool1->updatePose();
+            chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
+            chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
+            p_CommonData->chaiMagDevice1->getPosition(position1);
+            p_CommonData->chaiMagDevice1->getRotation(rotation1);
+            //m_curSphere1->setLocalPos(position1);
+            //m_curSphere1->setLocalRot(rotation1);
+            m_tool1->computeInteractionForces();*/
+
+            //perform transformation to get "device forces"
+            lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
+            rotation0.trans();
+            deviceRotation0.identity();
+            deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
+            deviceRotation0.trans();
+            magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
+            deviceLastLastComputedForce0 = deviceLastComputedForce0;
+            deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
+
+            //convert device "force" to a mapped position
+            double forceToPosMult = 1;
+            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
+            Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
+            Eigen::Vector3d desiredPos(3);
+            desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
+
+            // Perform position controller based on desired position
+            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
+            if(p_CommonData->posControlMode == true)
+            {
+                p_CommonData->wearableDelta->PositionController();
+            }
+
+            // update our rate estimate every second
+            rateDisplayCounter++;
+            if(rateDisplayClock.timeoutOccurred())
+            {
+                rateDisplayClock.stop();
+                p_CommonData->hapticRateEstimate = rateDisplayCounter;
+                rateDisplayCounter = 0;
+                rateDisplayClock.reset();
+                rateDisplayClock.start();
+            }
+
+            // record only on every 10 haptic loops
+            recordDataCounter++;
+            if(recordDataCounter == 10)
+            {
+                //RecordData();
+            }
+
+            // restart rateClock
+            rateClock.reset();
+            rateClock.start();
+        }        
+    }
+
+    // If we are terminating, delete the haptic device to set outputs to 0
+    delete p_CommonData->wearableDelta;
+}
+
+double haptics_thread::ComputeContactVibration(){
+    //create a contact vibration that depends on position or velocity
+    // if we are registering a contact
+    if (abs(deviceLastComputedForce0.z()) > 0.00001)
+    {
+        // if this is the first time in contact
+        if (firstTouch)
+        {
+            // start the time ticking
+            decaySinTime = 0;
+            decaySinTime += 0.001;
+
+            // get the sinusoid amplitude based last velocity
+            p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
+            this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
+
+            //check if amplitude exceeds desired amount
+            if (decaySinAmp > decaySinAmpMax)
+            {
+                decaySinAmp = decaySinAmpMax;
+            }
+
+            // calculate contributed force
+            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+            qDebug() << computedPosAdd;
+
+            // set next force to not be "first touch"
+            firstTouch = false;
+        }
+        else
+        {
+            //still inside wall with "contact"
+            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+
+            //increment decay time counter
+            decaySinTime += 0.001;
+        }
+    }
+    else
+    {
+        if (!firstTouch)
+        {
+            // just came out of contact, reset that next one will be "first touch"
+            firstTouch = true;
+
+            // reset the decay time, amplitude, and added "pos"
+            decaySinTime = 0;
+            decaySinAmp = 0;
+            computedPosAdd = 0;
+        }
+    }
+
+    return computedPosAdd;
+}
+
+void haptics_thread::SimulateDynamicBodies()
+{
+    double timeInterval = rateClock.getCurrentTimeSeconds();
+
+    //---------------------------------------------------
+    // Implement Dynamic simulation
+    //---------------------------------------------------
+    int numInteractionPoints = m_tool0->getNumInteractionPoints();
+    for (int i=0; i<numInteractionPoints; i++)
+    {
+        // get pointer to next interaction point of tool
+        chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
+
+        // check primary contact point if available
+        if (interactionPoint->getNumCollisionEvents() > 0)
+        {
+            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+            // given the mesh object we may be touching, we search for its owner which
+            // could be the mesh itself or a multi-mesh object. Once the owner found, we
+            // look for the parent that will point to the ODE object itself.
+            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+            // cast to ODE object
+            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+            // if ODE object, we apply interaction forces
+            if (ODEobject != NULL)
+            {
+                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                   collisionEvent->m_globalPos);
+            }
+        }
+    }
+    numInteractionPoints = m_tool1->getNumInteractionPoints();
+    for (int i=0; i<numInteractionPoints; i++)
+    {
+        // get pointer to next interaction point of tool
+        chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
+
+        // check primary contact point if available
+        if (interactionPoint->getNumCollisionEvents() > 0)
+        {
+            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+            // given the mesh object we may be touching, we search for its owner which
+            // could be the mesh itself or a multi-mesh object. Once the owner found, we
+            // look for the parent that will point to the ODE object itself.
+            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+            // cast to ODE object
+            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+            // if ODE object, we apply interaction forces
+            if (ODEobject != NULL)
+            {
+                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                   collisionEvent->m_globalPos);
+            }
+        }
+    }
+
+    ODEWorld->updateDynamics(timeInterval/5);
+}
+
+void haptics_thread::InitDynamicBodies()
+{
+
     //--------------------------------------------------------------------------
     // CREATING ODE World and Objects
     //--------------------------------------------------------------------------
@@ -134,7 +394,7 @@ void haptics_thread::initialize()
     // create a dynamic model of the ODE object
     ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
 
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body    
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
     meshBox = new chai3d::cMesh();
     cCreateBox(meshBox, boxSize, boxSize, boxSize); // make mesh a box
     meshBox->createAABBCollisionDetector(toolRadius);
@@ -182,257 +442,7 @@ void haptics_thread::initialize()
 
     // setup collision detector
     ground->createAABBCollisionDetector(toolRadius);*/
-
-    // GENERAL HAPTICS INITS=================================
-    // Ensure the device is not controlling to start
-    p_CommonData->posControlMode = false;
-    p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
-    p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
-
-    // set flag that says haptics thread is running
-    p_CommonData->hapticsThreadActive = true;
-
-    // Set the clock that controls haptic rate
-    rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.000001);
-    rateClock.start(true);
-
-    // setup the clock that will enable display of the haptic rate
-    rateDisplayClock.reset();
-    rateDisplayClock.setTimeoutPeriodSeconds(1.0);
-    rateDisplayClock.start(true);
-
-    // setup the overall program time clock
-    overallClock.reset();
-    overallClock.start(true);
-
-    rateDisplayCounter = 0;
-    recordDataCounter = 0;
-
-    // init first contact variables
-    decaySinAmpMax = 2;
-    decaySinFreq = 150;
-    decaySinExp = -20;
-    decaySinScale = 2;
-    firstTouch = true;
-    decaySinAmp = 0;
 }
-
-void haptics_thread::run()
-{
-    while(p_CommonData->hapticsThreadActive)
-    {
-        // if clock controlling haptic rate times out
-        if(rateClock.timeoutOccurred())
-        {
-            // stop clock while we perform haptic calcs
-            rateClock.stop();
-
-            double timeInterval = rateClock.getCurrentTimeSeconds();
-            rateClock.reset();
-            rateClock.start();
-
-            //update Chai3D parameters
-            // compute global reference frames for each object
-            world->computeGlobalPositions(true);
-
-            // update position and orientation of tool (and sphere that represents tool)
-            m_tool0->updatePose();
-            chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
-            chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
-            chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
-            chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
-            p_CommonData->chaiMagDevice0->getPosition(position0);
-            p_CommonData->chaiMagDevice0->getRotation(rotation0);
-            //m_curSphere0->setLocalPos(position0);
-            //m_curSphere0->setLocalRot(rotation0);
-
-            m_tool1->updatePose();
-            p_CommonData->chaiMagDevice1->getPosition(position1);
-            p_CommonData->chaiMagDevice1->getRotation(rotation1);
-            //m_curSphere1->setLocalPos(position1);
-            //m_curSphere1->setLocalRot(rotation1);
-
-            // update position of second sphere/tool
-
-            // update position of finger to stay on proxy point
-            // finger axis are not at fingerpad, so we want a translation along fingertip z axis
-            chai3d::cVector3d fingerOffset(0,-0.006,0);
-            fingerRotation0 = rotation0;
-            fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
-            fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
-            finger->setLocalRot(fingerRotation0);
-            finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
-
-            //computes the interaction force for the tool proxy point
-            m_tool0->computeInteractionForces();
-            m_tool1->computeInteractionForces();
-
-            m_tool0->applyForces();
-            m_tool1->applyForces();
-
-            //perform transformation to get "device forces"
-            lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
-            rotation0.trans();
-            deviceRotation0.identity();
-            deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
-            deviceRotation0.trans();
-            magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
-            deviceLastLastComputedForce0 = deviceLastComputedForce0;
-            deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
-
-            //convert device "force" to a mapped position
-            double forceToPosMult = 1;
-            chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
-            Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
-            Eigen::Vector3d desiredPos(3);
-            desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
-
-            //create a contact vibration that depends on position or velocity
-            // if we are registering a contact
-            if (abs(deviceLastComputedForce0.z()) > 0.00001)
-            {
-                // if this is the first time in contact
-                if (firstTouch)
-                {
-                    // start the time ticking
-                    decaySinTime = 0;
-                    decaySinTime += 0.001;
-
-                    // get the sinusoid amplitude based last velocity
-                    p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
-                    this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
-
-                    //check if amplitude exceeds desired amount
-                    if (decaySinAmp > decaySinAmpMax)
-                    {
-                        decaySinAmp = decaySinAmpMax;
-                    }
-
-                    // calculate contributed force
-                    computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-                    qDebug() << computedPosAdd;
-
-                    // set next force to not be "first touch"
-                    firstTouch = false;
-                }
-                else
-                {
-                    //still inside wall with "contact"
-                    computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-
-                    //increment decay time counter
-                    decaySinTime += 0.001;
-                }
-            }
-            else
-            {
-                if (!firstTouch)
-                {
-                    // just came out of contact, reset that next one will be "first touch"
-                    firstTouch = true;
-
-                    // reset the decay time, amplitude, and added "pos"
-                    decaySinTime = 0;
-                    decaySinAmp = 0;
-                    computedPosAdd = 0;
-                }
-            }
-
-            desiredPos[2] = desiredPos[2]+computedPosAdd;
-            // Perform position controller based on desired position
-            p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
-            if(p_CommonData->posControlMode == true)
-            {
-                p_CommonData->wearableDelta->PositionController();
-            }
-/*
-            //---------------------------------------------------
-            // Implement Dynamic simulation
-            //---------------------------------------------------
-            int numInteractionPoints = m_tool0->getNumInteractionPoints();
-            for (int i=0; i<numInteractionPoints; i++)
-            {
-                // get pointer to next interaction point of tool
-                chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
-
-                // check primary contact point if available
-                if (interactionPoint->getNumCollisionEvents() > 0)
-                {
-                    chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-                    // given the mesh object we may be touching, we search for its owner which
-                    // could be the mesh itself or a multi-mesh object. Once the owner found, we
-                    // look for the parent that will point to the ODE object itself.
-                    chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-                    // cast to ODE object
-                    cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-                    // if ODE object, we apply interaction forces
-                    if (ODEobject != NULL)
-                    {
-                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                           collisionEvent->m_globalPos);
-                    }
-                }
-            }
-            numInteractionPoints = m_tool1->getNumInteractionPoints();
-            for (int i=0; i<numInteractionPoints; i++)
-            {
-                // get pointer to next interaction point of tool
-                chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
-
-                // check primary contact point if available
-                if (interactionPoint->getNumCollisionEvents() > 0)
-                {
-                    chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-                    // given the mesh object we may be touching, we search for its owner which
-                    // could be the mesh itself or a multi-mesh object. Once the owner found, we
-                    // look for the parent that will point to the ODE object itself.
-                    chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-                    // cast to ODE object
-                    cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-                    // if ODE object, we apply interaction forces
-                    if (ODEobject != NULL)
-                    {
-                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                           collisionEvent->m_globalPos);
-                    }
-                }
-            }
-
-            ODEWorld->updateDynamics(timeInterval/5);*/
-
-
-
-            // update our rate estimate every second
-            rateDisplayCounter++;
-            if(rateDisplayClock.timeoutOccurred())
-            {
-                rateDisplayClock.stop();
-                p_CommonData->hapticRateEstimate = rateDisplayCounter;
-                rateDisplayCounter = 0;
-                rateDisplayClock.reset();
-                rateDisplayClock.start();
-            }
-            // record only on every 10 haptic loops
-            recordDataCounter++;
-            if(recordDataCounter == 10)
-            {
-                //RecordData();
-            }
-        }        
-    }
-
-    // If we are terminating, delete the haptic device to set outputs to 0
-    delete p_CommonData->wearableDelta;
-}
-
-
 
 
 

@@ -1,3 +1,8 @@
+/* This file reads in data for two magnetic tracker tips on the Ascension tracker
+ * and makes the data available as a custom Chai3d device.  It does not provide
+ * any force output. */
+
+
 
 //==============================================================================
 /*

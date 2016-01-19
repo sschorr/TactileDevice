@@ -30,6 +30,9 @@ public:
     // METHODS
     void initialize();
     void RecordData();
+    double ComputeContactVibration();
+    void SimulateDynamicBodies();
+    void InitDynamicBodies();
 
     // clocks
     chai3d::cPrecisionClock rateClock;
