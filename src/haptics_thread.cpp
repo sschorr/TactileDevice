@@ -57,7 +57,6 @@ void haptics_thread::initialize()
     m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool1->start(); */
 
-
     // Can use this to show frames on tool if so desired
     /*//create a sphere to represent the tool
     m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
@@ -155,8 +154,8 @@ void haptics_thread::initialize()
     decaySinAmp = 0;
 
     //init bandwidth variables
-    bandSinAmp = 1;
-    bandSinFreq = 0.1;
+    bandSinAmp = 3;
+    bandSinFreq = 3;
 }
 
 void haptics_thread::run()
@@ -175,7 +174,7 @@ void haptics_thread::run()
             }
             else if (p_CommonData->sinControlMode == true)
             {
-                Eigen::Vector3d inputAxis(0,0,1);
+                Eigen::Vector3d inputAxis(1,0,0);
                 CommandSinPos(inputAxis);
             }
 
