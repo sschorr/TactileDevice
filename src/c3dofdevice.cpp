@@ -343,8 +343,7 @@ void c3DOFDevice::PositionController()
 
 void c3DOFDevice::TurnOffControl()
 {
-    Eigen::Vector3d nullForce;
-    nullForce << 0,0,0;
+    Eigen::Vector3d nullForce(0,0,0);
     SetDesiredForce(nullForce);
     SetMotorTorqueOutput(ReadDesiredForce());
 }

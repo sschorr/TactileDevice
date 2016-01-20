@@ -42,6 +42,7 @@ private slots:
     void on_CalibratePushButton_clicked();
     void on_ZeroSliders_clicked();
     void onGUIchanged();
+    void on_startSin_clicked();
 };
 
 #endif // MAINWINDOW_H

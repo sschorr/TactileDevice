@@ -47,19 +47,22 @@ typedef struct
 {
     //Chai3D variables
     chai3d::cCamera* p_camera;
-
     QMutex sharedMutex;
-
     c3DOFDevice* wearableDelta;
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
-    chai3d::cGenericHapticDevicePtr chaiMagDevice1;
+    chai3d::cGenericHapticDevicePtr chaiMagDevice1; // support two mag sensors
+
 
     bool sliderControlMode;
     bool VRControlMode;
+    bool sinControlMode;
+
+
+
+
+
     bool hapticsThreadActive;
-
     double hapticRateEstimate;
-
     std::vector<DataRecordStruct> debugData;
 
 } shared_data;

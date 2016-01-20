@@ -33,7 +33,8 @@ public:
     double ComputeContactVibration();
     void SimulateDynamicBodies();
     void InitDynamicBodies();
-    void ComputeVRDevicePos();
+    void ComputeVRDesiredDevicePos();
+    void CommandSinPos(Eigen::Vector3d);
 
     // clocks
     chai3d::cPrecisionClock rateClock;
@@ -63,8 +64,6 @@ public:
     cODEGenericBody* ODEBody0;
     cODEGenericBody* ODEBody1;
 
-
-
     // planes confining objects
     cODEGenericBody* ODEGPlane0;
     cODEGenericBody* ODEGPlane1;
@@ -87,16 +86,20 @@ public:
     double decaySinFreq;
     double computedPosAdd;
 
-
-
-
     // ints for display counters
     int rateDisplayCounter;
     int recordDataCounter;
 
+    // bandwidth sin variables
+    double startTime;
+    bool firstTimeInSin;
+    double bandSinAmp;
+    double bandSinFreq;
+
+    // device variable
+    Eigen::Vector3d neutralPos;
+
     DataRecordStruct dataRecorder;
-
-
 
 protected:
     void run();
