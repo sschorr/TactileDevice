@@ -117,13 +117,14 @@ void haptics_thread::initialize()
         qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
     }
 
-
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
     p_CommonData->sliderControlMode = false;
     p_CommonData->VRControlMode = false;
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
-    p_CommonData->wearableDelta->SetDesiredPos(Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180))); // kinematic neutral position
+    neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
+    p_CommonData->wearableDelta->SetDesiredPos(neutralPos); // kinematic neutral position
+    firstTimeInSin = true;
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -152,6 +153,10 @@ void haptics_thread::initialize()
     decaySinScale = 2;
     firstTouch = true;
     decaySinAmp = 0;
+
+    //init bandwidth variables
+    bandSinAmp = 1;
+    bandSinFreq = 0.1;
 }
 
 void haptics_thread::run()
@@ -164,19 +169,17 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
-            if(p_CommonData->sliderControlMode == true)
+            if (p_CommonData->VRControlMode == true)
             {
-                p_CommonData->wearableDelta->PositionController();
+                ComputeVRDesiredDevicePos();
             }
-            else if (p_CommonData->VRControlMode == true)
+            else if (p_CommonData->sinControlMode == true)
             {
-                ComputeVRDevicePos();
-                p_CommonData->wearableDelta->PositionController();
+                Eigen::Vector3d inputAxis(0,0,1);
+                CommandSinPos(inputAxis);
             }
-            else
-            {
-                p_CommonData->wearableDelta->TurnOffControl();
-            }
+
+            p_CommonData->wearableDelta->PositionController();
 
             // update our rate estimate every second
             rateDisplayCounter++;
@@ -201,12 +204,33 @@ void haptics_thread::run()
             rateClock.start();
         }        
     }
-
     // If we are terminating, delete the haptic device to set outputs to 0
     delete p_CommonData->wearableDelta;
 }
 
-void haptics_thread::ComputeVRDevicePos()
+void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
+{
+    //perform check on validity of axis
+    double inputAxisMag = inputMotionAxis.norm();
+    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
+    {
+        if(firstTimeInSin)
+        {
+            startTime = overallClock.getCurrentTimeSeconds();
+            firstTimeInSin = false;
+        }
+
+        double currTime = overallClock.getCurrentTimeSeconds() - startTime;
+        Eigen::Vector3d sinPos = (bandSinAmp*sin(2*PI*bandSinFreq*currTime))*inputMotionAxis + neutralPos;
+        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+    }
+    else
+    {
+        qDebug("invalid motion axis");
+    }
+}
+
+void haptics_thread::ComputeVRDesiredDevicePos()
 {
     //update Chai3D parameters
     // compute global reference frames for each object
@@ -459,9 +483,6 @@ void haptics_thread::InitDynamicBodies()
     ground->createAABBCollisionDetector(toolRadius);*/
 }
 
-
-
-
 void haptics_thread::RecordData()
 {
     //recordDataCounter = 0;
@@ -477,6 +498,5 @@ void haptics_thread::RecordData()
 
 
     //p_CommonData->debugData.push_back(dataRecorder);
-
 }
 

@@ -23,6 +23,9 @@
       <height>871</height>
      </rect>
     </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
       <string>Tab 1</string>
@@ -746,6 +749,32 @@
       </property>
       <property name="text">
        <string>VR Control</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startSin">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>640</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Sin</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="returnZero">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>580</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Return</string>
       </property>
      </widget>
     </widget>

@@ -68,8 +68,10 @@ void MainWindow::onGUIchanged()
 {
     if(ui->sliderControl->isChecked())
     {
-        p_CommonData->sliderControlMode = true;
         p_CommonData->VRControlMode = false;
+        p_CommonData->sinControlMode = false;
+        p_CommonData->sliderControlMode = true;
+
         double xSlider = this->ui->verticalSliderX->value()/25.0;
         double ySlider = this->ui->verticalSliderY->value()/25.0;
         double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
@@ -77,10 +79,12 @@ void MainWindow::onGUIchanged()
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
 
-    if(ui->VRControl->isChecked())
+    else if(ui->VRControl->isChecked())
     {
         p_CommonData->sliderControlMode = false;
+        p_CommonData->sinControlMode = false;
         p_CommonData->VRControlMode = true;
+        //let haptics thread determine desired position
     }
     UpdateGUIInfo();
 }
@@ -94,42 +98,33 @@ void MainWindow::UpdateGUIInfo()
     Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
     Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
     Eigen::Vector3d localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
     ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
-
     ui->JointAngleLCDNumber1->display(localJointAngles[0]*180/PI);
     ui->JointAngleLCDNumber2->display(localJointAngles[1]*180/PI);
     ui->JointAngleLCDNumber3->display(localJointAngles[2]*180/PI);
-
     ui->CartesianXLCDNumber->display(localCartesianPos[0]);
     ui->CartesianYLCDNumber->display(localCartesianPos[1]);
     ui->CartesianZLCDNumber->display(localCartesianPos[2]);
-
     ui->DesiredForceX->display(localDesiredForce[0]);
     ui->DesiredForceY->display(localDesiredForce[1]);
     ui->DesiredForceZ->display(localDesiredForce[2]);
-
     ui->MotorTorque1->display(localDesiredMotorTorques[0]);
     ui->MotorTorque2->display(localDesiredMotorTorques[1]);
     ui->MotorTorque3->display(localDesiredMotorTorques[2]);
-
     ui->VoltageLCD1->display((double)(localOutputVoltages[0]));
     ui->VoltageLCD2->display((double)(localOutputVoltages[1]));
     ui->VoltageLCD3->display((double)(localOutputVoltages[2]));
-
     ui->DesX->display(localDesiredPos[0]);
     ui->DesY->display(localDesiredPos[1]);
     ui->DesZ->display(localDesiredPos[2]);
-
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
-
     onGUIchanged();
 }
 
@@ -144,7 +139,16 @@ void MainWindow::on_ZeroSliders_clicked()
     ui->verticalSliderX->blockSignals(false);
     ui->verticalSliderY->blockSignals(false);
     ui->verticalSliderZ->blockSignals(false);
-
     onGUIchanged();
 }
 
+
+void MainWindow::on_startSin_clicked()
+{
+    p_CommonData->VRControlMode = false;
+    p_CommonData->sliderControlMode = false;
+    ui->sliderControl->setChecked(false);
+    ui->VRControl->setChecked(false);
+
+    p_CommonData->sinControlMode = true;
+}
