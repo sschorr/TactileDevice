@@ -11,45 +11,14 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {    
     p_CommonData->hapticsThreadActive = false;
-
-    /*//write debugging data to file when we are done
-    std::ofstream file;
-    file.open("C:/Users/Charm_Stars/Desktop/Sam Projects/Sam GitProjects/DataWrite/testData.txt");
-    for (int i=0; i < p_CommonData->debugData.size(); i++)
-
-    {
-        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-        file << p_CommonData->debugData[i].time << "," << " "
-             << p_CommonData->debugData[i].pos[0] << "," << " "
-             << p_CommonData->debugData[i].pos[1] << "," << " "
-             << p_CommonData->debugData[i].pos[2] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[2] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-
-             << std::endl;
-    }
-    file.close();*/
     delete ui;
 }
 
 void MainWindow::Initialize()
 {
+    // Set our current state
+    p_CommonData->currentState = idle;
+
     // Initialize shared memory for OpenGL widget
     ui->DisplayWidget->p_CommonData = p_CommonData;
 
@@ -68,10 +37,7 @@ void MainWindow::onGUIchanged()
 {
     if(ui->sliderControl->isChecked())
     {
-        p_CommonData->VRControlMode = false;
-        p_CommonData->sinControlMode = false;
-        p_CommonData->sliderControlMode = true;
-
+        p_CommonData->currentState = sliderControlMode;
         double xSlider = this->ui->verticalSliderX->value()/25.0;
         double ySlider = this->ui->verticalSliderY->value()/25.0;
         double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
@@ -81,10 +47,8 @@ void MainWindow::onGUIchanged()
 
     else if(ui->VRControl->isChecked())
     {
-        p_CommonData->sliderControlMode = false;
-        p_CommonData->sinControlMode = false;
-        p_CommonData->VRControlMode = true;
         //let haptics thread determine desired position
+        p_CommonData->currentState = VRControlMode;
     }
     UpdateGUIInfo();
 }
@@ -142,13 +106,64 @@ void MainWindow::on_ZeroSliders_clicked()
     onGUIchanged();
 }
 
-
 void MainWindow::on_startSin_clicked()
 {
-    p_CommonData->VRControlMode = false;
-    p_CommonData->sliderControlMode = false;
+    p_CommonData->currentState = sinControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
 
-    p_CommonData->sinControlMode = true;
+    p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+}
+
+void MainWindow::on_stopRecord_clicked()
+{
+    p_CommonData->recordFlag = false;
+
+    QString dir;
+    QString fileName;
+    bool ok;
+
+
+    dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
+                                        "C:/Users/Charm_Stars/Dropbox(Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Data/",
+                                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    fileName = QInputDialog::getText(0, "Input File Name",
+                                     "File Name:", QLineEdit::Normal, " ",
+                                     &ok);
+    //write debugging data to file when we are done
+    std::ofstream file;
+    file.open(dir.toStdString() + "/" + fileName.toStdString());
+    for (int i=0; i < p_CommonData->debugData.size(); i++)
+    {
+        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+        file << p_CommonData->debugData[i].time << "," << " "
+             << p_CommonData->debugData[i].pos[0] << "," << " "
+             << p_CommonData->debugData[i].pos[1] << "," << " "
+             << p_CommonData->debugData[i].pos[2] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+             << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+             << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+             << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+             << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+             << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+             << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+             << std::endl;
+    }
+    file.close();
+}
+
+void MainWindow::on_startRecord_clicked()
+{
+    p_CommonData->recordFlag = true;
 }

@@ -36,11 +36,11 @@ public:
     void ComputeVRDesiredDevicePos();
     void UpdateVRGraphics();
     void CommandSinPos(Eigen::Vector3d);
+    void InitChaiStuff();
 
     // clocks
     chai3d::cPrecisionClock rateClock;
     chai3d::cPrecisionClock rateDisplayClock;
-    chai3d::cPrecisionClock overallClock;
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
@@ -98,8 +98,6 @@ public:
     int recordDataCounter;
 
     // bandwidth sin variables
-    double startTime;
-    bool firstTimeInSin;
     double bandSinAmp;
     double bandSinFreq;
 
