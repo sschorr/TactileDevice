@@ -34,6 +34,7 @@ public:
     void SimulateDynamicBodies();
     void InitDynamicBodies();
     void ComputeVRDesiredDevicePos();
+    void UpdateVRGraphics();
     void CommandSinPos(Eigen::Vector3d);
 
     // clocks
@@ -75,6 +76,12 @@ public:
     chai3d::cVector3d deviceLastComputedForce0;
     chai3d::cVector3d deviceLastLastComputedForce0;
     chai3d::cVector3d estimatedVel0;
+
+    // tracker rotation variables
+    chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
+    chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+    chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
+    chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
 
     //vars for contact vibration
     bool firstTouch;

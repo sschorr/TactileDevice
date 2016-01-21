@@ -98,7 +98,7 @@ void haptics_thread::initialize()
     if(cLoadFileOBJ(finger, "FingerModel.obj")){
         qDebug() << "finger file loaded";
     }
-    finger->setShowEnabled(true);
+    finger->setShowEnabled(false);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
@@ -170,11 +170,13 @@ void haptics_thread::run()
 
             if (p_CommonData->VRControlMode == true)
             {
+                UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
             }
             else if (p_CommonData->sinControlMode == true)
             {
-                Eigen::Vector3d inputAxis(1,0,0);
+                UpdateVRGraphics();
+                Eigen::Vector3d inputAxis(0,0,1);
                 CommandSinPos(inputAxis);
             }
 
@@ -229,7 +231,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     }
 }
 
-void haptics_thread::ComputeVRDesiredDevicePos()
+void haptics_thread::UpdateVRGraphics()
 {
     //update Chai3D parameters
     // compute global reference frames for each object
@@ -237,8 +239,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     // update position and orientation of tool (and sphere that represents tool)
     m_tool0->updatePose();
-    chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
-    chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+
     p_CommonData->chaiMagDevice0->getPosition(position0);
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
     //m_curSphere0->setLocalPos(position0);
@@ -259,14 +260,15 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     /* use this if two tools (haptic proxies) are desired
     m_tool1->updatePose();
-    chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
-    chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
     //m_curSphere1->setLocalPos(position1);
     //m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();*/
+}
 
+void haptics_thread::ComputeVRDesiredDevicePos()
+{
     //perform transformation to get "device forces"
     lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
     rotation0.trans();
@@ -286,7 +288,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     // Perform position controller based on desired position
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
-
 }
 
 double haptics_thread::ComputeContactVibration(){
