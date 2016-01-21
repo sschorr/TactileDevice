@@ -12,118 +12,13 @@ haptics_thread::~haptics_thread()
 
 void haptics_thread::initialize()
 {
-    //--------------------------------------------------------------------------
-    // WORLD - CAMERA - LIGHTING
-    //--------------------------------------------------------------------------
-    // Create a new world
-    world = new chai3d::cWorld();
-
-    // create a camera and insert it into the virtual world
-    world->setBackgroundColor(0, 0, 0);
-    world->m_backgroundColor.setWhite();
-
-    // create a camera and insert it into the virtual world
-    p_CommonData->p_camera = new chai3d::cCamera(world);
-    world->addChild(p_CommonData->p_camera);
-
-    // Position and orientate the camera
-    // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, -.03),    // camera position (eye)
-                                 chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
-                                 chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
-
-    // create a light source and attach it to the camera
-    light = new chai3d::cDirectionalLight(world);
-    world->addChild(light);   // insert light source inside world
-    light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
-
-    //--------------------------------------------------------------------------
-    // HAPTIC DEVICES / TOOLS
-    //--------------------------------------------------------------------------
-    m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool0); //insert the tool into the world
-    toolRadius = 0.003; // set tool radius
-    m_tool0->setRadius(toolRadius);
-    m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool0->start();
-
-    /* uncomment this if we want to use 2 tools
-    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool1); //insert the tool into the world
-    m_tool1->setRadius(toolRadius);
-    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
-    m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool1->start(); */
-
-    // Can use this to show frames on tool if so desired
-    /*//create a sphere to represent the tool
-    m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere0);
-    m_curSphere0->m_material->setGrayDarkSlate();
-    m_curSphere0->setShowFrame(false);
-    m_curSphere0->setFrameSize(0.05);
-
-    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere1);
-    m_curSphere1->m_material->setGrayDarkSlate();
-    m_curSphere1->setShowFrame(false);
-    m_curSphere1->setFrameSize(0.05);*/
-
-
-    //--------------------------------------------------------------------------
-    // CREATING OBJECTS
-    //--------------------------------------------------------------------------
-
-    // create a box and give it physical properties
-    meshBox = new chai3d::cMesh();  // create a mesh for a box
-    cCreateBox(meshBox, .07, .07, .035); // make mesh a box
-    meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
-    world->addChild(meshBox); // add to world
-    meshBox->setLocalPos(0,0,.02); // set the position
-    // give the box physical properties
-    meshBox->m_material->setStiffness(200);
-    meshBox->m_material->setStaticFriction(0.5);
-    meshBox->m_material->setDynamicFriction(0.5);
-    meshBox->m_material->setUseHapticFriction(true);
-
-    // create a finger object
-    finger = new chai3d::cMultiMesh(); // create a virtual mesh
-    world->addChild(finger); // add object to world
-    finger->setShowFrame(false);
-    finger->setFrameSize(0.05);
-    finger->setLocalPos(0,0,0);
-    // load an object file
-    if(cLoadFileOBJ(finger, "FingerModel.obj")){
-        qDebug() << "finger file loaded";
-    }
-    finger->setShowEnabled(false);
-    finger->computeBoundaryBox(true); //compute a boundary box
-    finger->setUseVertexColors(true);
-    chai3d::cColorf fingerColor;
-    fingerColor.setBrownSandy();
-    finger->setVertexColor(fingerColor);
-    finger->m_material->m_ambient.set(0.1, 0.1, 0.1);
-    finger->m_material->m_diffuse.set(0.3, 0.3, 0.3);
-    finger->m_material->m_specular.set(1.0, 1.0, 1.0);
-    finger->setUseMaterial(true);
-    finger->setHapticEnabled(false);
-    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
-    if (size > 0)
-    {
-        finger->scale(1.0);
-        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
-    }
+    InitChaiStuff();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
-    p_CommonData->sliderControlMode = false;
-    p_CommonData->VRControlMode = false;
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
     neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
     p_CommonData->wearableDelta->SetDesiredPos(neutralPos); // kinematic neutral position
-    firstTimeInSin = true;
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -139,9 +34,10 @@ void haptics_thread::initialize()
     rateDisplayClock.start(true);
 
     // setup the overall program time clock
-    overallClock.reset();
-    overallClock.start(true);
+    p_CommonData->overallClock.reset();
+    p_CommonData->overallClock.start(true);
 
+    //init counters to 0
     rateDisplayCounter = 0;
     recordDataCounter = 0;
 
@@ -155,7 +51,10 @@ void haptics_thread::initialize()
 
     //init bandwidth variables
     bandSinAmp = 3;
-    bandSinFreq = 3;
+    bandSinFreq = 0.1;
+
+    // Start off not recording
+    p_CommonData->recordFlag = false;
 }
 
 void haptics_thread::run()
@@ -168,19 +67,26 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
-            if (p_CommonData->VRControlMode == true)
+            switch(p_CommonData->currentState)
             {
+            case idle:
+                UpdateVRGraphics();
+                p_CommonData->wearableDelta->TurnOffControl();
+                break;
+
+            case VRControlMode:
                 UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
-            }
-            else if (p_CommonData->sinControlMode == true)
-            {
+                p_CommonData->wearableDelta->PositionController();
+                break;
+
+            case sinControlMode:
                 UpdateVRGraphics();
                 Eigen::Vector3d inputAxis(0,0,1);
                 CommandSinPos(inputAxis);
+                p_CommonData->wearableDelta->PositionController();
             }
 
-            p_CommonData->wearableDelta->PositionController();
 
             // update our rate estimate every second
             rateDisplayCounter++;
@@ -197,7 +103,7 @@ void haptics_thread::run()
             recordDataCounter++;
             if(recordDataCounter == 10)
             {
-                //RecordData();
+                RecordData();
             }
 
             // restart rateClock
@@ -205,6 +111,7 @@ void haptics_thread::run()
             rateClock.start();
         }        
     }
+
     // If we are terminating, delete the haptic device to set outputs to 0
     delete p_CommonData->wearableDelta;
 }
@@ -215,15 +122,13 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     double inputAxisMag = inputMotionAxis.norm();
     if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
     {
-        if(firstTimeInSin)
-        {
-            startTime = overallClock.getCurrentTimeSeconds();
-            firstTimeInSin = false;
-        }
-
-        double currTime = overallClock.getCurrentTimeSeconds() - startTime;
+        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
         Eigen::Vector3d sinPos = (bandSinAmp*sin(2*PI*bandSinFreq*currTime))*inputMotionAxis + neutralPos;
         p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+        if (currTime > 7.0)
+        {
+            p_CommonData->currentState = idle;
+        }
     }
     else
     {
@@ -485,18 +390,124 @@ void haptics_thread::InitDynamicBodies()
 
 void haptics_thread::RecordData()
 {
-    //recordDataCounter = 0;
+    recordDataCounter = 0;
+    dataRecorder.time = p_CommonData->overallClock.getCurrentTimeSeconds();
+    dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
+    dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
+    dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
+    dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
+    dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
+    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
 
-    //dataRecorder.time = overallClock.getCurrentTimeSeconds();
-    //dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
-    //dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
-    //dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
-    //dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-    //dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
-    //dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    //dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
+    p_CommonData->debugData.push_back(dataRecorder);
+}
+
+void haptics_thread::InitChaiStuff()
+{
+    //--------------------------------------------------------------------------
+    // WORLD - CAMERA - LIGHTING
+    //--------------------------------------------------------------------------
+    // Create a new world
+    world = new chai3d::cWorld();
+
+    // create a camera and insert it into the virtual world
+    world->setBackgroundColor(0, 0, 0);
+    world->m_backgroundColor.setWhite();
+
+    // create a camera and insert it into the virtual world
+    p_CommonData->p_camera = new chai3d::cCamera(world);
+    world->addChild(p_CommonData->p_camera);
+
+    // Position and orientate the camera
+    // X is toward camera, pos y is to right, pos z is up
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, -.03),    // camera position (eye)
+                                 chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
+                                 chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
+
+    // create a light source and attach it to the camera
+    light = new chai3d::cDirectionalLight(world);
+    world->addChild(light);   // insert light source inside world
+    light->setEnabled(true);                   // enable light source
+    light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
+
+    //--------------------------------------------------------------------------
+    // HAPTIC DEVICES / TOOLS
+    //--------------------------------------------------------------------------
+    m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool0); //insert the tool into the world
+    toolRadius = 0.003; // set tool radius
+    m_tool0->setRadius(toolRadius);
+    m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
+    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->start();
+
+    /* uncomment this if we want to use 2 tools
+    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool1); //insert the tool into the world
+    m_tool1->setRadius(toolRadius);
+    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
+    m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool1->start(); */
+
+    // Can use this to show frames on tool if so desired
+    /*//create a sphere to represent the tool
+    m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere0);
+    m_curSphere0->m_material->setGrayDarkSlate();
+    m_curSphere0->setShowFrame(false);
+    m_curSphere0->setFrameSize(0.05);
+
+    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere1);
+    m_curSphere1->m_material->setGrayDarkSlate();
+    m_curSphere1->setShowFrame(false);
+    m_curSphere1->setFrameSize(0.05);*/
 
 
-    //p_CommonData->debugData.push_back(dataRecorder);
+    //--------------------------------------------------------------------------
+    // CREATING OBJECTS
+    //--------------------------------------------------------------------------
+
+    // create a box and give it physical properties
+    meshBox = new chai3d::cMesh();  // create a mesh for a box
+    cCreateBox(meshBox, .07, .07, .035); // make mesh a box
+    meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
+    world->addChild(meshBox); // add to world
+    meshBox->setLocalPos(0,0,.02); // set the position
+    // give the box physical properties
+    meshBox->m_material->setStiffness(200);
+    meshBox->m_material->setStaticFriction(0.5);
+    meshBox->m_material->setDynamicFriction(0.5);
+    meshBox->m_material->setUseHapticFriction(true);
+
+    // create a finger object
+    finger = new chai3d::cMultiMesh(); // create a virtual mesh
+    world->addChild(finger); // add object to world
+    finger->setShowFrame(false);
+    finger->setFrameSize(0.05);
+    finger->setLocalPos(0,0,0);
+    // load an object file
+    if(cLoadFileOBJ(finger, "FingerModel.obj")){
+        qDebug() << "finger file loaded";
+    }
+    finger->setShowEnabled(false);
+    finger->computeBoundaryBox(true); //compute a boundary box
+    finger->setUseVertexColors(true);
+    chai3d::cColorf fingerColor;
+    fingerColor.setBrownSandy();
+    finger->setVertexColor(fingerColor);
+    finger->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    finger->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    finger->m_material->m_specular.set(1.0, 1.0, 1.0);
+    finger->setUseMaterial(true);
+    finger->setHapticEnabled(false);
+    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
+    if (size > 0)
+    {
+        finger->scale(1.0);
+        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
+    }
+
 }
 

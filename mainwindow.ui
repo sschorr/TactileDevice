@@ -33,7 +33,7 @@
      <widget class="Widget_OpenGLDisplay" name="DisplayWidget" native="true">
       <property name="geometry">
        <rect>
-        <x>360</x>
+        <x>350</x>
         <y>0</y>
         <width>771</width>
         <height>701</height>
@@ -754,8 +754,8 @@
      <widget class="QPushButton" name="startSin">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>640</y>
+        <x>30</x>
+        <y>520</y>
         <width>111</width>
         <height>41</height>
        </rect>
@@ -767,7 +767,7 @@
      <widget class="QPushButton" name="returnZero">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>30</x>
         <y>580</y>
         <width>111</width>
         <height>41</height>
@@ -775,6 +775,45 @@
       </property>
       <property name="text">
        <string>Return</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startRecord">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>520</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Record</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="stopRecord">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>580</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Stop Record</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="turnOff">
+      <property name="geometry">
+       <rect>
+        <x>260</x>
+        <y>190</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Turn Off</string>
       </property>
      </widget>
     </widget>

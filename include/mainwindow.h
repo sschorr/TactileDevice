@@ -12,7 +12,11 @@
 #include <ostream>
 #include <istream>
 #include <fstream>
-
+#include <QDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <Qt/qfiledialog.h>
+#include <Qt/qinputdialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -43,6 +47,8 @@ private slots:
     void on_ZeroSliders_clicked();
     void onGUIchanged();
     void on_startSin_clicked();
+    void on_stopRecord_clicked();
+    void on_startRecord_clicked();
 };
 
 #endif // MAINWINDOW_H

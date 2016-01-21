@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -28,21 +28,31 @@
 
 #define E_VALUE 2.718
 
-// define the data structure that holds stored data
+// define the data structure that holds recorded data
 typedef struct
 {
     double time;
-    chai3d::cVector3d pos;
-    chai3d::cVector3d desiredPos;
-    chai3d::cVector3d motorAngles;
-    chai3d::cVector3d jointAngles;
-    chai3d::cVector3d motorTorque;
-    chai3d::cVector3d voltageOut;
-    chai3d::cVector3d desiredForce;
+    Eigen::Vector3d pos;
+    Eigen::Vector3d desiredPos;
+    Eigen::Vector3d motorAngles;
+    Eigen::Vector3d jointAngles;
+    Eigen::Vector3d motorTorque;
+    Eigen::Vector3d voltageOut;
+    Eigen::Vector3d desiredForce;
 
 } DataRecordStruct;
 
-// define the data structure that contains shared data
+typedef enum
+{
+    idle,
+    sliderControlMode,
+    VRControlMode,
+    sinControlMode
+
+} sm_states;
+
+
+// define the data structure that contains data that we share between threads
 typedef struct
 {
     //Chai3D variables
@@ -52,11 +62,17 @@ typedef struct
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
     chai3d::cGenericHapticDevicePtr chaiMagDevice1; // support two mag sensors
 
+    //clock for all threads
+    chai3d::cPrecisionClock overallClock;
 
-    bool sliderControlMode;
-    bool VRControlMode;
-    bool sinControlMode;
+    // determine start time for bandwidth sin
+    double sinStartTime;
 
+    // Declare the state that we are in
+    sm_states currentState;
+
+    // check whether to record
+    bool recordFlag;
 
     bool hapticsThreadActive;
     double hapticRateEstimate;
