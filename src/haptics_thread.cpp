@@ -154,8 +154,8 @@ void haptics_thread::initialize()
     decaySinAmp = 0;
 
     //init bandwidth variables
-    bandSinAmp = 3;
-    bandSinFreq = 1;
+    bandSinAmp = 4;
+    bandSinFreq = 2;
 }
 
 void haptics_thread::run()
