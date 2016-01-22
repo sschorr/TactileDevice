@@ -43,7 +43,7 @@ public:
     void CommandSinPos(Eigen::Vector3d);
     void InitChaiStuff();
     void InitAccel();
-    double ReadAccel();
+    chai3d::cVector3d ReadAccel();
 
     // clocks
     chai3d::cPrecisionClock rateClock;
@@ -114,6 +114,9 @@ public:
     // variables for handling ADC read in
     BYTE poll_list[16]; // List of items to be digitized.
     SHORT databuf[16]; // Buffer to receive digitized data.
+
+    // accelerometer signals
+    chai3d::cVector3d accelSignal;
 
     DataRecordStruct dataRecorder;
 

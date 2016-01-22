@@ -69,6 +69,8 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
+            accelSignal = ReadAccel();
+
             switch(p_CommonData->currentState)
             {
             case idle:
@@ -402,6 +404,7 @@ void haptics_thread::RecordData()
     dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
     dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
     dataRecorder.magTrackerPos = position0;
+    dataRecorder.accelSignal = accelSignal;
 
     p_CommonData->debugData.push_back(dataRecorder);
 }
@@ -541,15 +544,16 @@ void haptics_thread::InitAccel()
 #endif
 }
 
-double haptics_thread::ReadAccel()
+chai3d::cVector3d haptics_thread::ReadAccel()
 {
 #ifdef SENSORAY626
     S626_ReadADC(0, databuf);
-
-    return databuf[0]; //0 is the adc channel the accel is plugged into
+    chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
+    return returnVec;
 #endif SENSORAY626
 
-    return 0; //if sensoray is not active, just return 0
+    chai3d::cVector3d emptyVec;
+    return emptyVec; //if sensoray is not active, just return 0
 }
 
 

@@ -161,6 +161,9 @@ void MainWindow::on_stopRecord_clicked()
              << p_CommonData->debugData[i].magTrackerPos.x() << "," << " "
              << p_CommonData->debugData[i].magTrackerPos.y() << "," << " "
              << p_CommonData->debugData[i].magTrackerPos.z() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.z() << "," << " "
              << std::endl;
     }
     file.close();
