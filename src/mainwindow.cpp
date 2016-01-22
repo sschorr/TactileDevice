@@ -158,6 +158,9 @@ void MainWindow::on_stopRecord_clicked()
              << p_CommonData->debugData[i].voltageOut[0] << "," << " "
              << p_CommonData->debugData[i].voltageOut[1] << "," << " "
              << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+             << p_CommonData->debugData[i].magTrackerPos.x() << "," << " "
+             << p_CommonData->debugData[i].magTrackerPos.y() << "," << " "
+             << p_CommonData->debugData[i].magTrackerPos.z() << "," << " "
              << std::endl;
     }
     file.close();

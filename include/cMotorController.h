@@ -12,6 +12,7 @@
 #include "Win626.h"
 #include <QMutex>
 #include <Eigen/dense>
+#include "windows.h"
 
 class cMotorController
 {

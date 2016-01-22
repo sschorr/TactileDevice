@@ -39,6 +39,7 @@ typedef struct
     Eigen::Vector3d motorTorque;
     Eigen::Vector3d voltageOut;
     Eigen::Vector3d desiredForce;
+    chai3d::cVector3d magTrackerPos;
 
 } DataRecordStruct;
 

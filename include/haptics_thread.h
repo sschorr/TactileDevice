@@ -10,8 +10,13 @@
 #include <QDir>
 #include <QCoreApplication>
 #include "CODE.h"
+#include "Win626.h"
+#include "windows.h"
 
-
+#define RANGE_10V 0x00 // Range code for ADC ±10V range.
+#define RANGE_5V 0x10 // Range code for ADC ±5V range.
+#define EOPL 0x80 // ADC end-of-poll-list marker.
+#define CHANMASK 0x0F // ADC channel number mask.
 
 class haptics_thread : public QThread
 {
@@ -37,6 +42,8 @@ public:
     void UpdateVRGraphics();
     void CommandSinPos(Eigen::Vector3d);
     void InitChaiStuff();
+    void InitAccel();
+    double ReadAccel();
 
     // clocks
     chai3d::cPrecisionClock rateClock;
@@ -103,6 +110,10 @@ public:
 
     // device variable
     Eigen::Vector3d neutralPos;
+
+    // variables for handling ADC read in
+    BYTE poll_list[16]; // List of items to be digitized.
+    SHORT databuf[16]; // Buffer to receive digitized data.
 
     DataRecordStruct dataRecorder;
 

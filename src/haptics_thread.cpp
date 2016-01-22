@@ -1,5 +1,6 @@
 #include "haptics_thread.h"
 
+
 haptics_thread::haptics_thread(QObject *parent) : QThread(parent)
 {
 
@@ -12,6 +13,7 @@ haptics_thread::~haptics_thread()
 
 void haptics_thread::initialize()
 {
+    InitAccel();
     InitChaiStuff();
 
     // GENERAL HAPTICS INITS=================================
@@ -399,6 +401,7 @@ void haptics_thread::RecordData()
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
     dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
     dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
+    dataRecorder.magTrackerPos = position0;
 
     p_CommonData->debugData.push_back(dataRecorder);
 }
@@ -508,6 +511,48 @@ void haptics_thread::InitChaiStuff()
         finger->scale(1.0);
         qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
     }
-
 }
+
+void haptics_thread::InitAccel()
+{
+#ifdef SENSORAY626
+    // Sets the 3.3 V output for running the accelerometer
+    double DAC_VSCALAR = 819.1;
+    double VoltOut = 3.3;
+    long writeData = (long)(VoltOut*DAC_VSCALAR);
+
+    S626_WriteDAC(0,3,writeData);
+
+    // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
+
+    // Allocate data structures. We allocate enough space for maximum possible
+    // number of items (16) even though this example only has 3 items. Although
+    // this is not required, it is the recommended practice to prevent programming
+    // errors if your application ever modifies the number of items in the poll list.
+
+    // Populate the poll list.
+    poll_list[0] = 0 | RANGE_5V | EOPL; // Chan 0, ±5V range, mark as list end.
+    // Prepare for A/D conversions by passing the poll list to the driver.
+    S626_ResetADC( 0, poll_list );
+    // Digitize all items in the poll list. As long as the poll list is not modified,
+    // S626_ReadADC() can be called repeatedly without calling S626_ResetADC() again.
+    // This could be implemented as two calls: S626_StartADC() and S626_WaitDoneADC().
+    S626_ReadADC( 0, databuf ); //board 0, data in databuf
+#endif
+}
+
+double haptics_thread::ReadAccel()
+{
+#ifdef SENSORAY626
+    S626_ReadADC(0, databuf);
+
+    return databuf[0]; //0 is the adc channel the accel is plugged into
+#endif SENSORAY626
+
+    return 0; //if sensoray is not active, just return 0
+}
+
+
+
+
 
