@@ -227,12 +227,12 @@
        <rect>
         <x>250</x>
         <y>80</y>
-        <width>101</width>
+        <width>91</width>
         <height>17</height>
        </rect>
       </property>
       <property name="text">
-       <string>SliderControl</string>
+       <string>Slider Control</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_6">

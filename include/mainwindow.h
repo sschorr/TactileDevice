@@ -49,6 +49,7 @@ private slots:
     void on_startSin_clicked();
     void on_stopRecord_clicked();
     void on_startRecord_clicked();
+    void on_turnOff_clicked();
 };
 
 #endif // MAINWINDOW_H

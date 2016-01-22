@@ -52,8 +52,8 @@ void haptics_thread::initialize()
     decaySinAmp = 0;
 
     //init bandwidth variables
-    bandSinAmp = 3;
-    bandSinFreq = 0.1;
+    bandSinAmp = 4;
+    bandSinFreq = 1;
 
     // Start off not recording
     p_CommonData->recordFlag = false;
@@ -79,6 +79,11 @@ void haptics_thread::run()
             case VRControlMode:
                 UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
+                p_CommonData->wearableDelta->PositionController();
+                break;
+
+            case sliderControlMode:
+                UpdateVRGraphics();
                 p_CommonData->wearableDelta->PositionController();
                 break;
 

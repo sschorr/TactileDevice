@@ -132,7 +132,7 @@ void MainWindow::on_stopRecord_clicked()
                                      &ok);
     //write debugging data to file when we are done
     std::ofstream file;
-    file.open(dir.toStdString() + "/" + fileName.toStdString());
+    file.open(dir.toStdString() + "/" + fileName.toStdString() + ".txt");
     for (int i=0; i < p_CommonData->debugData.size(); i++)
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
@@ -161,6 +161,9 @@ void MainWindow::on_stopRecord_clicked()
              << p_CommonData->debugData[i].magTrackerPos.x() << "," << " "
              << p_CommonData->debugData[i].magTrackerPos.y() << "," << " "
              << p_CommonData->debugData[i].magTrackerPos.z() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+             << p_CommonData->debugData[i].accelSignal.z() << "," << " "
              << std::endl;
     }
     file.close();
@@ -169,4 +172,16 @@ void MainWindow::on_stopRecord_clicked()
 void MainWindow::on_startRecord_clicked()
 {
     p_CommonData->recordFlag = true;
+}
+
+void MainWindow::on_turnOff_clicked()
+{
+    p_CommonData->currentState = idle;
+    ui->sliderControl->setAutoExclusive(false);
+    ui->VRControl->setAutoExclusive(false);
+    ui->sliderControl->setChecked(false);
+    ui->VRControl->setChecked(false);
+    ui->sliderControl->setAutoExclusive(true);
+    ui->VRControl->setAutoExclusive(true);
+
 }
