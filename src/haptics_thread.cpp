@@ -1,5 +1,6 @@
 #include "haptics_thread.h"
 
+#define DAC_VSCALAR 819.1
 
 haptics_thread::haptics_thread(QObject *parent) : QThread(parent)
 {
@@ -525,14 +526,14 @@ void haptics_thread::InitAccel()
 {
 #ifdef SENSORAY626
     // Sets the 3.3 V output for running the accelerometer
-    double DAC_VSCALAR = 819.1;
     double VoltOut = 3.3;
     long writeData = (long)(VoltOut*DAC_VSCALAR);
 
     S626_WriteDAC(0,3,writeData);
+    qDebug() << "made it";
+    qDebug() << writeData;
 
     // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
-
     // Allocate data structures. We allocate enough space for maximum possible
     // number of items (16) even though this example only has 3 items. Although
     // this is not required, it is the recommended practice to prevent programming

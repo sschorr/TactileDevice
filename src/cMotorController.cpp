@@ -194,7 +194,6 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
 
-
     // Write Voltage out to DAC with software limits checked
     if (VoltOut > MaxVolt)
     {
@@ -206,6 +205,7 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     }
 
     long writeData = (long)(VoltOut*DAC_VSCALAR);
+
 
 #ifdef SENSORAY626
     S626_WriteDAC(0,channelNum,writeData);
