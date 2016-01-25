@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -79,6 +79,14 @@ typedef struct
     bool hapticsThreadActive;
     double hapticRateEstimate;
     std::vector<DataRecordStruct> debugData;
+
+    // bandwidth sin variables
+    double bandSinAmp;
+    double bandSinFreq;
+
+    // controller variables
+    double Kp;
+    double Kd;
 
 } shared_data;
 

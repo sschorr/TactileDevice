@@ -13,7 +13,6 @@
 #include <Eigen/dense>
 #include <iostream>
 #include "chai3d.h"
-
 #include <QMutex>
 
 #define PI 3.14159265
@@ -90,7 +89,7 @@ public:
     Eigen::Vector3d ReadVoltageOutput();
 
     // Commands a position to the 3DOF device
-    void PositionController();
+    void PositionController(double Kp, double Kd);
 
     // Commands a force to the 3DOF device
     void ForceController();

@@ -310,10 +310,11 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
     return returnVoltage;
 }
 
-void c3DOFDevice::PositionController()
+void c3DOFDevice::PositionController(double Kp, double Kd)
 {    
-    double K_p = 30;
-    double K_d = .6;
+
+    double K_p = Kp;
+    double K_d = Kd;
 
     static bool firstTimeThrough = true;
     static Eigen::Vector3d lastPos;

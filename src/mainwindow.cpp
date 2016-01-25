@@ -20,11 +20,16 @@ void MainWindow::Initialize()
     p_CommonData->currentState = idle;
 
     // Initialize shared memory for OpenGL widget
-    ui->DisplayWidget->p_CommonData = p_CommonData;
+    ui->DisplayWidget->p_CommonData = p_CommonData;    
 
     connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->KpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->KdSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->bandwidthFreqSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
@@ -50,6 +55,17 @@ void MainWindow::onGUIchanged()
         //let haptics thread determine desired position
         p_CommonData->currentState = VRControlMode;
     }
+
+    double KpSlider = this->ui->KpSlider->value()/2.0;
+    double KdSlider = this->ui->KdSlider->value()/50.0;
+    double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
+    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/20.0;
+
+    p_CommonData->Kp = KpSlider;
+    p_CommonData->Kd = KdSlider;
+    p_CommonData->bandSinAmp = bandwidthAmp;
+    p_CommonData->bandSinFreq = bandwidthFreq;
+
     UpdateGUIInfo();
 }
 
@@ -84,6 +100,10 @@ void MainWindow::UpdateGUIInfo()
     ui->DesY->display(localDesiredPos[1]);
     ui->DesZ->display(localDesiredPos[2]);
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
+    ui->lcdBandAmp->display(p_CommonData->bandSinAmp);
+    ui->lcdBandFreq->display(p_CommonData->bandSinFreq);
+    ui->lcdKp->display(p_CommonData->Kp);
+    ui->lcdKd->display(p_CommonData->Kd);
 }
 
 void MainWindow::on_CalibratePushButton_clicked()

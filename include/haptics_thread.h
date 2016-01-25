@@ -104,9 +104,7 @@ public:
     int rateDisplayCounter;
     int recordDataCounter;
 
-    // bandwidth sin variables
-    double bandSinAmp;
-    double bandSinFreq;
+
 
     // device variable
     Eigen::Vector3d neutralPos;

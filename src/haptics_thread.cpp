@@ -23,6 +23,9 @@ void haptics_thread::initialize()
     neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
     p_CommonData->wearableDelta->SetDesiredPos(neutralPos); // kinematic neutral position
 
+    p_CommonData->Kp = 0;
+    p_CommonData->Kd = 0;
+
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
 
@@ -53,8 +56,8 @@ void haptics_thread::initialize()
     decaySinAmp = 0;
 
     //init bandwidth variables
-    bandSinAmp = 4;
-    bandSinFreq = 1;
+    p_CommonData->bandSinAmp = 0;
+    p_CommonData->bandSinFreq = 0;
 
     // Start off not recording
     p_CommonData->recordFlag = false;
@@ -82,19 +85,19 @@ void haptics_thread::run()
             case VRControlMode:
                 UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
-                p_CommonData->wearableDelta->PositionController();
+                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
                 break;
 
             case sliderControlMode:
                 UpdateVRGraphics();
-                p_CommonData->wearableDelta->PositionController();
+                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
                 break;
 
             case sinControlMode:
                 UpdateVRGraphics();
                 Eigen::Vector3d inputAxis(0,0,1);
                 CommandSinPos(inputAxis);
-                p_CommonData->wearableDelta->PositionController();
+                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
             }
 
 
@@ -133,7 +136,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
     {
         double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
-        Eigen::Vector3d sinPos = (bandSinAmp*sin(2*PI*bandSinFreq*currTime))*inputMotionAxis + neutralPos;
+        Eigen::Vector3d sinPos = (p_CommonData->bandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + neutralPos;
         p_CommonData->wearableDelta->SetDesiredPos(sinPos);
         if (currTime > 7.0)
         {

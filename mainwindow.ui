@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
-    <height>786</height>
+    <width>1166</width>
+    <height>936</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,10 +33,10 @@
      <widget class="Widget_OpenGLDisplay" name="DisplayWidget" native="true">
       <property name="geometry">
        <rect>
-        <x>350</x>
+        <x>380</x>
         <y>0</y>
-        <width>771</width>
-        <height>701</height>
+        <width>781</width>
+        <height>651</height>
        </rect>
       </property>
      </widget>
@@ -816,6 +816,150 @@
        <string>Turn Off</string>
       </property>
      </widget>
+     <widget class="QSlider" name="KpSlider">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>710</y>
+        <width>160</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QSlider" name="KdSlider">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>760</y>
+        <width>160</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QSlider" name="bandwidthAmpSlider">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>710</y>
+        <width>160</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QSlider" name="bandwidthFreqSlider">
+      <property name="geometry">
+       <rect>
+        <x>350</x>
+        <y>760</y>
+        <width>160</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdKp">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>710</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdKd">
+      <property name="geometry">
+       <rect>
+        <x>200</x>
+        <y>760</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdBandAmp">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>710</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="lcdBandFreq">
+      <property name="geometry">
+       <rect>
+        <x>520</x>
+        <y>760</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="KpLabel">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>680</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Kp</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="KdLabel">
+      <property name="geometry">
+       <rect>
+        <x>90</x>
+        <y>740</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Kd</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="BandwidthAmpLabel">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>680</y>
+        <width>101</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bandwidth Amplitude</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="BandwidthFreqLabel">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>730</y>
+        <width>111</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Bandwidth Frequency</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -829,7 +973,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1170</width>
+     <width>1166</width>
      <height>21</height>
     </rect>
    </property>
