@@ -489,8 +489,8 @@ void haptics_thread::InitChaiStuff()
     meshBox->setLocalPos(0,0,.02); // set the position
     // give the box physical properties
     meshBox->m_material->setStiffness(200);
-    meshBox->m_material->setStaticFriction(0.5);
-    meshBox->m_material->setDynamicFriction(0.5);
+    meshBox->m_material->setStaticFriction(0.7);
+    meshBox->m_material->setDynamicFriction(0.7);
     meshBox->m_material->setUseHapticFriction(true);
 
     // create a finger object
