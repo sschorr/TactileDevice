@@ -34,6 +34,12 @@ void MainWindow::Initialize()
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
+    // init slider values
+    this->ui->KpSlider->setValue(50);
+    this->ui->KdSlider->setValue(1);
+    this->ui->bandwidthAmpSlider->setValue(50);
+    this->ui->bandwidthFreqSlider->setValue(10);
+
     GraphicsTimer.start(20);
     UpdateGUIInfo();
 }
@@ -59,7 +65,7 @@ void MainWindow::onGUIchanged()
     double KpSlider = this->ui->KpSlider->value()/2.0;
     double KdSlider = this->ui->KdSlider->value()/50.0;
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
-    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/20.0;
+    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/10.0;
 
     p_CommonData->Kp = KpSlider;
     p_CommonData->Kd = KdSlider;
