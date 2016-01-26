@@ -95,7 +95,7 @@ void haptics_thread::run()
 
             case sinControlMode:
                 UpdateVRGraphics();
-                Eigen::Vector3d inputAxis(0,0,1);
+                Eigen::Vector3d inputAxis(0,1,0);
                 CommandSinPos(inputAxis);
                 p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
             }
