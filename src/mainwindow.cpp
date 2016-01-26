@@ -36,7 +36,7 @@ void MainWindow::Initialize()
 
     // init slider values
     this->ui->KpSlider->setValue(50);
-    this->ui->KdSlider->setValue(1);
+    this->ui->KdSlider->setValue(10);
     this->ui->bandwidthAmpSlider->setValue(50);
     this->ui->bandwidthFreqSlider->setValue(10);
 

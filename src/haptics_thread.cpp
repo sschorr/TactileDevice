@@ -15,7 +15,9 @@ haptics_thread::~haptics_thread()
 void haptics_thread::initialize()
 {
     InitAccel();
-    InitChaiStuff();
+    InitGeneralChaiStuff();
+    InitFingerAndTool();
+    InitPalpationEnvironment();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -414,11 +416,10 @@ void haptics_thread::RecordData()
     dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
     dataRecorder.magTrackerPos = position0;
     dataRecorder.accelSignal = accelSignal;
-
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
-void haptics_thread::InitChaiStuff()
+void haptics_thread::InitGeneralChaiStuff()
 {
     //--------------------------------------------------------------------------
     // WORLD - CAMERA - LIGHTING
@@ -436,7 +437,7 @@ void haptics_thread::InitChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.35/2, 0, -.03),    // camera position (eye)
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.25, 0, -.06),    // camera position (eye)
                                  chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
                                  chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
 
@@ -445,7 +446,10 @@ void haptics_thread::InitChaiStuff()
     world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
     light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
+}
 
+void haptics_thread::InitFingerAndTool()
+{
     //--------------------------------------------------------------------------
     // HAPTIC DEVICES / TOOLS
     //--------------------------------------------------------------------------
@@ -483,18 +487,19 @@ void haptics_thread::InitChaiStuff()
     //--------------------------------------------------------------------------
     // CREATING OBJECTS
     //--------------------------------------------------------------------------
-
+    /*
     // create a box and give it physical properties
     meshBox = new chai3d::cMesh();  // create a mesh for a box
     cCreateBox(meshBox, .07, .07, .035); // make mesh a box
     meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
     world->addChild(meshBox); // add to world
     meshBox->setLocalPos(0,0,.02); // set the position
+
     // give the box physical properties
     meshBox->m_material->setStiffness(200);
     meshBox->m_material->setStaticFriction(0.7);
     meshBox->m_material->setDynamicFriction(0.7);
-    meshBox->m_material->setUseHapticFriction(true);
+    meshBox->m_material->setUseHapticFriction(true);*/
 
     // create a finger object
     finger = new chai3d::cMultiMesh(); // create a virtual mesh
@@ -502,11 +507,14 @@ void haptics_thread::InitChaiStuff()
     finger->setShowFrame(false);
     finger->setFrameSize(0.05);
     finger->setLocalPos(0,0,0);
+
     // load an object file
-    if(cLoadFileOBJ(finger, "FingerModel.obj")){
+    if(cLoadFileOBJ(finger, "./Resources/FingerModel.obj")){
         qDebug() << "finger file loaded";
     }
-    finger->setShowEnabled(false);
+
+    // set params
+    finger->setShowEnabled(true);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
@@ -523,6 +531,268 @@ void haptics_thread::InitChaiStuff()
         finger->scale(1.0);
         qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
     }
+}
+
+void haptics_thread::InitPalpationEnvironment()
+{
+    /*
+    // create a virtual mesh
+    p_table = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_table);
+
+    // load object
+    //cLoadFileOBJ(p_petriDish, "./Resources/table/table.obj");
+    bool fileLoad = p_table->loadFromFile("./Resources/table/table.obj");
+
+    // compute a boundary box
+    p_table->computeBoundaryBox(true);
+
+    // get dimensions of object
+    double size = cSub(p_table->getBoundaryMax(), p_table->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_table->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_table->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_table->setStiffness(100, true);*/
+
+    double size;
+
+
+    //----------------------------------------------Create Petri Dish---------------------------------------------------
+    // create a virtual mesh
+    p_petriDish = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_petriDish);
+
+    //load the object from file
+    cLoadFileOBJ(p_petriDish, "./Resources/petri_dish/petri_dish.obj");
+    //p_petriDish->loadFromFile("./Resources/petri_dish/petri_dish.obj");
+
+    // compute a boundary box
+    p_petriDish->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_petriDish->getBoundaryMax(), p_petriDish->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_petriDish->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_petriDish->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_petriDish->setStiffness(100, true);
+
+    p_petriDish->setTransparencyLevel(0.4, true, true);
+
+    p_petriDish->setUseVertexColors(true);
+    chai3d::cColorf petriDishColor;
+    petriDishColor.setGrayDark();
+    p_petriDish->setVertexColor(petriDishColor);
+    p_petriDish->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    p_petriDish->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    p_petriDish->m_material->m_specular.set(1.0, 1.0, 1.0);
+    p_petriDish->setUseMaterial(true);
+
+    p_petriDish->setShowEnabled(false);
+
+    //----------------------------------------------Create Tissue One---------------------------------------------------
+
+    // create a virtual mesh
+    p_tissueOne = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_tissueOne);
+
+    p_tissueOne->setLocalPos(0,0,.005);
+
+    //load the object from file
+    //cLoadFileOBJ(p_tissueOne, "./Resources/tissue_1/tissue_1.obj");
+    p_tissueOne->loadFromFile("./Resources/tissue_1/tissue_1.obj");
+
+    // compute a boundary box
+    p_tissueOne->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_tissueOne->getBoundaryMax(), p_tissueOne->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_tissueOne->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_tissueOne->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_tissueOne->setStiffness(100, true);
+
+    p_tissueOne->setTransparencyLevel(0.4, true, true);
+
+    /*p_tissueOne->setUseVertexColors(true);
+    chai3d::cColorf tissueOneColor;
+    tissueOneColor.setBrownRosy();
+    p_tissueOne->setVertexColor(tissueOneColor);
+    p_tissueOne->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    p_tissueOne->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    p_tissueOne->m_material->m_specular.set(1.0, 1.0, 1.0);
+    p_tissueOne->setUseMaterial(true);*/
+
+    p_tissueOne->setShowEnabled(false);
+
+    //----------------------------------------------Create Tissue Two---------------------------------------------------
+
+    // create a virtual mesh
+    p_tissueTwo = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_tissueTwo);
+
+    p_tissueTwo->setLocalPos(0,0,.025);
+
+    //load the object from file
+    //cLoadFileOBJ(p_tissueTwo, "./Resources/tissue_2/tissue_2.obj");
+    p_tissueTwo->loadFromFile("./Resources/tissue_2/tissue_2.obj");
+
+    // compute a boundary box
+    p_tissueTwo->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_tissueTwo->getBoundaryMax(), p_tissueTwo->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_tissueTwo->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_tissueTwo->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_tissueTwo->setStiffness(100, true);
+
+    /*p_tissueTwo->setUseVertexColors(true);
+    chai3d::cColorf tissueTwoColor;
+    tissueTwoColor.setBrownGoldenrod();
+    p_tissueTwo->setVertexColor(tissueTwoColor);
+    p_tissueTwo->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    p_tissueTwo->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    p_tissueTwo->m_material->m_specular.set(1.0, 1.0, 1.0);
+    p_tissueTwo->setUseMaterial(true);*/
+
+
+    //----------------------------------------------Create Tissue Three---------------------------------------------------
+
+    // create a virtual mesh
+    p_tissueThree = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_tissueThree);
+
+    p_tissueThree->setLocalPos(0,0,.025);
+
+    //load the object from file
+    //cLoadFileOBJ(p_tissueThree, "./Resources/tissue_3/tissue_3.obj");
+    p_tissueThree->loadFromFile("./Resources/tissue_3/tissue_3.obj");
+
+    // compute a boundary box
+    p_tissueThree->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_tissueThree->getBoundaryMax(), p_tissueThree->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_tissueThree->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_tissueThree->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_tissueThree->setStiffness(100, true);
+
+    //----------------------------------------------Create Tissue Four---------------------------------------------------
+
+    // create a virtual mesh
+    p_tissueFour = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_tissueFour);
+
+    p_tissueFour->setLocalPos(0,0,.025);
+
+    //load the object from file
+    //cLoadFileOBJ(p_tissueFour, "./Resources/tissue_4/tissue_4.obj");
+    p_tissueFour->loadFromFile("./Resources/tissue_4/tissue_4.obj");
+
+    // compute a boundary box
+    p_tissueFour->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_tissueFour->getBoundaryMax(), p_tissueFour->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_tissueFour->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_tissueFour->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_tissueFour->setStiffness(100, true);
+
+    //----------------------------------------------Create Tissue Five---------------------------------------------------
+
+    // create a virtual mesh
+    p_tissueFive = new chai3d::cMultiMesh();
+
+    // add object to world
+    world->addChild(p_tissueFive);
+
+    p_tissueFive->setLocalPos(0,0,.025);
+
+    //load the object from file
+    //cLoadFileOBJ(p_tissueFive, "./Resources/tissue_5/tissue_5.obj");
+    p_tissueFive->loadFromFile("./Resources/tissue_5/tissue_5.obj");
+
+    // compute a boundary box
+    p_tissueFive->computeBoundaryBox(true);
+
+    // get dimensions of object
+    size = cSub(p_tissueFive->getBoundaryMax(), p_tissueFive->getBoundaryMin()).length();
+
+    // resize object to screen
+    if (size > 0)
+    {
+        p_tissueFive->scale(1);
+    }
+
+    // compute collision detection algorithm
+    p_tissueFive->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_tissueFive->setStiffness(100, true);
+
+
 }
 
 void haptics_thread::InitAccel()
