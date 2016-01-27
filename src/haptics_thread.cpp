@@ -437,7 +437,7 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.3, 0.0, -0.03),//(0.25, 0, -.25),    // camera position (eye)
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.3, 0.0, -0.25),//(0.25, 0, -.25),    // camera position (eye)
                                  chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
                                  chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
 
@@ -567,7 +567,7 @@ void haptics_thread::InitPalpationEnvironment()
     double size;
 
 
-    /*//----------------------------------------------Create Petri Dish---------------------------------------------------
+    //----------------------------------------------Create Petri Dish---------------------------------------------------
     // create a virtual mesh
     p_CommonData->p_petriDish = new chai3d::cMultiMesh();
 
@@ -575,8 +575,10 @@ void haptics_thread::InitPalpationEnvironment()
     world->addChild(p_CommonData->p_petriDish);
 
     //load the object from file
-    cLoadFileOBJ(p_CommonData->p_petriDish, "./Resources/petri_dish/petri_dish.obj");
-    //p_petriDish->loadFromFile("./Resources/petri_dish/petri_dish.obj");
+    //cLoadFileOBJ(p_CommonData->p_petriDish, "./Resources/petri_dish/petri_dish.obj");
+    p_CommonData->p_petriDish->loadFromFile("./Resources/petri_dish/petri_dish.obj");
+
+    p_CommonData->p_petriDish->rotateAboutLocalAxisDeg(1,0,0,180);
 
     // compute a boundary box
     p_CommonData->p_petriDish->computeBoundaryBox(true);
@@ -614,11 +616,13 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueOne);
 
-    p_CommonData->p_tissueOne->setLocalPos(0,0,.005);
+    p_CommonData->p_tissueOne->setLocalPos(0,0,-.005);
 
     //load the object from file
     //cLoadFileOBJ(p_CommonData->p_tissueOne, "./Resources/tissue_1/tissue_1.obj");
     p_CommonData->p_tissueOne->loadFromFile("./Resources/tissue_1/tissue_1.obj");
+
+    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
 
     // compute a boundary box
     p_CommonData->p_tissueOne->computeBoundaryBox(true);
@@ -645,12 +649,15 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
 
     // add object to world
-    world->addChild(p_CommonData->p_tissueTwo);
+    world->addChild(p_CommonData->p_tissueTwo);    
 
-    p_CommonData->p_tissueTwo->setLocalPos(0,0,.025);
+    p_CommonData->p_tissueTwo->setLocalPos(0,0,-.025);
+    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueTwo->loadFromFile("./Resources/tissue_2/tissue_2.obj");
+
+
 
     // compute a boundary box
     p_CommonData->p_tissueTwo->computeBoundaryBox(true);
@@ -668,7 +675,7 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueTwo->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueTwo->setStiffness(100, true);
+    p_CommonData->p_tissueTwo->setStiffness(300, true);
     //----------------------------------------------Create Tissue Three---------------------------------------------------
 
     // create a virtual mesh
@@ -677,7 +684,8 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueThree);
 
-    p_CommonData->p_tissueThree->setLocalPos(0,0,.025);
+    p_CommonData->p_tissueThree->setLocalPos(0,0,-.025);
+    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueThree->loadFromFile("./Resources/tissue_3/tissue_3.obj");
@@ -698,7 +706,7 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueThree->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueThree->setStiffness(100, true);
+    p_CommonData->p_tissueThree->setStiffness(300, true);
 
     //----------------------------------------------Create Tissue Four---------------------------------------------------
     // create a virtual mesh
@@ -707,7 +715,8 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueFour);
 
-    p_CommonData->p_tissueFour->setLocalPos(0,0,.025);
+    p_CommonData->p_tissueFour->setLocalPos(0,0,-.025);
+    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueFour->loadFromFile("./Resources/tissue_4/tissue_4.obj");
@@ -728,7 +737,7 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFour->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFour->setStiffness(100, true);
+    p_CommonData->p_tissueFour->setStiffness(300, true);
 
     //----------------------------------------------Create Tissue Five---------------------------------------------------
     // create a virtual mesh
@@ -737,7 +746,8 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueFive);
 
-    p_CommonData->p_tissueFive->setLocalPos(0,0,.025);
+    p_CommonData->p_tissueFive->setLocalPos(0,0,-.025);
+    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueFive->loadFromFile("./Resources/tissue_5/tissue_5.obj");
@@ -758,7 +768,7 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFive->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFive->setStiffness(100, true);
+    p_CommonData->p_tissueFive->setStiffness(300, true);
 
     //----------------------------------------------Create Tissue Six---------------------------------------------------
     // create a virtual mesh
@@ -767,7 +777,8 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueSix);
 
-    p_CommonData->p_tissueSix->setLocalPos(0,0,.025);
+    p_CommonData->p_tissueSix->setLocalPos(0,0,-.025);
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueSix->loadFromFile("./Resources/tissue_6/tissue_6.obj");
@@ -788,7 +799,7 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueSix->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueSix->setStiffness(100, true);*/
+    p_CommonData->p_tissueSix->setStiffness(300, true);
 
     //----------------------------------------------Create Tissue Seven---------------------------------------------------
     // create a virtual mesh
@@ -797,7 +808,8 @@ void haptics_thread::InitPalpationEnvironment()
     // add object to world
     world->addChild(p_CommonData->p_tissueSeven);
 
-    p_CommonData->p_tissueSeven->setLocalPos(0,0,.02);
+    p_CommonData->p_tissueSeven->setLocalPos(0,0,-.02);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueSeven->loadFromFile("./Resources/tissue_7/tissue_7.obj");
@@ -814,9 +826,11 @@ void haptics_thread::InitPalpationEnvironment()
         p_CommonData->p_tissueSeven->scale(1);
     }
 
+    p_CommonData->p_tissueSeven->setShowEnabled(false);
     //------------------------------------------------------------------------------------------------------
     //Set initial transparency of tissue
     p_CommonData->m_flagTissueTransparent = false;
+
 }
 
 void haptics_thread::InitAccel()
