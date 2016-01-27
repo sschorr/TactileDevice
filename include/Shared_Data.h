@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -27,7 +27,7 @@
 #define CAMERA_Z_TRANSLATE 0
 
 #define STIFFNESS_BASELINE 50
-#define STIFFNESS_INCREMENT 15
+#define STIFFNESS_INCREMENT 10
 #define STATIC_FRICTION 1
 #define DYNAMIC_FRICTION 1
 

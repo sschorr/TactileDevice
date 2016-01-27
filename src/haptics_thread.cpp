@@ -131,25 +131,6 @@ void haptics_thread::run()
     delete p_CommonData->wearableDelta;
 }
 
-void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
-{
-    //perform check on validity of axis
-    double inputAxisMag = inputMotionAxis.norm();
-    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
-    {
-        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
-        Eigen::Vector3d sinPos = (p_CommonData->bandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + neutralPos;
-        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
-        if (currTime > 7.0)
-        {
-            p_CommonData->currentState = idle;
-        }
-    }
-    else
-    {
-        qDebug("invalid motion axis");
-    }
-}
 
 void haptics_thread::UpdateVRGraphics()
 {
@@ -210,198 +191,8 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 }
 
-double haptics_thread::ComputeContactVibration(){
-    //create a contact vibration that depends on position or velocity
-    // if we are registering a contact
-    if (abs(deviceLastComputedForce0.z()) > 0.00001)
-    {
-        // if this is the first time in contact
-        if (firstTouch)
-        {
-            // start the time ticking
-            decaySinTime = 0;
-            decaySinTime += 0.001;
 
-            // get the sinusoid amplitude based last velocity
-            p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
-            this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
 
-            //check if amplitude exceeds desired amount
-            if (decaySinAmp > decaySinAmpMax)
-            {
-                decaySinAmp = decaySinAmpMax;
-            }
-
-            // calculate contributed force
-            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-            qDebug() << computedPosAdd;
-
-            // set next force to not be "first touch"
-            firstTouch = false;
-        }
-        else
-        {
-            //still inside wall with "contact"
-            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-
-            //increment decay time counter
-            decaySinTime += 0.001;
-        }
-    }
-    else
-    {
-        if (!firstTouch)
-        {
-            // just came out of contact, reset that next one will be "first touch"
-            firstTouch = true;
-
-            // reset the decay time, amplitude, and added "pos"
-            decaySinTime = 0;
-            decaySinAmp = 0;
-            computedPosAdd = 0;
-        }
-    }
-
-    return computedPosAdd;
-}
-
-void haptics_thread::SimulateDynamicBodies()
-{
-    double timeInterval = rateClock.getCurrentTimeSeconds();
-
-    //---------------------------------------------------
-    // Implement Dynamic simulation
-    //---------------------------------------------------
-    int numInteractionPoints = m_tool0->getNumInteractionPoints();
-    for (int i=0; i<numInteractionPoints; i++)
-    {
-        // get pointer to next interaction point of tool
-        chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
-
-        // check primary contact point if available
-        if (interactionPoint->getNumCollisionEvents() > 0)
-        {
-            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-            // given the mesh object we may be touching, we search for its owner which
-            // could be the mesh itself or a multi-mesh object. Once the owner found, we
-            // look for the parent that will point to the ODE object itself.
-            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-            // cast to ODE object
-            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-            // if ODE object, we apply interaction forces
-            if (ODEobject != NULL)
-            {
-                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                   collisionEvent->m_globalPos);
-            }
-        }
-    }
-    numInteractionPoints = m_tool1->getNumInteractionPoints();
-    for (int i=0; i<numInteractionPoints; i++)
-    {
-        // get pointer to next interaction point of tool
-        chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
-
-        // check primary contact point if available
-        if (interactionPoint->getNumCollisionEvents() > 0)
-        {
-            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-            // given the mesh object we may be touching, we search for its owner which
-            // could be the mesh itself or a multi-mesh object. Once the owner found, we
-            // look for the parent that will point to the ODE object itself.
-            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-            // cast to ODE object
-            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-            // if ODE object, we apply interaction forces
-            if (ODEobject != NULL)
-            {
-                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                   collisionEvent->m_globalPos);
-            }
-        }
-    }
-
-    ODEWorld->updateDynamics(timeInterval/5);
-}
-
-void haptics_thread::InitDynamicBodies()
-{
-
-    //--------------------------------------------------------------------------
-    // CREATING ODE World and Objects
-    //--------------------------------------------------------------------------
-/*
-    // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(world);
-    world->addChild(ODEWorld);
-
-    //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
-    // define damping properties
-    ODEWorld->setAngularDamping(0.00002);
-    ODEWorld->setLinearDamping(0.00002);
-
-    // Create an ODE Block
-    double boxSize = 0.05;
-    ODEBody0 = new cODEGenericBody(ODEWorld);
-    // create a dynamic model of the ODE object
-    ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
-
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    meshBox = new chai3d::cMesh();
-    cCreateBox(meshBox, boxSize, boxSize, boxSize); // make mesh a box
-    meshBox->createAABBCollisionDetector(toolRadius);
-    chai3d::cMaterial mat0;
-    mat0.setBlueRoyal();
-    mat0.setStiffness(300);
-    mat0.setDynamicFriction(0.6);
-    mat0.setStaticFriction(0.6);
-    meshBox->setMaterial(mat0);
-
-    // add mesh to ODE object
-    ODEBody0->setImageModel(meshBox);
-
-    // set mass of box
-    ODEBody0->setMass(0.5);
-
-    // set position of box
-    ODEBody0->setLocalPos(0.0,0,0);
-
-    //--------------------------------------------------------------------------
-    // CREATING ODE INVISIBLE WALLS
-    //--------------------------------------------------------------------------
-    ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
-    //create ground
-    ground = new chai3d::cMesh();
-    world->addChild(ground);
-
-    //create a plane
-    double groundSize = 5;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
-
-    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05);
-
-    //define some material properties
-    chai3d::cMaterial matGround;
-    matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.4);
-    matGround.setStaticFriction(0.0);
-    matGround.setWhite();
-    matGround.m_emission.setGrayLevel(0.3);
-    ground->setMaterial(matGround);
-
-    // setup collision detector
-    ground->createAABBCollisionDetector(toolRadius);*/
-}
 
 void haptics_thread::RecordData()
 {
@@ -878,7 +669,217 @@ chai3d::cVector3d haptics_thread::ReadAccel()
     return emptyVec; //if sensoray is not active, just return 0
 }
 
+void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
+{
+    //perform check on validity of axis
+    double inputAxisMag = inputMotionAxis.norm();
+    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
+    {
+        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
+        Eigen::Vector3d sinPos = (p_CommonData->bandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + neutralPos;
+        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+        if (currTime > 7.0)
+        {
+            p_CommonData->currentState = idle;
+        }
+    }
+    else
+    {
+        qDebug("invalid motion axis");
+    }
+}
 
+double haptics_thread::ComputeContactVibration(){
+    //create a contact vibration that depends on position or velocity
+    // if we are registering a contact
+    if (abs(deviceLastComputedForce0.z()) > 0.00001)
+    {
+        // if this is the first time in contact
+        if (firstTouch)
+        {
+            // start the time ticking
+            decaySinTime = 0;
+            decaySinTime += 0.001;
 
+            // get the sinusoid amplitude based last velocity
+            p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
+            this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
+
+            //check if amplitude exceeds desired amount
+            if (decaySinAmp > decaySinAmpMax)
+            {
+                decaySinAmp = decaySinAmpMax;
+            }
+
+            // calculate contributed force
+            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+            qDebug() << computedPosAdd;
+
+            // set next force to not be "first touch"
+            firstTouch = false;
+        }
+        else
+        {
+            //still inside wall with "contact"
+            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
+
+            //increment decay time counter
+            decaySinTime += 0.001;
+        }
+    }
+    else
+    {
+        if (!firstTouch)
+        {
+            // just came out of contact, reset that next one will be "first touch"
+            firstTouch = true;
+
+            // reset the decay time, amplitude, and added "pos"
+            decaySinTime = 0;
+            decaySinAmp = 0;
+            computedPosAdd = 0;
+        }
+    }
+
+    return computedPosAdd;
+}
+
+void haptics_thread::InitDynamicBodies()
+{
+
+    //--------------------------------------------------------------------------
+    // CREATING ODE World and Objects
+    //--------------------------------------------------------------------------
+/*
+    // create an ODE world to simulate dynamic bodies
+    ODEWorld = new cODEWorld(world);
+    world->addChild(ODEWorld);
+
+    //give world gravity
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
+    // define damping properties
+    ODEWorld->setAngularDamping(0.00002);
+    ODEWorld->setLinearDamping(0.00002);
+
+    // Create an ODE Block
+    double boxSize = 0.05;
+    ODEBody0 = new cODEGenericBody(ODEWorld);
+    // create a dynamic model of the ODE object
+    ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
+
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    meshBox = new chai3d::cMesh();
+    cCreateBox(meshBox, boxSize, boxSize, boxSize); // make mesh a box
+    meshBox->createAABBCollisionDetector(toolRadius);
+    chai3d::cMaterial mat0;
+    mat0.setBlueRoyal();
+    mat0.setStiffness(300);
+    mat0.setDynamicFriction(0.6);
+    mat0.setStaticFriction(0.6);
+    meshBox->setMaterial(mat0);
+
+    // add mesh to ODE object
+    ODEBody0->setImageModel(meshBox);
+
+    // set mass of box
+    ODEBody0->setMass(0.5);
+
+    // set position of box
+    ODEBody0->setLocalPos(0.0,0,0);
+
+    //--------------------------------------------------------------------------
+    // CREATING ODE INVISIBLE WALLS
+    //--------------------------------------------------------------------------
+    ODEGPlane0 = new cODEGenericBody(ODEWorld);
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+
+    //create ground
+    ground = new chai3d::cMesh();
+    world->addChild(ground);
+
+    //create a plane
+    double groundSize = 5;
+    chai3d::cCreatePlane(ground, groundSize, groundSize);
+
+    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
+    ground->setLocalPos(0,0,0.05);
+
+    //define some material properties
+    chai3d::cMaterial matGround;
+    matGround.setStiffness(300);
+    matGround.setDynamicFriction(0.4);
+    matGround.setStaticFriction(0.0);
+    matGround.setWhite();
+    matGround.m_emission.setGrayLevel(0.3);
+    ground->setMaterial(matGround);
+
+    // setup collision detector
+    ground->createAABBCollisionDetector(toolRadius);*/
+}
+
+void haptics_thread::SimulateDynamicBodies()
+{
+    double timeInterval = rateClock.getCurrentTimeSeconds();
+
+    //---------------------------------------------------
+    // Implement Dynamic simulation
+    //---------------------------------------------------
+    int numInteractionPoints = m_tool0->getNumInteractionPoints();
+    for (int i=0; i<numInteractionPoints; i++)
+    {
+        // get pointer to next interaction point of tool
+        chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
+
+        // check primary contact point if available
+        if (interactionPoint->getNumCollisionEvents() > 0)
+        {
+            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+            // given the mesh object we may be touching, we search for its owner which
+            // could be the mesh itself or a multi-mesh object. Once the owner found, we
+            // look for the parent that will point to the ODE object itself.
+            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+            // cast to ODE object
+            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+            // if ODE object, we apply interaction forces
+            if (ODEobject != NULL)
+            {
+                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                   collisionEvent->m_globalPos);
+            }
+        }
+    }
+    numInteractionPoints = m_tool1->getNumInteractionPoints();
+    for (int i=0; i<numInteractionPoints; i++)
+    {
+        // get pointer to next interaction point of tool
+        chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
+
+        // check primary contact point if available
+        if (interactionPoint->getNumCollisionEvents() > 0)
+        {
+            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+            // given the mesh object we may be touching, we search for its owner which
+            // could be the mesh itself or a multi-mesh object. Once the owner found, we
+            // look for the parent that will point to the ODE object itself.
+            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+            // cast to ODE object
+            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+            // if ODE object, we apply interaction forces
+            if (ODEobject != NULL)
+            {
+                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                   collisionEvent->m_globalPos);
+            }
+        }
+    }
+
+    ODEWorld->updateDynamics(timeInterval/5);
+}
 
 
