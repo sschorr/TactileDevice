@@ -640,9 +640,9 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueOne->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueOne->setStiffness(100, true);
-
     p_CommonData->p_tissueOne->setTransparencyLevel(0.4, true, true);
+    p_CommonData->p_tissueOne->setStiffness(STIFFNESS_BASELINE, true);
+    p_CommonData->p_tissueOne->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Two---------------------------------------------------
     // create a virtual mesh
@@ -675,7 +675,8 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueTwo->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueTwo->setStiffness(300, true);
+    p_CommonData->p_tissueTwo->setStiffness(STIFFNESS_BASELINE + STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueTwo->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
     //----------------------------------------------Create Tissue Three---------------------------------------------------
 
     // create a virtual mesh
@@ -706,7 +707,8 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueThree->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueThree->setStiffness(300, true);
+    p_CommonData->p_tissueThree->setStiffness(STIFFNESS_BASELINE + 2* STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueThree->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Four---------------------------------------------------
     // create a virtual mesh
@@ -737,7 +739,8 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFour->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFour->setStiffness(300, true);
+    p_CommonData->p_tissueFour->setStiffness(STIFFNESS_BASELINE + 3*STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueFour->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Five---------------------------------------------------
     // create a virtual mesh
@@ -768,7 +771,8 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFive->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFive->setStiffness(300, true);
+    p_CommonData->p_tissueFive->setStiffness(STIFFNESS_BASELINE + 4*STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueFive->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Six---------------------------------------------------
     // create a virtual mesh
@@ -799,7 +803,8 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueSix->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueSix->setStiffness(300, true);
+    p_CommonData->p_tissueSix->setStiffness(STIFFNESS_BASELINE + 5*STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueSix->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Seven---------------------------------------------------
     // create a virtual mesh
