@@ -205,9 +205,38 @@ void MainWindow::on_turnOff_clicked()
     p_CommonData->currentState = idle;
     ui->sliderControl->setAutoExclusive(false);
     ui->VRControl->setAutoExclusive(false);
+
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
+
     ui->sliderControl->setAutoExclusive(true);
     ui->VRControl->setAutoExclusive(true);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *a_event)
+{
+    if (a_event->key() == Qt::Key_T)
+    {
+        if (p_CommonData->m_flagTissueTransparent == true)
+        {
+            p_CommonData->m_flagTissueTransparent = false;
+            p_CommonData->p_tissueOne->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueTwo->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueThree->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueFour->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueFive->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(1.0, true);
+        }
+        else
+        {
+            p_CommonData->m_flagTissueTransparent = true;
+            p_CommonData->p_tissueOne->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueTwo->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueThree->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueFour->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueFive->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0.0, true);
+        }
+    }
 
 }

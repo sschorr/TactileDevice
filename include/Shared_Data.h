@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -87,6 +87,20 @@ typedef struct
     // controller variables
     double Kp;
     double Kd;
+
+    // haptics thread objects that window thread needs access too
+    chai3d::cMultiMesh* p_table;
+    chai3d::cMultiMesh* p_petriDish;
+    chai3d::cMultiMesh* p_tissueOne;
+    chai3d::cMultiMesh* p_tissueTwo;
+    chai3d::cMultiMesh* p_tissueThree;
+    chai3d::cMultiMesh* p_tissueFour;
+    chai3d::cMultiMesh* p_tissueFive;
+    chai3d::cMultiMesh* p_tissueSix;
+    chai3d::cMultiMesh* p_tissueSeven;
+    chai3d::cMultiMesh* p_indicator;
+
+    bool m_flagTissueTransparent;
 
 } shared_data;
 

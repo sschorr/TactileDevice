@@ -67,15 +67,7 @@ public:
     chai3d::cMesh* ground;
     chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;
-    chai3d::cMultiMesh* p_table;
-    chai3d::cMultiMesh* p_petriDish;
-    chai3d::cMultiMesh* p_tissueOne;
-    chai3d::cMultiMesh* p_tissueTwo;
-    chai3d::cMultiMesh* p_tissueThree;
-    chai3d::cMultiMesh* p_tissueFour;
-    chai3d::cMultiMesh* p_tissueFive;
-    chai3d::cMultiMesh* p_tissueSix;
-    chai3d::cMultiMesh* p_tissueSeven;
+
 
     // ODE Module variables
     cODEWorld* ODEWorld;

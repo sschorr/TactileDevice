@@ -17,6 +17,7 @@
 #include <QMessageBox>
 #include <Qt/qfiledialog.h>
 #include <Qt/qinputdialog.h>
+#include <QKeyEvent>
 
 namespace Ui {
 class MainWindow;
@@ -40,6 +41,8 @@ private:
 
     // a timer for updating the gui
     QTimer GraphicsTimer;
+
+    void keyPressEvent(QKeyEvent* a_event);
 
 private slots:
     void UpdateGUIInfo();
