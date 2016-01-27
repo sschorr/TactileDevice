@@ -437,7 +437,7 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->p_camera->set( chai3d::cVector3d (0.3, 0.0, -0.25),//(0.25, 0, -.25),    // camera position (eye)
+    p_CommonData->p_camera->set( chai3d::cVector3d (0.18, 0.0, -0.20),//(0.25, 0, -.25),    // camera position (eye)
                                  chai3d::cVector3d (0.0, 0.0, 0.0),    // lookat position (target)
                                  chai3d::cVector3d (0.0, 0.0, -1.0));   // direction of the "up" vector
 
