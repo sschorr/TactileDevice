@@ -69,8 +69,8 @@ void MainWindow::onGUIchanged()
 
     p_CommonData->Kp = KpSlider;
     p_CommonData->Kd = KdSlider;
-    p_CommonData->bandSinAmp = bandwidthAmp;
-    p_CommonData->bandSinFreq = bandwidthFreq;
+    p_CommonData->bandSinAmpDisp = bandwidthAmp;
+    p_CommonData->bandSinFreqDisp = bandwidthFreq;
 
     UpdateGUIInfo();
 }
@@ -106,8 +106,8 @@ void MainWindow::UpdateGUIInfo()
     ui->DesY->display(localDesiredPos[1]);
     ui->DesZ->display(localDesiredPos[2]);
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
-    ui->lcdBandAmp->display(p_CommonData->bandSinAmp);
-    ui->lcdBandFreq->display(p_CommonData->bandSinFreq);
+    ui->lcdBandAmp->display(p_CommonData->bandSinAmpDisp);
+    ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
     ui->lcdKp->display(p_CommonData->Kp);
     ui->lcdKd->display(p_CommonData->Kd);
 }
@@ -139,6 +139,8 @@ void MainWindow::on_startSin_clicked()
     ui->VRControl->setChecked(false);
 
     p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+    p_CommonData->bandSinAmp = p_CommonData->bandSinAmpDisp;
+    p_CommonData->bandSinFreq = p_CommonData->bandSinFreqDisp;
 }
 
 void MainWindow::on_stopRecord_clicked()

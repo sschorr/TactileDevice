@@ -17,12 +17,12 @@ void haptics_thread::initialize()
     InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
-    InitPalpationEnvironment();
+    //InitPalpationEnvironment();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
     p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
-    neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
+    p_CommonData->neutralPos << 0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180);
     p_CommonData->wearableDelta->SetDesiredPos(neutralPos); // kinematic neutral position
 
     p_CommonData->Kp = 0;
@@ -33,7 +33,7 @@ void haptics_thread::initialize()
 
     // Set the clock that controls haptic rate
     rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.000001);
+    rateClock.setTimeoutPeriodSeconds(0.00001);
     rateClock.start(true);
 
     // setup the clock that will enable display of the haptic rate
@@ -190,8 +190,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     // Perform position controller based on desired position
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 }
-
-
 
 
 void haptics_thread::RecordData()
@@ -626,7 +624,48 @@ void haptics_thread::InitPalpationEnvironment()
     //------------------------------------------------------------------------------------------------------
     //Set initial transparency of tissue
     p_CommonData->m_flagTissueTransparent = false;
+}
 
+void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
+{
+    //perform check on validity of axis
+    double inputAxisMag = inputMotionAxis.norm();
+    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
+    {
+        // ----------------- START SINUSOID -----------------------------------
+        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
+        double rampTime = 2.0;
+        // scale to avoid abrupt starting input
+        double scaledBandSinAmp = currTime/rampTime*p_CommonData->bandSinAmp;
+        if (scaledBandSinAmp > p_CommonData->bandSinAmp)
+        {
+            scaledBandSinAmp = p_CommonData->bandSinAmp;
+        }
+        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + p_CommonData->neutralPos;
+        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+
+        // If time is greater than 10 seconds, pause for a bit
+        if (currTime > 10)
+        {
+            p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
+        }
+
+        // If time is greater than 12 seconds, set ourselves up to go again
+        if (currTime > 12)
+        {
+            p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+            p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
+            p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
+            if (p_CommonData->bandSinFreq > 9.9)
+            {
+                p_CommonData->currentState = idle;
+            }
+        }
+    }
+    else
+    {
+        qDebug("invalid motion axis");
+    }
 }
 
 void haptics_thread::InitAccel()
@@ -669,25 +708,7 @@ chai3d::cVector3d haptics_thread::ReadAccel()
     return emptyVec; //if sensoray is not active, just return 0
 }
 
-void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
-{
-    //perform check on validity of axis
-    double inputAxisMag = inputMotionAxis.norm();
-    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
-    {
-        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
-        Eigen::Vector3d sinPos = (p_CommonData->bandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + neutralPos;
-        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
-        if (currTime > 7.0)
-        {
-            p_CommonData->currentState = idle;
-        }
-    }
-    else
-    {
-        qDebug("invalid motion axis");
-    }
-}
+
 
 double haptics_thread::ComputeContactVibration(){
     //create a contact vibration that depends on position or velocity
@@ -740,7 +761,6 @@ double haptics_thread::ComputeContactVibration(){
             computedPosAdd = 0;
         }
     }
-
     return computedPosAdd;
 }
 

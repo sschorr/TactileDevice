@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -86,12 +86,17 @@ typedef struct
     std::vector<DataRecordStruct> debugData;
 
     // bandwidth sin variables
+    double bandSinAmpDisp;
+    double bandSinFreqDisp;
     double bandSinAmp;
     double bandSinFreq;
 
     // controller variables
     double Kp;
     double Kd;
+
+    //
+    Eigen::Vector3d neutralPos;
 
     // haptics thread objects that window thread needs access too
     chai3d::cMultiMesh* p_table;
