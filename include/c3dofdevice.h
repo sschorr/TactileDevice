@@ -37,7 +37,7 @@
 // length of end effector (center to joint)
 #define L_EE 15
 // Spring torque of spring at parallel
-#define SPRING_TORQUE 0.5 //is the old one
+#define SPRING_TORQUE 0.05 //is the old one
 
 
 
