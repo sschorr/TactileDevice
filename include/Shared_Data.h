@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -44,7 +44,8 @@ typedef struct
     Eigen::Vector3d motorTorque;
     Eigen::Vector3d voltageOut;
     Eigen::Vector3d desiredForce;
-    chai3d::cVector3d magTrackerPos;
+    chai3d::cVector3d magTrackerPos0;
+    chai3d::cVector3d magTrackerPos1;
     chai3d::cVector3d accelSignal;
 
 } DataRecordStruct;
