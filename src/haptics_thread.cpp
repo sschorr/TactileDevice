@@ -159,13 +159,13 @@ void haptics_thread::UpdateVRGraphics()
     //computes the interaction force for the tool proxy point
     m_tool0->computeInteractionForces();
 
-    /* use this if two tools (haptic proxies) are desired
+    //use this if two tools (haptic proxies) are desired
     m_tool1->updatePose();
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
     //m_curSphere1->setLocalPos(position1);
     //m_curSphere1->setLocalRot(rotation1);
-    m_tool1->computeInteractionForces();*/
+    m_tool1->computeInteractionForces();
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -252,13 +252,13 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool0->start();
 
-    /* uncomment this if we want to use 2 tools
+    //uncomment this if we want to use 2 tools
     m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool1); //insert the tool into the world
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
     m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool1->start(); */
+    m_tool1->start();
 
     // Can use this to show frames on tool if so desired
     /*//create a sphere to represent the tool
