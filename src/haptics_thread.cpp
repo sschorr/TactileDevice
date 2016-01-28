@@ -97,7 +97,7 @@ void haptics_thread::run()
 
             case sinControlMode:
                 UpdateVRGraphics();
-                Eigen::Vector3d inputAxis(0,1,0);
+                Eigen::Vector3d inputAxis(0,0,1);
                 CommandSinPos(inputAxis);
                 p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
             }
@@ -651,7 +651,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         }
 
         // If time is greater than 12 seconds, set ourselves up to go again
-        if (currTime > 12)
+        if (currTime > 11)
         {
             p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
             p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
