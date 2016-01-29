@@ -12,6 +12,7 @@
 #include "CODE.h"
 #include "Win626.h"
 #include "windows.h"
+#include <qDebug>
 
 #define RANGE_10V 0x00 // Range code for ADC ±10V range.
 #define RANGE_5V 0x10 // Range code for ADC ±5V range.
@@ -107,11 +108,6 @@ public:
     // ints for display counters
     int rateDisplayCounter;
     int recordDataCounter;
-
-
-
-    // device variable
-    Eigen::Vector3d neutralPos;
 
     // variables for handling ADC read in
     BYTE poll_list[16]; // List of items to be digitized.

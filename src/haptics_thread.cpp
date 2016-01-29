@@ -21,9 +21,9 @@ void haptics_thread::initialize()
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
-    p_CommonData->wearableDelta->SetDesiredForce(Eigen::Vector3d(0,0,0));
+    p_CommonData->wearableDelta->TurnOffControl();
     p_CommonData->neutralPos << 0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180);
-    p_CommonData->wearableDelta->SetDesiredPos(neutralPos); // kinematic neutral position
+    p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos); // kinematic neutral position
 
     p_CommonData->Kp = 0;
     p_CommonData->Kd = 0;
@@ -63,6 +63,8 @@ void haptics_thread::initialize()
 
     // Start off not recording
     p_CommonData->recordFlag = false;
+
+    p_CommonData->currentState = idle;
 }
 
 void haptics_thread::run()
