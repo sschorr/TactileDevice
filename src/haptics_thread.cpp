@@ -76,7 +76,6 @@ void haptics_thread::run()
         {
             // stop clock while we perform haptic calcs
             rateClock.stop();
-
             accelSignal = ReadAccel();
 
             switch(p_CommonData->currentState)
@@ -674,14 +673,6 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 void haptics_thread::InitAccel()
 {
 #ifdef SENSORAY626
-    // Sets the 3.3 V output for running the accelerometer
-    double VoltOut = 3.3;
-    long writeData = (long)(VoltOut*DAC_VSCALAR);
-
-    S626_WriteDAC(0,3,writeData);
-    qDebug() << "made it";
-    qDebug() << writeData;
-
     // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
     // Allocate data structures. We allocate enough space for maximum possible
     // number of items (16) even though this example only has 3 items. Although
@@ -704,6 +695,7 @@ chai3d::cVector3d haptics_thread::ReadAccel()
 #ifdef SENSORAY626
     S626_ReadADC(0, databuf);
     chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
+    qDebug() << returnVec.z();
     return returnVec;
 #endif SENSORAY626
 

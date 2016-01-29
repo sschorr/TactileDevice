@@ -12,7 +12,6 @@ void magTracker::InitMagTracker(){
     // variable declarations
     pRecord0 = &record0;
     pRecord1 = &record1;
-    measFreq = 40.0;
 
     // initialize the magnetic tracker
     qDebug("Initializing the ATC3DG system...\n");
@@ -38,6 +37,7 @@ void magTracker::InitMagTracker(){
         qDebug("Got transmitters configuration\n");
     }
 
+    measFreq = 80.0;
     // set parameters for recording
     SET_SYSTEM_PARAMETER(SELECT_TRANSMITTER,	0);
     SET_SYSTEM_PARAMETER(POWER_LINE_FREQUENCY,	60.0);
@@ -57,7 +57,6 @@ void magTracker::InitMagTracker(){
         SET_SENSOR_PARAMETER(sensorID, FILTER_AC_WIDE_NOTCH, false);
         SET_SENSOR_PARAMETER(sensorID, FILTER_AC_NARROW_NOTCH, false);
         SET_SENSOR_PARAMETER(sensorID, FILTER_DC_ADAPTIVE, 0.0);
-
     }
 
     transmitterID = 0;
