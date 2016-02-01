@@ -17,7 +17,7 @@ void haptics_thread::initialize()
     InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
-    InitPalpationEnvironment();
+    //InitPalpationEnvironment();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -117,7 +117,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 2)
             {
                 RecordData();
             }
@@ -695,7 +695,7 @@ chai3d::cVector3d haptics_thread::ReadAccel()
 #ifdef SENSORAY626
     S626_ReadADC(0, databuf);
     chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
-    qDebug() << returnVec.z();
+    //qDebug() << "Accel reading: " << returnVec.z();
     return returnVec;
 #endif SENSORAY626
 
