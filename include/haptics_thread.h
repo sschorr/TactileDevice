@@ -13,6 +13,13 @@
 #include "Win626.h"
 #include "windows.h"
 #include <qDebug>
+#include <string>
+#include <QString>
+#include <ostream>
+#include <istream>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 #define RANGE_10V 0x00 // Range code for ADC ±10V range.
 #define RANGE_5V 0x10 // Range code for ADC ±5V range.
@@ -46,6 +53,7 @@ public:
     void InitGeneralChaiStuff();
     void InitFingerAndTool();
     void InitPalpationEnvironment();
+    void InitFrictionEnvironment();
     void InitAccel();
     chai3d::cVector3d ReadAccel();
 

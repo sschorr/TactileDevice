@@ -51,7 +51,7 @@ private slots:
     void onGUIchanged();
     void on_startSin_clicked();
     void on_stopRecord_clicked();
-    void on_startRecord_clicked();
+    void on_setDirectory_clicked();
     void on_turnOff_clicked();
 };
 

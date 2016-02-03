@@ -146,63 +146,19 @@ void MainWindow::on_startSin_clicked()
 void MainWindow::on_stopRecord_clicked()
 {
     p_CommonData->recordFlag = false;
+}
 
-    QString dir;
-    QString fileName;
+void MainWindow::on_setDirectory_clicked()
+{    
     bool ok;
 
 
-    dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
+    p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
                                         "C:/Users/Charm_Stars/Dropbox(Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Data/",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    fileName = QInputDialog::getText(0, "Input File Name",
+    p_CommonData->fileName = QInputDialog::getText(0, "Input File Name",
                                      "File Name:", QLineEdit::Normal, " ",
                                      &ok);
-    //write debugging data to file when we are done
-    std::ofstream file;
-    file.open(dir.toStdString() + "/" + fileName.toStdString() + ".txt");
-    for (int i=0; i < p_CommonData->debugData.size(); i++)
-    {
-        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-        file << p_CommonData->debugData[i].time << "," << " "
-             << p_CommonData->debugData[i].pos[0] << "," << " "
-             << p_CommonData->debugData[i].pos[1] << "," << " "
-             << p_CommonData->debugData[i].pos[2] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-             << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-             << p_CommonData->debugData[i].desiredForce[2] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-             << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-             << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-             << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-             << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-             << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-             << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-             << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-             << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-             << std::endl;
-    }
-    file.close();
-}
-
-void MainWindow::on_startRecord_clicked()
-{
-    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::on_turnOff_clicked()
@@ -243,5 +199,34 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueSix->setTransparencyLevel(0.0, true);
         }
     }
+
+    double degInc = 5.0;
+    double radInc = 0.05;
+    if (a_event->key() == Qt::Key_W)
+    {
+        p_CommonData->polar = p_CommonData->polar + degInc;
+    }
+    if (a_event->key() == Qt::Key_S)
+    {
+        p_CommonData->polar = p_CommonData->polar - degInc;
+    }
+    if (a_event->key() == Qt::Key_A)
+    {
+        p_CommonData->azimuth = p_CommonData->azimuth + degInc;
+    }
+    if (a_event->key() == Qt::Key_D)
+    {
+        p_CommonData->azimuth = p_CommonData->azimuth - degInc;
+    }
+    if (a_event->key() == Qt::Key_Q)
+    {
+        p_CommonData->camRadius = p_CommonData->camRadius - radInc;
+    }
+    if (a_event->key() == Qt::Key_E)
+    {
+        p_CommonData->camRadius = p_CommonData->camRadius + radInc;
+    }
+
+
 
 }

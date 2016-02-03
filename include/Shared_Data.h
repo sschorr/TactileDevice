@@ -6,7 +6,7 @@
 
 // defines indicating what physical hardware is present
 //#define SENSORAY626
-#define MAGTRACKER
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -64,7 +64,17 @@ typedef enum
 typedef struct
 {
     //Chai3D variables
+
+    // camera vars
     chai3d::cCamera* p_camera;
+    chai3d::cVector3d cameraPos;
+    chai3d::cVector3d lookatPos;
+    chai3d::cVector3d upVector;
+
+    double azimuth;
+    double polar;
+    double camRadius;
+
     QMutex sharedMutex;
     c3DOFDevice* wearableDelta;
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
@@ -99,7 +109,7 @@ typedef struct
     //
     Eigen::Vector3d neutralPos;
 
-    // haptics thread objects that window thread needs access too
+    // haptics thread objects for palpation environment
     chai3d::cMultiMesh* p_table;
     chai3d::cMultiMesh* p_petriDish;
     chai3d::cMultiMesh* p_tissueOne;
@@ -111,7 +121,15 @@ typedef struct
     chai3d::cMultiMesh* p_tissueSeven;
     chai3d::cMultiMesh* p_indicator;
 
+    // haptics thread objects for friction environment
+    chai3d::cMesh* p_frictionBox1;
+    chai3d::cMesh* p_frictionBox2;
+
     bool m_flagTissueTransparent;
+
+    // recording variables
+    QString dir;
+    QString fileName;
 
 } shared_data;
 

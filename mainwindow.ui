@@ -777,7 +777,7 @@
        <string>Return</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="startRecord">
+     <widget class="QPushButton" name="setDirectory">
       <property name="geometry">
        <rect>
         <x>160</x>
@@ -787,7 +787,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Start Record</string>
+       <string>Set Directory</string>
       </property>
      </widget>
      <widget class="QPushButton" name="stopRecord">
