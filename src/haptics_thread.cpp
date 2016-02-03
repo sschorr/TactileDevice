@@ -684,7 +684,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         if (currTime > (12.0*1.0/p_CommonData->bandSinFreq))
         {
             p_CommonData->recordFlag = false;
-            p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
+            p_CommonData->wearableDelta->TurnOffControl();
 
             //write data to file when we are done
             std::ofstream file;
