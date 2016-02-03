@@ -17,8 +17,8 @@ void haptics_thread::initialize()
     InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
-    InitPalpationEnvironment();
-    InitFrictionEnvironment();
+    //InitPalpationEnvironment();
+    //InitFrictionEnvironment();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
