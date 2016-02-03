@@ -17,7 +17,8 @@ void haptics_thread::initialize()
     InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
-    //InitPalpationEnvironment();
+    InitPalpationEnvironment();
+    InitFrictionEnvironment();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -968,6 +969,11 @@ void haptics_thread::SimulateDynamicBodies()
     }
 
     ODEWorld->updateDynamics(timeInterval/5);
+}
+
+void haptics_thread::RemoveWorldChildren()
+{
+
 }
 
 

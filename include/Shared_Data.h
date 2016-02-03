@@ -59,6 +59,14 @@ typedef enum
 
 } sm_states;
 
+typedef enum
+{
+    none,
+    palpation,
+    friction
+
+} environment_states;
+
 
 // define the data structure that contains data that we share between threads
 typedef struct
@@ -86,8 +94,11 @@ typedef struct
     // determine start time for bandwidth sin
     double sinStartTime;
 
-    // Declare the state that we are in
+    // Declare the control state that we are in
     sm_states currentState;
+
+    // Declare the environment state that we are in
+    environment_states currentEnvironmentState;
 
     // check whether to record
     bool recordFlag;

@@ -54,6 +54,7 @@ public:
     void InitFingerAndTool();
     void InitPalpationEnvironment();
     void InitFrictionEnvironment();
+    void RemoveWorldChildren();
     void InitAccel();
     chai3d::cVector3d ReadAccel();
 
