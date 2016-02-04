@@ -99,7 +99,7 @@ void haptics_thread::run()
 
             case sinControlMode:
                 UpdateVRGraphics();
-                Eigen::Vector3d inputAxis(0,0,1);
+                Eigen::Vector3d inputAxis(0,1,0);
                 CommandSinPos(inputAxis);
                 p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
             }
@@ -120,7 +120,11 @@ void haptics_thread::run()
             recordDataCounter++;
             if(recordDataCounter == 2)
             {
-                RecordData();
+                recordDataCounter = 0;
+                if(p_CommonData->recordFlag == true)
+                {
+                    RecordData();
+                }
             }
 
             // restart rateClock
@@ -654,90 +658,86 @@ void haptics_thread::RenderPalpation()
 
 void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 {
+    // ----------------- START SINUSOID -----------------------------------
+    // set the current time to "0"
+    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
 
-    //perform check on validity of axis
-    double inputAxisMag = inputMotionAxis.norm();
-    if ((inputAxisMag < 1.01) & (inputAxisMag > 0.99))
+    // scale to avoid abrupt starting input
+    // make a dynamic ramp time of 2 periods
+    double rampTime = 1.0/(2.0*p_CommonData->bandSinFreq);
+    double scaledBandSinAmp = currTime/rampTime*p_CommonData->bandSinAmp;
+    if (scaledBandSinAmp > p_CommonData->bandSinAmp)
     {
-
-        // ----------------- START SINUSOID -----------------------------------
-        // set the current time to "0"
-        double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
-
-        // scale to avoid abrupt starting input
-        // make a dynamic ramp time of 2 periods
-        double rampTime = 1/(2.0*p_CommonData->bandSinFreq);
-        double scaledBandSinAmp = currTime/rampTime*p_CommonData->bandSinAmp;
-        if (scaledBandSinAmp > p_CommonData->bandSinAmp)
-        {
-            scaledBandSinAmp = p_CommonData->bandSinAmp;
-        }
-        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + p_CommonData->neutralPos;
-        p_CommonData->wearableDelta->SetDesiredPos(sinPos);        
-
-        // If time is greater than 12 pause and write to file
-        if (currTime > (12.0*1.0/p_CommonData->bandSinFreq))
-        {
-            p_CommonData->recordFlag = false;
-            p_CommonData->wearableDelta->TurnOffControl();
-
-            //write data to file when we are done
-            std::ofstream file;
-            std::stringstream ss (std::stringstream::in | std::stringstream::out);
-            ss << p_CommonData->bandSinFreq;
-            std::string writeFreq = ss.str();
-            file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() +  writeFreq + ".txt");
-            for (int i=0; i < p_CommonData->debugData.size(); i++)
-            {
-                //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-                file << p_CommonData->debugData[i].time << "," << " "
-                     << p_CommonData->debugData[i].pos[0] << "," << " "
-                     << p_CommonData->debugData[i].pos[1] << "," << " "
-                     << p_CommonData->debugData[i].pos[2] << "," << " "
-                     << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-                     << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-                     << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-                     << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-                     << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-                     << p_CommonData->debugData[i].desiredForce[2] << "," << " "
-                     << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-                     << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-                     << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-                     << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-                     << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-                     << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-                     << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-                     << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-                     << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-                     << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-                     << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-                     << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-                     << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-                     << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-                     << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-                     << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-                     << std::endl;
-            }
-            file.close();
-            p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
-            p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
-            if (p_CommonData->bandSinFreq > 9.9)
-            {
-                p_CommonData->currentState = idle;
-            }
-            p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
-        }
+        scaledBandSinAmp = p_CommonData->bandSinAmp;
+        p_CommonData->recordFlag = true;
     }
-    else
+    Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + p_CommonData->neutralPos;
+    p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+
+    // If time is greater than 12 pause and write to file
+    if (currTime > (12.0*1.0/p_CommonData->bandSinFreq))
     {
-        qDebug("invalid motion axis");
+        p_CommonData->recordFlag = false;
+        p_CommonData->wearableDelta->TurnOffControl();
+
+        //write data to file when we are done
+        std::ofstream file;
+        std::stringstream ss (std::stringstream::in | std::stringstream::out);
+        ss << p_CommonData->bandSinFreq;
+        std::string writeFreq = ss.str();
+        file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() +  writeFreq + ".txt");
+        for (int i=0; i < p_CommonData->debugData.size(); i++)
+        {
+            //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+            file << p_CommonData->debugData[i].time << "," << " "
+            << p_CommonData->debugData[i].pos[0] << "," << " "
+            << p_CommonData->debugData[i].pos[1] << "," << " "
+            << p_CommonData->debugData[i].pos[2] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.z() << "," << " "
+            << std::endl;
+        }
+        file.close();
+
+        // clear out the storagevector
+        p_CommonData->debugData.clear();
+        p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
+        p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
+
+        if (p_CommonData->bandSinFreq > 9.9)
+        {
+            p_CommonData->currentState = idle;
+        }
+
+        p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     }
 }
+
 
 void haptics_thread::InitAccel()
 {
