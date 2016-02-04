@@ -960,6 +960,32 @@
        <string>Bandwidth Frequency</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="palpationButton">
+      <property name="geometry">
+       <rect>
+        <x>680</x>
+        <y>720</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Palpation Environment</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="frictionButton">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>720</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Friction Environment</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">

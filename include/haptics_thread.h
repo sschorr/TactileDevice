@@ -52,9 +52,10 @@ public:
 
     void InitGeneralChaiStuff();
     void InitFingerAndTool();
-    void InitPalpationEnvironment();
-    void InitFrictionEnvironment();
-    void RemoveWorldChildren();
+    void InitEnvironments();
+    void RenderPalpation();
+    void RenderFriction();
+
     void InitAccel();
     chai3d::cVector3d ReadAccel();
 
@@ -77,7 +78,6 @@ public:
     chai3d::cMesh* ground;
     chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;
-
 
     // ODE Module variables
     cODEWorld* ODEWorld;

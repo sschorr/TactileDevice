@@ -53,6 +53,8 @@ private slots:
     void on_stopRecord_clicked();
     void on_setDirectory_clicked();
     void on_turnOff_clicked();
+    void on_palpationButton_clicked();
+    void on_frictionButton_clicked();
 };
 
 #endif // MAINWINDOW_H

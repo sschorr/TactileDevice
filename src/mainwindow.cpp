@@ -18,6 +18,7 @@ void MainWindow::Initialize()
 {
     // Set our current state
     p_CommonData->currentState = idle;
+    p_CommonData->currentEnvironmentState = none;
 
     // Initialize shared memory for OpenGL widget
     ui->DisplayWidget->p_CommonData = p_CommonData;    
@@ -229,4 +230,16 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
 
 
+}
+
+void MainWindow::on_palpationButton_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = palpation;
+}
+
+void MainWindow::on_frictionButton_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = friction;
 }

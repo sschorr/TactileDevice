@@ -17,8 +17,7 @@ void haptics_thread::initialize()
     InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
-    //InitPalpationEnvironment();
-    //InitFrictionEnvironment();
+    InitEnvironments();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -31,6 +30,7 @@ void haptics_thread::initialize()
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
+    p_CommonData->environmentChange = false;
 
     // Set the clock that controls haptic rate
     rateClock.reset();
@@ -147,6 +147,26 @@ void haptics_thread::UpdateVRGraphics()
                                  p_CommonData->lookatPos,
                                  p_CommonData->upVector);
 
+    if(p_CommonData->environmentChange == true)
+    {
+        p_CommonData->environmentChange = false;
+        switch(p_CommonData->currentEnvironmentState)
+        {
+        case none:
+            world->clearAllChildren();
+            break;
+
+        case friction:
+            world->clearAllChildren();
+            RenderFriction();
+            break;
+
+        case palpation:
+            world->clearAllChildren();
+            RenderPalpation();
+            break;
+        }
+    }
 
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
@@ -156,8 +176,8 @@ void haptics_thread::UpdateVRGraphics()
 
     p_CommonData->chaiMagDevice0->getPosition(position0);
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
-    //m_curSphere0->setLocalPos(position0);
-    //m_curSphere0->setLocalRot(rotation0);
+    m_curSphere0->setLocalPos(position0);
+    m_curSphere0->setLocalRot(rotation0);
 
     // update position of second sphere/tool
     // update position of finger to stay on proxy point
@@ -203,7 +223,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     // Perform position controller based on desired position
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 }
-
 
 void haptics_thread::RecordData()
 {
@@ -280,14 +299,14 @@ void haptics_thread::InitFingerAndTool()
     m_tool1->start();
 
     // Can use this to show frames on tool if so desired
-    /*//create a sphere to represent the tool
+    //create a sphere to represent the tool
     m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_curSphere0);
     m_curSphere0->m_material->setGrayDarkSlate();
-    m_curSphere0->setShowFrame(false);
+    m_curSphere0->setShowFrame(true);
     m_curSphere0->setFrameSize(0.05);
 
-    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+    /*m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_curSphere1);
     m_curSphere1->m_material->setGrayDarkSlate();
     m_curSphere1->setShowFrame(false);
@@ -329,14 +348,53 @@ void haptics_thread::InitFingerAndTool()
     }
 }
 
-void haptics_thread::InitFrictionEnvironment()
+void haptics_thread::InitEnvironments()
 {
     p_CommonData->p_frictionBox1 = new chai3d::cMesh();
     p_CommonData->p_frictionBox2 = new chai3d::cMesh();
-    cCreateBox(p_CommonData->p_frictionBox1, .03, .03, .01); // make mesh a box
-    cCreateBox(p_CommonData->p_frictionBox2, .03, .03, .01); // make mesh a box
+
+    p_CommonData->p_petriDish = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
+    p_CommonData->p_petriDish->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
+
+}
+
+void haptics_thread::RenderFriction()
+{    
+    cCreateBox(p_CommonData->p_frictionBox1, .08, .08, .01); // make mesh a box
+    cCreateBox(p_CommonData->p_frictionBox2, .08, .08, .01); // make mesh a box
     p_CommonData->p_frictionBox1->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_frictionBox2->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_frictionBox1->setLocalPos(0,.05, 0);
+    p_CommonData->p_frictionBox2->setLocalPos(0,-.05, 0);
+
+    p_CommonData->p_frictionBox1->m_material->setStiffness(200);
+    p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.4);
+    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.4);
+
+    p_CommonData->p_frictionBox2->m_material->setStiffness(200);
+    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
+    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8);
+
+    world->addChild(p_CommonData->p_frictionBox1);
+    world->addChild(p_CommonData->p_frictionBox2);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+
 
     /*
     // create a box and give it physical properties
@@ -353,43 +411,14 @@ void haptics_thread::InitFrictionEnvironment()
     meshBox->m_material->setUseHapticFriction(true);*/
 }
 
-void haptics_thread::InitPalpationEnvironment()
+void haptics_thread::RenderPalpation()
 {
-    /*
-    // create a virtual mesh
-    p_table = new chai3d::cMultiMesh();
-
-    // add object to world
-    world->addChild(p_table);
-
-    // load object
-    //cLoadFileOBJ(p_petriDish, "./Resources/table/table.obj");
-    bool fileLoad = p_table->loadFromFile("./Resources/table/table.obj");
-
-    // compute a boundary box
-    p_table->computeBoundaryBox(true);
-
-    // get dimensions of object
-    double size = cSub(p_table->getBoundaryMax(), p_table->getBoundaryMin()).length();
-
-    // resize object to screen
-    if (size > 0)
-    {
-        p_table->scale(1);
-    }
-
-    // compute collision detection algorithm
-    p_table->createAABBCollisionDetector(toolRadius);
-
-    // define a default stiffness for the object
-    p_table->setStiffness(100, true);*/
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
 
     double size;
-
-
     //----------------------------------------------Create Petri Dish---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_petriDish = new chai3d::cMultiMesh();
 
     // add object to world
     world->addChild(p_CommonData->p_petriDish);
@@ -397,8 +426,6 @@ void haptics_thread::InitPalpationEnvironment()
     //load the object from file
     //cLoadFileOBJ(p_CommonData->p_petriDish, "./Resources/petri_dish/petri_dish.obj");
     p_CommonData->p_petriDish->loadFromFile("./Resources/petri_dish/petri_dish.obj");
-
-    p_CommonData->p_petriDish->rotateAboutLocalAxisDeg(1,0,0,180);
 
     // compute a boundary box
     p_CommonData->p_petriDish->computeBoundaryBox(true);
@@ -430,9 +457,6 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_petriDish->setUseMaterial(true);
 
     //----------------------------------------------Create Tissue One---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueOne);
 
@@ -441,8 +465,6 @@ void haptics_thread::InitPalpationEnvironment()
     //load the object from file
     //cLoadFileOBJ(p_CommonData->p_tissueOne, "./Resources/tissue_1/tissue_1.obj");
     p_CommonData->p_tissueOne->loadFromFile("./Resources/tissue_1/tissue_1.obj");
-
-    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
 
     // compute a boundary box
     p_CommonData->p_tissueOne->computeBoundaryBox(true);
@@ -465,19 +487,13 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueOne->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Two---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueTwo);    
 
     p_CommonData->p_tissueTwo->setLocalPos(0,0,-.025);
-    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueTwo->loadFromFile("./Resources/tissue_2/tissue_2.obj");
-
-
 
     // compute a boundary box
     p_CommonData->p_tissueTwo->computeBoundaryBox(true);
@@ -498,15 +514,10 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueTwo->setStiffness(STIFFNESS_BASELINE + STIFFNESS_INCREMENT, true);
     p_CommonData->p_tissueTwo->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
     //----------------------------------------------Create Tissue Three---------------------------------------------------
-
-    // create a virtual mesh
-    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueThree);
 
     p_CommonData->p_tissueThree->setLocalPos(0,0,-.025);
-    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueThree->loadFromFile("./Resources/tissue_3/tissue_3.obj");
@@ -531,14 +542,10 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueThree->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Four---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueFour);
 
     p_CommonData->p_tissueFour->setLocalPos(0,0,-.025);
-    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueFour->loadFromFile("./Resources/tissue_4/tissue_4.obj");
@@ -563,14 +570,10 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFour->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Five---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueFive);
 
     p_CommonData->p_tissueFive->setLocalPos(0,0,-.025);
-    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueFive->loadFromFile("./Resources/tissue_5/tissue_5.obj");
@@ -595,14 +598,10 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueFive->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Six---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueSix);
 
     p_CommonData->p_tissueSix->setLocalPos(0,0,-.025);
-    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueSix->loadFromFile("./Resources/tissue_6/tissue_6.obj");
@@ -627,14 +626,10 @@ void haptics_thread::InitPalpationEnvironment()
     p_CommonData->p_tissueSix->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Seven---------------------------------------------------
-    // create a virtual mesh
-    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
-
     // add object to world
     world->addChild(p_CommonData->p_tissueSeven);
 
     p_CommonData->p_tissueSeven->setLocalPos(0,0,-.02);
-    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
 
     //load the object from file
     p_CommonData->p_tissueSeven->loadFromFile("./Resources/tissue_7/tissue_7.obj");
@@ -777,9 +772,8 @@ chai3d::cVector3d haptics_thread::ReadAccel()
     return emptyVec; //if sensoray is not active, just return 0
 }
 
-
-
-double haptics_thread::ComputeContactVibration(){
+double haptics_thread::ComputeContactVibration()
+{
     //create a contact vibration that depends on position or velocity
     // if we are registering a contact
     if (abs(deviceLastComputedForce0.z()) > 0.00001)
@@ -908,7 +902,7 @@ void haptics_thread::InitDynamicBodies()
 
 void haptics_thread::SimulateDynamicBodies()
 {
-    double timeInterval = rateClock.getCurrentTimeSeconds();
+   /* double timeInterval = rateClock.getCurrentTimeSeconds();
 
     //---------------------------------------------------
     // Implement Dynamic simulation
@@ -968,12 +962,7 @@ void haptics_thread::SimulateDynamicBodies()
         }
     }
 
-    ODEWorld->updateDynamics(timeInterval/5);
-}
-
-void haptics_thread::RemoveWorldChildren()
-{
-
+    ODEWorld->updateDynamics(timeInterval/5);*/
 }
 
 

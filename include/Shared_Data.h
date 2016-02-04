@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -136,6 +136,8 @@ typedef struct
     chai3d::cMesh* p_frictionBox1;
     chai3d::cMesh* p_frictionBox2;
 
+
+    bool environmentChange;
     bool m_flagTissueTransparent;
 
     // recording variables
