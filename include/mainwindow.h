@@ -55,6 +55,8 @@ private slots:
     void on_turnOff_clicked();
     void on_palpationButton_clicked();
     void on_frictionButton_clicked();
+    void on_humpButton_clicked();
+    void on_hoopHumpButton_clicked();
 };
 
 #endif // MAINWINDOW_H

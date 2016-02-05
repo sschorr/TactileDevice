@@ -55,6 +55,8 @@ public:
     void InitEnvironments();
     void RenderPalpation();
     void RenderFriction();
+    void RenderHump();
+    void RenderHoopHump();
 
     void InitAccel();
     chai3d::cVector3d ReadAccel();

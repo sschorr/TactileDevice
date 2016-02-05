@@ -243,3 +243,15 @@ void MainWindow::on_frictionButton_clicked()
     p_CommonData->environmentChange = true;
     p_CommonData->currentEnvironmentState = friction;
 }
+
+void MainWindow::on_humpButton_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = hump;
+}
+
+void MainWindow::on_hoopHumpButton_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = hoopHump;
+}

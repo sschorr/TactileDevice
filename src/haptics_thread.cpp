@@ -157,7 +157,6 @@ void haptics_thread::UpdateVRGraphics()
         switch(p_CommonData->currentEnvironmentState)
         {
         case none:
-            world->clearAllChildren();
             break;
 
         case friction:
@@ -168,6 +167,16 @@ void haptics_thread::UpdateVRGraphics()
         case palpation:
             world->clearAllChildren();
             RenderPalpation();
+            break;
+
+        case hump:
+            world->clearAllChildren();
+            RenderHump();
+            break;
+
+        case hoopHump:
+            world->clearAllChildren();
+            RenderHoopHump();
             break;
         }
     }
@@ -373,6 +382,64 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
+
+    p_CommonData->p_hump = new chai3d::cMultiMesh();
+    p_CommonData->p_hoopHump = new chai3d::cMultiMesh();
+    p_CommonData->p_hump->rotateAboutGlobalAxisDeg(1,0,0,-90);
+    p_CommonData->p_hoopHump->rotateAboutGlobalAxisDeg(1,0,0,-90);
+
+}
+
+void haptics_thread::RenderHump()
+{
+    p_CommonData->p_hump->loadFromFile("./Resources/HumpImported.obj");
+    world->addChild(p_CommonData->p_hump);
+
+    // compute collision detection algorithm
+    p_CommonData->p_hump->createAABBCollisionDetector(toolRadius);
+
+    // set params
+    p_CommonData->p_hump->setShowEnabled(true);
+    p_CommonData->p_hump->computeBoundaryBox(true); //compute a boundary box
+    p_CommonData->p_hump->setUseVertexColors(true);
+    chai3d::cColorf humpColor;
+    humpColor.setBlueDeepSky();
+    p_CommonData->p_hump->setVertexColor(humpColor);
+    p_CommonData->p_hump->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    p_CommonData->p_hump->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    p_CommonData->p_hump->m_material->m_specular.set(1.0, 1.0, 1.0);
+    p_CommonData->p_hump->setUseMaterial(true);
+    p_CommonData->p_hump->setHapticEnabled(true);
+    p_CommonData->p_hump->setStiffness(200);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+}
+
+void haptics_thread::RenderHoopHump()
+{
+    p_CommonData->p_hoopHump->loadFromFile("./Resources/HumpHoopImported.obj");
+    world->addChild(p_CommonData->p_hoopHump);
+
+    // compute collision detection algorithm
+    p_CommonData->p_hoopHump->createAABBCollisionDetector(toolRadius);
+
+    // set params
+    p_CommonData->p_hoopHump->setShowEnabled(true);
+    p_CommonData->p_hoopHump->computeBoundaryBox(true); //compute a boundary box
+    p_CommonData->p_hoopHump->setUseVertexColors(true);
+    chai3d::cColorf hoopHumpColor;
+    hoopHumpColor.setBlueDeepSky();
+    p_CommonData->p_hoopHump->setVertexColor(hoopHumpColor);
+    p_CommonData->p_hoopHump->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    p_CommonData->p_hoopHump->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    p_CommonData->p_hoopHump->m_material->m_specular.set(1.0, 1.0, 1.0);
+    p_CommonData->p_hoopHump->setUseMaterial(true);
+    p_CommonData->p_hoopHump->setHapticEnabled(true);
+    p_CommonData->p_hoopHump->setStiffness(200);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
 
 }
 

@@ -963,8 +963,8 @@
      <widget class="QPushButton" name="palpationButton">
       <property name="geometry">
        <rect>
-        <x>680</x>
-        <y>720</y>
+        <x>640</x>
+        <y>690</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -976,14 +976,40 @@
      <widget class="QPushButton" name="frictionButton">
       <property name="geometry">
        <rect>
-        <x>830</x>
-        <y>720</y>
+        <x>800</x>
+        <y>690</y>
         <width>131</width>
         <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>Friction Environment</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="humpButton">
+      <property name="geometry">
+       <rect>
+        <x>640</x>
+        <y>760</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hump Enivronment</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="hoopHumpButton">
+      <property name="geometry">
+       <rect>
+        <x>800</x>
+        <y>760</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Hoop Hump Environment</string>
       </property>
      </widget>
     </widget>

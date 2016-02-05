@@ -5,8 +5,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -63,7 +63,9 @@ typedef enum
 {
     none,
     palpation,
-    friction
+    friction,
+    hump,
+    hoopHump
 
 } environment_states;
 
@@ -135,6 +137,10 @@ typedef struct
     // haptics thread objects for friction environment
     chai3d::cMesh* p_frictionBox1;
     chai3d::cMesh* p_frictionBox2;
+
+    // haptics thread objects for hump environment
+    chai3d::cMultiMesh* p_hump;
+    chai3d::cMultiMesh* p_hoopHump;
 
 
     bool environmentChange;
