@@ -801,6 +801,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
             p_CommonData->currentState = idle;
         }
 
+        Sleep(1000);
         p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     }
 }

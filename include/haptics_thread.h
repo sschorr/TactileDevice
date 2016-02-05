@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include "windows.h"
 
 #define RANGE_10V 0x00 // Range code for ADC ±10V range.
 #define RANGE_5V 0x10 // Range code for ADC ±5V range.
