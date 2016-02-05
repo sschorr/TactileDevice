@@ -278,7 +278,11 @@ bool c3dofChaiDevice::open()
     // result = openConnectionToMyDevice();
 
 #ifdef MAGTRACKER
-    ourMagTracker.InitMagTracker();
+    //if(trackerNo == 0)
+    //{
+        ourMagTracker.InitMagTracker();
+    //}
+
 #endif
 
     result = C_SUCCESS; // my code saying connection success

@@ -411,6 +411,8 @@ void haptics_thread::RenderHump()
     p_CommonData->p_hump->setUseMaterial(true);
     p_CommonData->p_hump->setHapticEnabled(true);
     p_CommonData->p_hump->setStiffness(200);
+    p_CommonData->p_hump->m_material->setStaticFriction(0.4);
+    p_CommonData->p_hump->m_material->setDynamicFriction(0.4);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
@@ -437,6 +439,8 @@ void haptics_thread::RenderHoopHump()
     p_CommonData->p_hoopHump->setUseMaterial(true);
     p_CommonData->p_hoopHump->setHapticEnabled(true);
     p_CommonData->p_hoopHump->setStiffness(200);
+    p_CommonData->p_hoopHump->m_material->setStaticFriction(0.4);
+    p_CommonData->p_hoopHump->m_material->setDynamicFriction(0.4);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
@@ -725,24 +729,38 @@ void haptics_thread::RenderPalpation()
 
 void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 {
+
     // ----------------- START SINUSOID -----------------------------------
     // set the current time to "0"
-    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
-
     // scale to avoid abrupt starting input
     // make a dynamic ramp time of 2 periods
-    double rampTime = 1.0/(2.0*p_CommonData->bandSinFreq);
-    double scaledBandSinAmp = currTime/rampTime*p_CommonData->bandSinAmp;
-    if (scaledBandSinAmp > p_CommonData->bandSinAmp)
+    double stillTime = 1.0;
+    double rampTime = 1.0/(6.0*p_CommonData->bandSinFreq);
+    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
+
+    // case that we want to stay still at beginning
+    if (currTime < stillTime)
     {
-        scaledBandSinAmp = p_CommonData->bandSinAmp;
-        p_CommonData->recordFlag = true;
+        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
     }
-    Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*currTime))*inputMotionAxis + p_CommonData->neutralPos;
-    p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+
+    // case that we want to be ramping and then oscillating
+    else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq)+stillTime))
+    {
+        double scaledBandSinAmp = (currTime-stillTime)/rampTime*p_CommonData->bandSinAmp;
+        if ((currTime - stillTime) > rampTime)
+        {
+            qDebug() << (currTime-stillTime);
+            scaledBandSinAmp = p_CommonData->bandSinAmp;
+            p_CommonData->recordFlag = true;
+        }
+
+        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->neutralPos;
+        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+    }
 
     // If time is greater than 12 pause and write to file
-    if (currTime > (12.0*1.0/p_CommonData->bandSinFreq))
+    else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
     {
         p_CommonData->recordFlag = false;
         p_CommonData->wearableDelta->TurnOffControl();
@@ -796,7 +814,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
         p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
 
-        if (p_CommonData->bandSinFreq > 9.9)
+        if (p_CommonData->bandSinFreq > 15)
         {
             p_CommonData->currentState = idle;
         }
