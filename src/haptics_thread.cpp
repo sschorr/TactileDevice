@@ -729,13 +729,12 @@ void haptics_thread::RenderPalpation()
 
 void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 {
-
     // ----------------- START SINUSOID -----------------------------------
     // set the current time to "0"
     // scale to avoid abrupt starting input
     // make a dynamic ramp time of 2 periods
     double stillTime = 1.0;
-    double rampTime = 1.0/(6.0*p_CommonData->bandSinFreq);
+    double rampTime = 6.0*1.0/p_CommonData->bandSinFreq;
     double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
 
     // case that we want to stay still at beginning
@@ -750,7 +749,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         double scaledBandSinAmp = (currTime-stillTime)/rampTime*p_CommonData->bandSinAmp;
         if ((currTime - stillTime) > rampTime)
         {
-            qDebug() << (currTime-stillTime);
+            //qDebug() << (currTime-stillTime-rampTime);
             scaledBandSinAmp = p_CommonData->bandSinAmp;
             p_CommonData->recordFlag = true;
         }
