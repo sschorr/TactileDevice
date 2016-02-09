@@ -14,6 +14,7 @@ public:
     void InitMagTracker();
     chai3d::cVector3d CheckPos(int);
     chai3d::cMatrix3d CheckRot(int);
+    chai3d::cTransform CheckPose(int);
 
     // magnetic tracker variables
     CSystem     ATC3DG; // a pointer to a single instance of the system class

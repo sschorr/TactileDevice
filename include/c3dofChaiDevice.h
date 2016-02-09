@@ -202,6 +202,7 @@ protected:
 
     //! a short description of my variable
     int m_MyVariable;
+    chai3d::cTransform pose;
 };
 
 //------------------------------------------------------------------------------
