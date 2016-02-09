@@ -529,6 +529,11 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     frame.rotateAboutLocalAxisDeg(0,1,0,180); // for mag tracker chord facing us instead of base box
 #endif
 
+    if (trackerNo == 0)
+    {
+        frame.rotateAboutLocalAxisDeg(0,1,0,15);
+    }
+
     // store new rotation matrix
     a_rotation = frame;
 
