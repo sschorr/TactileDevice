@@ -209,8 +209,8 @@ void haptics_thread::UpdateVRGraphics()
     m_tool1->updatePose();
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    //m_curSphere1->setLocalPos(position1);
-    //m_curSphere1->setLocalRot(rotation1);
+    m_curSphere1->setLocalPos(position1);
+    m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 }
 
@@ -319,11 +319,11 @@ void haptics_thread::InitFingerAndTool()
     m_curSphere0->setShowFrame(true);
     m_curSphere0->setFrameSize(0.05);
 
-    /*m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_curSphere1);
     m_curSphere1->m_material->setGrayDarkSlate();
-    m_curSphere1->setShowFrame(false);
-    m_curSphere1->setFrameSize(0.05);*/
+    m_curSphere1->setShowFrame(true);
+    m_curSphere1->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------

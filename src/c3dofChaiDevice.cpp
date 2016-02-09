@@ -448,7 +448,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // these axes align assuming the box is facing you and the chord of the tracker faces the box.
 #ifdef MAGTRACKER
-    chai3d::cVector3d pos = ourMagTracker.CheckPos(trackerNo);
+    pose = ourMagTracker.CheckPose(trackerNo);
+    chai3d::cVector3d pos = pose.getLocalPos();
     x = pos.x(); y = pos.y(); z = pos.z();
 #endif
 

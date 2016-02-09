@@ -69,6 +69,52 @@ void magTracker::InitMagTracker(){
 
 }
 
+chai3d::cTransform magTracker::CheckPose(int trackerNum){
+    chai3d::cTransform returnTransform;
+    chai3d::cVector3d returnVec;
+    chai3d::cMatrix3d returnMatrix;
+    double x,y,z;
+
+    if (trackerNum == 0)
+    {
+        // test the reading of the magnetic tracker
+        errorCode = GetAsynchronousRecord(trackerNum, pRecord0, sizeof(record0));
+        if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
+        // get the status of the last data record
+        // only report the data if everything is okay
+        x = (record0.x - 200)/1000.0;
+        y = record0.y/1000.0;
+        z = record0.z/1000.0;
+        returnVec.set(x, y, z);
+
+        returnMatrix.set(record0.s[0][0], record0.s[0][1], record0.s[0][2],
+                         record0.s[1][0], record0.s[1][1], record0.s[1][2],
+                         record0.s[2][0], record0.s[2][1], record0.s[2][2]);
+
+        returnTransform.set(returnVec, returnMatrix);
+        return returnTransform;
+    }
+    if (trackerNum == 1)
+    {
+        // test the reading of the magnetic tracker
+        errorCode = GetAsynchronousRecord(trackerNum, pRecord1, sizeof(record1));
+        if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
+        // get the status of the last data record
+        // only report the data if everything is okay
+        x = (record1.x - 200)/1000.0;
+        y = record1.y/1000.0;
+        z = record1.z/1000.0;
+        returnVec.set(x, y, z);
+
+        returnMatrix.set(record1.s[0][0], record1.s[0][1], record1.s[0][2],
+                         record1.s[1][0], record1.s[1][1], record1.s[1][2],
+                         record1.s[2][0], record1.s[2][1], record1.s[2][2]);
+
+        returnTransform.set(returnVec, returnMatrix);
+        return returnTransform;
+    }
+}
+
 chai3d::cVector3d magTracker::CheckPos(int trackerNum){
 
     chai3d::cVector3d returnVec;
