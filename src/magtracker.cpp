@@ -90,6 +90,8 @@ chai3d::cTransform magTracker::CheckPose(int trackerNum){
         returnMatrix.set(record0.s[0][0], record0.s[0][1], record0.s[0][2],
                          record0.s[1][0], record0.s[1][1], record0.s[1][2],
                          record0.s[2][0], record0.s[2][1], record0.s[2][2]);
+        returnMatrix.trans();
+        returnMatrix.rotateAboutLocalAxisDeg(0,1,0,180); // for mag tracker chord facing us instead of base box
 
         returnTransform.set(returnVec, returnMatrix);
         return returnTransform;

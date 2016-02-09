@@ -463,7 +463,6 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
         chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
         chai3d::cVector3d posOffsetinA;
         R_BtoA.mulr(posOffsetinB, posOffsetinA);
-
         a_position = a_position + posOffsetinA;
     }
     // estimate linear velocity
@@ -511,22 +510,14 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     // variables that describe the rotation matrix
     double r00, r01, r02, r10, r11, r12, r20, r21, r22;
     cMatrix3d frame;
-    frame.identity();
-
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
-
     // if the device does not provide any rotation capabilities
     // set the rotation matrix equal to the identity matrix.
-    r00 = 1.0;  r01 = 0.0;  r02 = 0.0;
-    r10 = 0.0;  r11 = 1.0;  r12 = 0.0;
-    r20 = 0.0;  r21 = 0.0;  r22 = 1.0;
+    frame.identity();
 
-    frame.set(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 #ifdef MAGTRACKER
     // try setting rotation from mag tracker
-    frame = pose.getLocalRot();
-    frame.trans();
-    frame.rotateAboutLocalAxisDeg(0,1,0,180); // for mag tracker chord facing us instead of base box
+    frame = pose.getLocalRot();    
 #endif
 
     if (trackerNo == 0)

@@ -18,6 +18,7 @@ void haptics_thread::initialize()
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
+    RenderFriction();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -204,12 +205,11 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
 
-
     //use this if two tools (haptic proxies) are desired
     m_tool1->updatePose();
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    m_curSphere1->setLocalPos(position1);
+    m_curSphere1->setLocalPos(0,0,0); //position1);
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 }
@@ -272,16 +272,16 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->cameraPos.set(0.18, 0.0, -0.20);
+    p_CommonData->cameraPos.set(0.18, 0.0, 0);
     p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
     p_CommonData->upVector.set(0.0, 0.0, -1.0);
     p_CommonData->p_camera->set( p_CommonData->cameraPos,//(0.25, 0, -.25),    // camera position (eye)
                                  p_CommonData->lookatPos,    // lookat position (target)
                                  p_CommonData->upVector);   // direction of the "up" vector
-    p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 135.0;
-    p_CommonData->camRadius = 0.3;
 
+    p_CommonData->azimuth = 0.0;
+    p_CommonData->polar = 90.0;
+    p_CommonData->camRadius = 0.3;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -297,7 +297,7 @@ void haptics_thread::InitFingerAndTool()
     //--------------------------------------------------------------------------
     m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool0); //insert the tool into the world
-    toolRadius = 0.003; // set tool radius
+    toolRadius = 0.006; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     //m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
@@ -342,7 +342,7 @@ void haptics_thread::InitFingerAndTool()
     }
 
     // set params
-    finger->setShowEnabled(false);
+    finger->setShowEnabled(true);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
