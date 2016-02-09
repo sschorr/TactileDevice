@@ -514,7 +514,7 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     frame.set(r00, r01, r02, r10, r11, r12, r20, r21, r22);
 #ifdef MAGTRACKER
     // try setting rotation from mag tracker
-    frame = ourMagTracker.CheckRot(trackerNo);
+    frame = pose.getLocalRot();
     frame.trans();
     frame.rotateAboutLocalAxisDeg(0,1,0,180); // for mag tracker chord facing us instead of base box
 #endif
