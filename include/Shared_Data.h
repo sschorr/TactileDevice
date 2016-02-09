@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -142,7 +142,6 @@ typedef struct
     // haptics thread objects for hump environment
     chai3d::cMultiMesh* p_hump;
     chai3d::cMultiMesh* p_hoopHump;
-
 
     bool environmentChange;
     bool m_flagTissueTransparent;

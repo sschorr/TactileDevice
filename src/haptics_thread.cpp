@@ -191,6 +191,7 @@ void haptics_thread::UpdateVRGraphics()
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
     m_curSphere0->setLocalPos(position0);
     m_curSphere0->setLocalRot(rotation0);
+    m_tool0->computeInteractionForces();
 
     // update position of second sphere/tool
     // update position of finger to stay on proxy point
@@ -202,8 +203,7 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalRot(fingerRotation0);
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
-    //computes the interaction force for the tool proxy point
-    m_tool0->computeInteractionForces();
+
 
     //use this if two tools (haptic proxies) are desired
     m_tool1->updatePose();
@@ -321,7 +321,7 @@ void haptics_thread::InitFingerAndTool()
 
     m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_curSphere1);
-    m_curSphere1->m_material->setGrayDarkSlate();
+    m_curSphere1->m_material->setBlueAqua();
     m_curSphere1->setShowFrame(true);
     m_curSphere1->setFrameSize(0.05);
 
@@ -342,7 +342,7 @@ void haptics_thread::InitFingerAndTool()
     }
 
     // set params
-    finger->setShowEnabled(true);
+    finger->setShowEnabled(false);
     finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
