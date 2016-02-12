@@ -50,6 +50,7 @@ public:
     void ComputeVRDesiredDevicePos();
     void UpdateVRGraphics();
     void CommandSinPos(Eigen::Vector3d);
+    void CommandCircPos(Eigen::Vector3d);
 
     void InitGeneralChaiStuff();
     void InitFingerAndTool();

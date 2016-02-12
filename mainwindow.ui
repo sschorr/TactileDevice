@@ -764,19 +764,6 @@
        <string>Start Sin</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="returnZero">
-      <property name="geometry">
-       <rect>
-        <x>30</x>
-        <y>580</y>
-        <width>111</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Return</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="setDirectory">
       <property name="geometry">
        <rect>
@@ -1010,6 +997,19 @@
       </property>
       <property name="text">
        <string>Hoop Hump Environment</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startCircle">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>580</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Circ</string>
       </property>
      </widget>
     </widget>

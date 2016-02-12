@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -56,7 +56,8 @@ typedef enum
     idle,
     sliderControlMode,
     VRControlMode,
-    sinControlMode
+    sinControlMode,
+    circControlMode
 
 } sm_states;
 
@@ -96,6 +97,9 @@ typedef struct
 
     // determine start time for bandwidth sin
     double sinStartTime;
+
+    // determine start time for circ
+    double circStartTime;
 
     // Declare the control state that we are in
     sm_states currentState;

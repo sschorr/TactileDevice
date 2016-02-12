@@ -80,8 +80,10 @@ void haptics_thread::run()
             rateClock.stop();
             accelSignal = ReadAccel();
 
+            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentState)
             {
+
             case idle:
                 UpdateVRGraphics();
                 p_CommonData->wearableDelta->TurnOffControl();
@@ -99,10 +101,16 @@ void haptics_thread::run()
                 break;
 
             case sinControlMode:
-                UpdateVRGraphics();
-                Eigen::Vector3d inputAxis(0,1,0);
+                UpdateVRGraphics();                
                 CommandSinPos(inputAxis);
                 p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
+                break;
+
+            case circControlMode:
+                UpdateVRGraphics();
+                CommandCircPos(inputAxis);
+                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
+                break;
             }
 
 
@@ -137,7 +145,6 @@ void haptics_thread::run()
     // If we are terminating, delete the haptic device to set outputs to 0
     delete p_CommonData->wearableDelta;
 }
-
 
 void haptics_thread::UpdateVRGraphics()
 {
@@ -209,7 +216,7 @@ void haptics_thread::UpdateVRGraphics()
     m_tool1->updatePose();
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    m_curSphere1->setLocalPos(0,0,0); //position1);
+    m_curSphere1->setLocalPos(position1);
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 }
@@ -469,21 +476,6 @@ void haptics_thread::RenderFriction()
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
-
-
-    /*
-    // create a box and give it physical properties
-    meshBox = new chai3d::cMesh();  // create a mesh for a box
-    cCreateBox(meshBox, .07, .07, .035); // make mesh a box
-    meshBox->createAABBCollisionDetector(toolRadius); // create collision detector
-    world->addChild(meshBox); // add to world
-    meshBox->setLocalPos(0,0,.02); // set the position
-
-    // give the box physical properties
-    meshBox->m_material->setStiffness(200);
-    meshBox->m_material->setStaticFriction(0.7);
-    meshBox->m_material->setDynamicFriction(0.7);
-    meshBox->m_material->setUseHapticFriction(true);*/
 }
 
 void haptics_thread::RenderPalpation()
@@ -758,7 +750,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         p_CommonData->wearableDelta->SetDesiredPos(sinPos);
     }
 
-    // If time is greater than 12 pause and write to file
+    // If time is greater than 12 pause and write to file, then reset for next frequency sin
     else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
     {
         p_CommonData->recordFlag = false;
@@ -823,6 +815,106 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     }
 }
 
+void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
+{
+    double circleR = 3;
+    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
+    double revTime = 5;
+    double theta = 2.0*PI/revTime*currTime; //the angle grows as one rev every revTime seconds
+    Eigen::Vector3d desPos(0,0,p_CommonData->neutralPos.z());
+
+    double rampTime = 2.0*revTime; //ramp the amplitude over 2 revolutions
+    double finalTime = 10.0*revTime; // ending time, then write to file
+    double amp;
+
+    if (currTime < rampTime)
+    {
+        amp = circleR/rampTime;
+    }
+    else if (currTime > rampTime)
+    {
+        amp = circleR;
+        p_CommonData->recordFlag = true;
+    }
+
+    double X = amp*cos(theta);
+    double Y = amp*sin(theta);
+
+    if (inputMotionAxis.x() == 1)
+    {
+        desPos[0] = 0;
+        desPos[1] = X;
+        desPos[2] = p_CommonData->neutralPos.z()+Y;
+    }
+    else if (inputMotionAxis.y() == 1)
+    {
+        desPos[0] = Y;
+        desPos[1] = 0;
+        desPos[2] = p_CommonData->neutralPos.z()+X;
+    }
+    else if (inputMotionAxis.z() == 1)
+    {
+        desPos[0] = X;
+        desPos[1] = Y;
+        desPos[2] = p_CommonData->neutralPos.z();
+    }
+
+    p_CommonData->wearableDelta->SetDesiredPos(desPos);
+
+
+    if (currTime > finalTime)
+    {
+        p_CommonData->recordFlag = false;
+        p_CommonData->wearableDelta->TurnOffControl();
+
+        //write data to file when we are done
+        std::ofstream file;
+        file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + ".txt");
+        for (int i=0; i < p_CommonData->debugData.size(); i++)
+        {
+            //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+            file << p_CommonData->debugData[i].time << "," << " "
+            << p_CommonData->debugData[i].pos[0] << "," << " "
+            << p_CommonData->debugData[i].pos[1] << "," << " "
+            << p_CommonData->debugData[i].pos[2] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+            << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+            << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+            << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+            << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+            << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+            << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
+            << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+            << p_CommonData->debugData[i].accelSignal.z() << "," << " "
+            << std::endl;
+        }
+        file.close();
+
+        // clear out the storagevector
+        p_CommonData->debugData.clear();
+        p_CommonData->currentState = idle;
+
+        Sleep(1000);
+    }
+}
 
 void haptics_thread::InitAccel()
 {

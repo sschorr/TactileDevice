@@ -144,6 +144,15 @@ void MainWindow::on_startSin_clicked()
     p_CommonData->bandSinFreq = p_CommonData->bandSinFreqDisp;
 }
 
+void MainWindow::on_startCircle_clicked()
+{
+    p_CommonData->currentState = circControlMode;
+    ui->sliderControl->setChecked(false);
+    ui->VRControl->setChecked(false);
+
+    p_CommonData->circStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+}
+
 void MainWindow::on_stopRecord_clicked()
 {
     p_CommonData->recordFlag = false;
@@ -255,3 +264,5 @@ void MainWindow::on_hoopHumpButton_clicked()
     p_CommonData->environmentChange = true;
     p_CommonData->currentEnvironmentState = hoopHump;
 }
+
+
