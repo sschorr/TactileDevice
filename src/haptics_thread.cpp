@@ -80,7 +80,7 @@ void haptics_thread::run()
             rateClock.stop();
             accelSignal = ReadAccel();
 
-            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
             switch(p_CommonData->currentState)
             {
 
@@ -816,24 +816,30 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 
 void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
 {
-    double circleR = 3;
+    static bool firstTime = false;
+    double circleR = 4.0;
     double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
-    double revTime = 5;
+    double revTime = 2.5;
+    double waitTime = 0.1;
     double theta = 2.0*PI/revTime*currTime; //the angle grows as one rev every revTime seconds
     Eigen::Vector3d desPos(0,0,p_CommonData->neutralPos.z());
 
     double rampTime = 2.0*revTime; //ramp the amplitude over 2 revolutions
     double finalTime = 10.0*revTime; // ending time, then write to file
     double amp;
+    p_CommonData->recordFlag = true;
 
-    if (currTime < rampTime)
+    if (currTime < waitTime)
     {
-        amp = circleR/rampTime;
+        amp = 0;
+    }
+    else if (currTime < rampTime)
+    {
+        amp = circleR*currTime/rampTime;
     }
     else if (currTime > rampTime)
     {
-        amp = circleR;
-        p_CommonData->recordFlag = true;
+        amp = circleR;        
     }
 
     double X = amp*cos(theta);
