@@ -44,9 +44,6 @@ public:
     // METHODS
     void initialize();
     void RecordData();
-    double ComputeContactVibration();
-    void SimulateDynamicBodies();
-    void InitDynamicBodies();
     void ComputeVRDesiredDevicePos();
     void UpdateVRGraphics();
     void CommandSinPos(Eigen::Vector3d);
@@ -56,9 +53,11 @@ public:
     void InitFingerAndTool();
     void InitEnvironments();
     void RenderPalpation();
-    void RenderFriction();
+    void RenderTwoFriction();
     void RenderHump();
     void RenderHoopHump();
+    void RenderExpFriction();
+    void WriteDataToFile();
 
     void InitAccel();
     chai3d::cVector3d ReadAccel();

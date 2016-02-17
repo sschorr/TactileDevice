@@ -15,8 +15,8 @@
 #include <QDialog>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <Qt/qfiledialog.h>
-#include <Qt/qinputdialog.h>
+#include <qfiledialog.h>
+#include <qinputdialog.h>
 #include <QKeyEvent>
 
 namespace Ui {
@@ -58,6 +58,9 @@ private slots:
     void on_humpButton_clicked();
     void on_hoopHumpButton_clicked();
     void on_startCircle_clicked();
+    void on_loadProtocol_clicked();
+    void on_startExperiment_clicked();
+    void WriteDataToFile();
 };
 
 #endif // MAINWINDOW_H

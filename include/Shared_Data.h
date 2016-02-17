@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -17,6 +17,19 @@
 #include "c3DOFdevice.h"
 #include <Eigen/Dense>
 #include "chai3d.h"
+#include "SimpleIni.h"
+#include <QDebug>
+#include <QMetaType>
+#include <QString>
+#include <string>
+#include <iostream>
+#include <ostream>
+#include <istream>
+#include <fstream>
+#include <sstream>
+#include <vector>
+#include <Qt/qfiledialog.h>
+#include <Qt/qinputdialog.h>
 
 #define POS_SCALE 6
 #define HAPTIC_X_TRANSLATE 0 //.12
@@ -48,18 +61,31 @@ typedef struct
     chai3d::cVector3d magTrackerPos0;
     chai3d::cVector3d magTrackerPos1;
     chai3d::cVector3d accelSignal;
+    int referenceFirst;
+    int pairNo;
+    double referenceFriction;
+    double comparisonFriction;
+    int subjectAnswer;
 
 } DataRecordStruct;
 
 typedef enum
 {
-    idle,
+    idleExperiment,
+    trial,
+    trialBreak,
+    end
+} experiment_states;
+
+typedef enum
+{
+    idleControl,
+    neutralPosControl,
     sliderControlMode,
     VRControlMode,
     sinControlMode,
-    circControlMode
-
-} sm_states;
+    circControlMode    
+} control_states;
 
 typedef enum
 {
@@ -67,8 +93,8 @@ typedef enum
     palpation,
     friction,
     hump,
-    hoopHump
-
+    hoopHump,
+    experimentFriction
 } environment_states;
 
 
@@ -102,10 +128,13 @@ typedef struct
     double circStartTime;
 
     // Declare the control state that we are in
-    sm_states currentState;
+    control_states currentControlState;
 
     // Declare the environment state that we are in
     environment_states currentEnvironmentState;
+
+    // The experiment state we are in
+    experiment_states currentExperimentState;
 
     // check whether to record
     bool recordFlag;
@@ -120,12 +149,34 @@ typedef struct
     double bandSinAmp;
     double bandSinFreq;
 
-    // controller variables
+    // position controller variables
     double Kp;
     double Kd;
 
-    //
+    // the trial number of the experiment
+    int trialNo;
+    // the trial number of the protocol
+    int trialNoProto;
+    // are we doing the first or second of the comparison
+    int pairNo;
+    // Is this trial reference or comparison first
+    bool referenceFirst;
+    // for reading in the friction values
+    double comparisonFriction;
+    double referenceFriction;
+    // for reading in the experiment feedback condition
+    bool tactileFeedback;
+
+    // answer to which was stiffer
+    int subjectAnswer;
+
+
+    // updatable neutral position
     Eigen::Vector3d neutralPos;
+
+    // protocol loading
+    QString protocolLocation;
+    CSimpleIniA protocolFile;
 
     // haptics thread objects for palpation environment
     chai3d::cMultiMesh* p_table;
@@ -142,6 +193,9 @@ typedef struct
     // haptics thread objects for friction environment
     chai3d::cMesh* p_frictionBox1;
     chai3d::cMesh* p_frictionBox2;
+
+    // haptics thread objects for frictione experiment
+    chai3d::cMesh* p_expFrictionBox;
 
     // haptics thread objects for hump environment
     chai3d::cMultiMesh* p_hump;

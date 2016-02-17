@@ -20,6 +20,7 @@ SOURCES += ./src/main.cpp\
            ./src/c3dofChaiDevice.cpp \
            ./src/trakSTAR.cpp \
            ./src/magtracker.cpp \
+    src/experiment_thread.cpp
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -35,6 +36,10 @@ HEADERS  += ./include/mainwindow.h\
             ./include/ATC3DG.h \
             ./include/stdafx.h \
             ./include/magtracker.h \
+            ./include/SimpleIni.h \
+    ./include/experiment_thread.h
+
+
 
 FORMS    += ./mainwindow.ui
 

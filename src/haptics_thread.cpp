@@ -18,7 +18,6 @@ void haptics_thread::initialize()
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
-    RenderFriction();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -66,7 +65,7 @@ void haptics_thread::initialize()
     // Start off not recording
     p_CommonData->recordFlag = false;
 
-    p_CommonData->currentState = idle;
+    p_CommonData->currentControlState = idleControl;
 }
 
 void haptics_thread::run()
@@ -81,10 +80,10 @@ void haptics_thread::run()
             accelSignal = ReadAccel();
 
             Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
-            switch(p_CommonData->currentState)
+            switch(p_CommonData->currentControlState)
             {
 
-            case idle:
+            case idleControl:
                 UpdateVRGraphics();
                 p_CommonData->wearableDelta->TurnOffControl();
                 break;
@@ -167,9 +166,14 @@ void haptics_thread::UpdateVRGraphics()
         case none:
             break;
 
+        case experimentFriction:
+            world->clearAllChildren();
+            RenderExpFriction();
+            break;
+
         case friction:
             world->clearAllChildren();
-            RenderFriction();
+            RenderTwoFriction();
             break;
 
         case palpation:
@@ -258,6 +262,11 @@ void haptics_thread::RecordData()
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
     dataRecorder.accelSignal = accelSignal;
+    dataRecorder.referenceFirst = p_CommonData->referenceFirst;
+    dataRecorder.pairNo = p_CommonData->pairNo;
+    dataRecorder.referenceFriction = p_CommonData->referenceFriction;
+    dataRecorder.comparisonFriction = p_CommonData->comparisonFriction;
+    dataRecorder.subjectAnswer = p_CommonData->subjectAnswer;
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
@@ -287,7 +296,7 @@ void haptics_thread::InitGeneralChaiStuff()
                                  p_CommonData->upVector);   // direction of the "up" vector
 
     p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 90.0;
+    p_CommonData->polar = 120.0;
     p_CommonData->camRadius = 0.3;
 
     // create a light source and attach it to the camera
@@ -395,6 +404,8 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_hump->rotateAboutGlobalAxisDeg(1,0,0,-90);
     p_CommonData->p_hoopHump->rotateAboutGlobalAxisDeg(1,0,0,-90);
 
+    p_CommonData->p_expFrictionBox = new chai3d::cMesh();
+
 }
 
 void haptics_thread::RenderHump()
@@ -454,7 +465,21 @@ void haptics_thread::RenderHoopHump()
 
 }
 
-void haptics_thread::RenderFriction()
+void haptics_thread::RenderExpFriction()
+{
+    cCreateBox(p_CommonData->p_expFrictionBox, .13, .13, .01);
+    p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
+    p_CommonData->p_expFrictionBox->m_material->setStiffness(200);
+    p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
+    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
+    world->addChild(p_CommonData->p_expFrictionBox);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+}
+
+void haptics_thread::RenderTwoFriction()
 {    
     cCreateBox(p_CommonData->p_frictionBox1, .08, .08, .01); // make mesh a box
     cCreateBox(p_CommonData->p_frictionBox2, .08, .08, .01); // make mesh a box
@@ -476,6 +501,202 @@ void haptics_thread::RenderFriction()
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
+}
+
+void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
+{
+    // ----------------- START SINUSOID -----------------------------------
+    // set the current time to "0"
+    // scale to avoid abrupt starting input
+    // make a dynamic ramp time of 2 periods
+    double stillTime = 1.0;
+    double rampTime = 6.0*1.0/p_CommonData->bandSinFreq;
+    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
+
+    // case that we want to stay still at beginning
+    if (currTime < stillTime)
+    {
+        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
+        p_CommonData->recordFlag = true;
+    }
+
+    // case that we want to be ramping and then oscillating
+    else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
+    {
+        double scaledBandSinAmp = (currTime-stillTime)/rampTime*p_CommonData->bandSinAmp;
+        if ((currTime - stillTime) > rampTime)
+        {
+            scaledBandSinAmp = p_CommonData->bandSinAmp;
+        }
+
+        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->neutralPos;
+        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+    }
+
+    // If time is greater than 12 pause and write to file, then reset for next frequency sin
+    else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
+    {
+        p_CommonData->wearableDelta->TurnOffControl();
+        WriteDataToFile();
+
+        p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
+        p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
+
+        if (p_CommonData->bandSinFreq > 15)
+        {
+            p_CommonData->currentControlState = idleControl;
+        }
+
+        Sleep(1000);
+        p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+    }
+}
+
+void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
+{
+    double circleR = 4.0;
+    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
+    double revTime = 2.5;
+    double waitTime = 0.1;
+    double theta = 2.0*PI/revTime*currTime; //the angle grows as one rev every revTime seconds
+    Eigen::Vector3d desPos(0,0,p_CommonData->neutralPos.z());
+
+    double rampTime = 2.0*revTime; //ramp the amplitude over 2 revolutions
+    double finalTime = 10.0*revTime; // ending time, then write to file
+    double amp;
+    p_CommonData->recordFlag = true;
+
+    if (currTime < waitTime)
+    {
+        amp = 0;
+    }
+    else if (currTime < rampTime)
+    {
+        amp = circleR*currTime/rampTime;
+    }
+    else if (currTime > rampTime)
+    {
+        amp = circleR;        
+    }
+
+    double X = amp*cos(theta);
+    double Y = amp*sin(theta);
+
+    if (inputMotionAxis.x() == 1)
+    {
+        desPos[0] = 0;
+        desPos[1] = X;
+        desPos[2] = p_CommonData->neutralPos.z()+Y;
+    }
+    else if (inputMotionAxis.y() == 1)
+    {
+        desPos[0] = Y;
+        desPos[1] = 0;
+        desPos[2] = p_CommonData->neutralPos.z()+X;
+    }
+    else if (inputMotionAxis.z() == 1)
+    {
+        desPos[0] = X;
+        desPos[1] = Y;
+        desPos[2] = p_CommonData->neutralPos.z();
+    }
+
+    p_CommonData->wearableDelta->SetDesiredPos(desPos);
+
+
+    if (currTime > finalTime)
+    {
+        p_CommonData->wearableDelta->TurnOffControl();
+        WriteDataToFile();
+        p_CommonData->currentControlState = idleControl;
+
+        Sleep(1000);
+    }
+}
+
+void haptics_thread::InitAccel()
+{
+#ifdef SENSORAY626
+    // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
+    // Allocate data structures. We allocate enough space for maximum possible
+    // number of items (16) even though this example only has 3 items. Although
+    // this is not required, it is the recommended practice to prevent programming
+    // errors if your application ever modifies the number of items in the poll list.
+
+    // Populate the poll list.
+    poll_list[0] = 0 | RANGE_5V | EOPL; // Chan 0, ±5V range, mark as list end.
+    // Prepare for A/D conversions by passing the poll list to the driver.
+    S626_ResetADC( 0, poll_list );
+    // Digitize all items in the poll list. As long as the poll list is not modified,
+    // S626_ReadADC() can be called repeatedly without calling S626_ResetADC() again.
+    // This could be implemented as two calls: S626_StartADC() and S626_WaitDoneADC().
+    S626_ReadADC( 0, databuf ); //board 0, data in databuf
+#endif
+}
+
+chai3d::cVector3d haptics_thread::ReadAccel()
+{
+#ifdef SENSORAY626
+    S626_ReadADC(0, databuf);
+    chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
+    //qDebug() << "Accel reading: " << returnVec.z();
+    return returnVec;
+#endif SENSORAY626
+
+    chai3d::cVector3d emptyVec;
+    return emptyVec; //if sensoray is not active, just return 0
+}
+
+void haptics_thread::WriteDataToFile()
+{
+    p_CommonData->recordFlag = false;
+    //write data to file when we are done
+    std::ofstream file;
+    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + ".txt");
+    for (int i=0; i < p_CommonData->debugData.size(); i++)
+    {
+        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+        file << p_CommonData->debugData[i].time << "," << " "
+        << p_CommonData->debugData[i].pos[0] << "," << " "
+        << p_CommonData->debugData[i].pos[1] << "," << " "
+        << p_CommonData->debugData[i].pos[2] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.z() << "," << " "
+        << p_CommonData->debugData[i].referenceFirst << "," << " "
+        << p_CommonData->debugData[i].referenceFirst << "," << " "
+        << p_CommonData->debugData[i].pairNo << "," << " "
+        << p_CommonData->debugData[i].referenceFriction << "," << " "
+        << p_CommonData->debugData[i].comparisonFriction << "," << " "
+        << p_CommonData->debugData[i].subjectAnswer << "," << " "
+        << std::endl;
+    }
+    file.close();
+    p_CommonData->debugData.clear();
 }
 
 void haptics_thread::RenderPalpation()
@@ -555,7 +776,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Two---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueTwo);    
+    world->addChild(p_CommonData->p_tissueTwo);
 
     p_CommonData->p_tissueTwo->setLocalPos(0,0,-.025);
 
@@ -605,7 +826,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueThree->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueThree->setStiffness(STIFFNESS_BASELINE + 2* STIFFNESS_INCREMENT, true);
+    p_CommonData->p_tissueThree->setStiffness(STIFFNESS_BASELINE + 2*STIFFNESS_INCREMENT, true);
     p_CommonData->p_tissueThree->setFriction(STATIC_FRICTION, DYNAMIC_FRICTION, TRUE);
 
     //----------------------------------------------Create Tissue Four---------------------------------------------------
@@ -719,432 +940,6 @@ void haptics_thread::RenderPalpation()
     p_CommonData->m_flagTissueTransparent = false;
 }
 
-void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
-{
-    // ----------------- START SINUSOID -----------------------------------
-    // set the current time to "0"
-    // scale to avoid abrupt starting input
-    // make a dynamic ramp time of 2 periods
-    double stillTime = 1.0;
-    double rampTime = 6.0*1.0/p_CommonData->bandSinFreq;
-    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
 
-    // case that we want to stay still at beginning
-    if (currTime < stillTime)
-    {
-        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
-        p_CommonData->recordFlag = true;
-    }
-
-    // case that we want to be ramping and then oscillating
-    else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
-    {
-        double scaledBandSinAmp = (currTime-stillTime)/rampTime*p_CommonData->bandSinAmp;
-        if ((currTime - stillTime) > rampTime)
-        {
-            scaledBandSinAmp = p_CommonData->bandSinAmp;
-        }
-
-        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->neutralPos;
-        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
-    }
-
-    // If time is greater than 12 pause and write to file, then reset for next frequency sin
-    else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
-    {
-        p_CommonData->recordFlag = false;
-        p_CommonData->wearableDelta->TurnOffControl();
-
-        //write data to file when we are done
-        std::ofstream file;
-        std::stringstream ss (std::stringstream::in | std::stringstream::out);
-        ss << p_CommonData->bandSinFreq;
-        std::string writeFreq = ss.str();
-        file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() +  writeFreq + ".txt");
-        for (int i=0; i < p_CommonData->debugData.size(); i++)
-        {
-            //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-            file << p_CommonData->debugData[i].time << "," << " "
-            << p_CommonData->debugData[i].pos[0] << "," << " "
-            << p_CommonData->debugData[i].pos[1] << "," << " "
-            << p_CommonData->debugData[i].pos[2] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[2] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-            << std::endl;
-        }
-        file.close();
-
-        // clear out the storagevector
-        p_CommonData->debugData.clear();
-        p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
-        p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
-
-        if (p_CommonData->bandSinFreq > 15)
-        {
-            p_CommonData->currentState = idle;
-        }
-
-        Sleep(1000);
-        p_CommonData->sinStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
-    }
-}
-
-void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
-{
-    static bool firstTime = false;
-    double circleR = 4.0;
-    double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
-    double revTime = 2.5;
-    double waitTime = 0.1;
-    double theta = 2.0*PI/revTime*currTime; //the angle grows as one rev every revTime seconds
-    Eigen::Vector3d desPos(0,0,p_CommonData->neutralPos.z());
-
-    double rampTime = 2.0*revTime; //ramp the amplitude over 2 revolutions
-    double finalTime = 10.0*revTime; // ending time, then write to file
-    double amp;
-    p_CommonData->recordFlag = true;
-
-    if (currTime < waitTime)
-    {
-        amp = 0;
-    }
-    else if (currTime < rampTime)
-    {
-        amp = circleR*currTime/rampTime;
-    }
-    else if (currTime > rampTime)
-    {
-        amp = circleR;        
-    }
-
-    double X = amp*cos(theta);
-    double Y = amp*sin(theta);
-
-    if (inputMotionAxis.x() == 1)
-    {
-        desPos[0] = 0;
-        desPos[1] = X;
-        desPos[2] = p_CommonData->neutralPos.z()+Y;
-    }
-    else if (inputMotionAxis.y() == 1)
-    {
-        desPos[0] = Y;
-        desPos[1] = 0;
-        desPos[2] = p_CommonData->neutralPos.z()+X;
-    }
-    else if (inputMotionAxis.z() == 1)
-    {
-        desPos[0] = X;
-        desPos[1] = Y;
-        desPos[2] = p_CommonData->neutralPos.z();
-    }
-
-    p_CommonData->wearableDelta->SetDesiredPos(desPos);
-
-
-    if (currTime > finalTime)
-    {
-        p_CommonData->recordFlag = false;
-        p_CommonData->wearableDelta->TurnOffControl();
-
-        //write data to file when we are done
-        std::ofstream file;
-        file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + ".txt");
-        for (int i=0; i < p_CommonData->debugData.size(); i++)
-        {
-            //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-            file << p_CommonData->debugData[i].time << "," << " "
-            << p_CommonData->debugData[i].pos[0] << "," << " "
-            << p_CommonData->debugData[i].pos[1] << "," << " "
-            << p_CommonData->debugData[i].pos[2] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-            << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-            << p_CommonData->debugData[i].desiredForce[2] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-            << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-            << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-            << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-            << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-            << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-            << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-            << std::endl;
-        }
-        file.close();
-
-        // clear out the storagevector
-        p_CommonData->debugData.clear();
-        p_CommonData->currentState = idle;
-
-        Sleep(1000);
-    }
-}
-
-void haptics_thread::InitAccel()
-{
-#ifdef SENSORAY626
-    // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
-    // Allocate data structures. We allocate enough space for maximum possible
-    // number of items (16) even though this example only has 3 items. Although
-    // this is not required, it is the recommended practice to prevent programming
-    // errors if your application ever modifies the number of items in the poll list.
-
-    // Populate the poll list.
-    poll_list[0] = 0 | RANGE_5V | EOPL; // Chan 0, ±5V range, mark as list end.
-    // Prepare for A/D conversions by passing the poll list to the driver.
-    S626_ResetADC( 0, poll_list );
-    // Digitize all items in the poll list. As long as the poll list is not modified,
-    // S626_ReadADC() can be called repeatedly without calling S626_ResetADC() again.
-    // This could be implemented as two calls: S626_StartADC() and S626_WaitDoneADC().
-    S626_ReadADC( 0, databuf ); //board 0, data in databuf
-#endif
-}
-
-chai3d::cVector3d haptics_thread::ReadAccel()
-{
-#ifdef SENSORAY626
-    S626_ReadADC(0, databuf);
-    chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
-    //qDebug() << "Accel reading: " << returnVec.z();
-    return returnVec;
-#endif SENSORAY626
-
-    chai3d::cVector3d emptyVec;
-    return emptyVec; //if sensoray is not active, just return 0
-}
-
-double haptics_thread::ComputeContactVibration()
-{
-    //create a contact vibration that depends on position or velocity
-    // if we are registering a contact
-    if (abs(deviceLastComputedForce0.z()) > 0.00001)
-    {
-        // if this is the first time in contact
-        if (firstTouch)
-        {
-            // start the time ticking
-            decaySinTime = 0;
-            decaySinTime += 0.001;
-
-            // get the sinusoid amplitude based last velocity
-            p_CommonData->chaiMagDevice0->getLinearVelocity(estimatedVel0);
-            this->decaySinAmp = this->decaySinScale*estimatedVel0.z();
-
-            //check if amplitude exceeds desired amount
-            if (decaySinAmp > decaySinAmpMax)
-            {
-                decaySinAmp = decaySinAmpMax;
-            }
-
-            // calculate contributed force
-            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-            qDebug() << computedPosAdd;
-
-            // set next force to not be "first touch"
-            firstTouch = false;
-        }
-        else
-        {
-            //still inside wall with "contact"
-            computedPosAdd = -pow(E_VALUE, decaySinExp*decaySinTime) * decaySinAmp * sin(decaySinFreq*2*PI*decaySinTime);
-
-            //increment decay time counter
-            decaySinTime += 0.001;
-        }
-    }
-    else
-    {
-        if (!firstTouch)
-        {
-            // just came out of contact, reset that next one will be "first touch"
-            firstTouch = true;
-
-            // reset the decay time, amplitude, and added "pos"
-            decaySinTime = 0;
-            decaySinAmp = 0;
-            computedPosAdd = 0;
-        }
-    }
-    return computedPosAdd;
-}
-
-void haptics_thread::InitDynamicBodies()
-{
-
-    //--------------------------------------------------------------------------
-    // CREATING ODE World and Objects
-    //--------------------------------------------------------------------------
-/*
-    // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(world);
-    world->addChild(ODEWorld);
-
-    //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
-    // define damping properties
-    ODEWorld->setAngularDamping(0.00002);
-    ODEWorld->setLinearDamping(0.00002);
-
-    // Create an ODE Block
-    double boxSize = 0.05;
-    ODEBody0 = new cODEGenericBody(ODEWorld);
-    // create a dynamic model of the ODE object
-    ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
-
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    meshBox = new chai3d::cMesh();
-    cCreateBox(meshBox, boxSize, boxSize, boxSize); // make mesh a box
-    meshBox->createAABBCollisionDetector(toolRadius);
-    chai3d::cMaterial mat0;
-    mat0.setBlueRoyal();
-    mat0.setStiffness(300);
-    mat0.setDynamicFriction(0.6);
-    mat0.setStaticFriction(0.6);
-    meshBox->setMaterial(mat0);
-
-    // add mesh to ODE object
-    ODEBody0->setImageModel(meshBox);
-
-    // set mass of box
-    ODEBody0->setMass(0.5);
-
-    // set position of box
-    ODEBody0->setLocalPos(0.0,0,0);
-
-    //--------------------------------------------------------------------------
-    // CREATING ODE INVISIBLE WALLS
-    //--------------------------------------------------------------------------
-    ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
-    //create ground
-    ground = new chai3d::cMesh();
-    world->addChild(ground);
-
-    //create a plane
-    double groundSize = 5;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
-
-    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05);
-
-    //define some material properties
-    chai3d::cMaterial matGround;
-    matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.4);
-    matGround.setStaticFriction(0.0);
-    matGround.setWhite();
-    matGround.m_emission.setGrayLevel(0.3);
-    ground->setMaterial(matGround);
-
-    // setup collision detector
-    ground->createAABBCollisionDetector(toolRadius);*/
-}
-
-void haptics_thread::SimulateDynamicBodies()
-{
-   /* double timeInterval = rateClock.getCurrentTimeSeconds();
-
-    //---------------------------------------------------
-    // Implement Dynamic simulation
-    //---------------------------------------------------
-    int numInteractionPoints = m_tool0->getNumInteractionPoints();
-    for (int i=0; i<numInteractionPoints; i++)
-    {
-        // get pointer to next interaction point of tool
-        chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
-
-        // check primary contact point if available
-        if (interactionPoint->getNumCollisionEvents() > 0)
-        {
-            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-            // given the mesh object we may be touching, we search for its owner which
-            // could be the mesh itself or a multi-mesh object. Once the owner found, we
-            // look for the parent that will point to the ODE object itself.
-            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-            // cast to ODE object
-            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-            // if ODE object, we apply interaction forces
-            if (ODEobject != NULL)
-            {
-                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                   collisionEvent->m_globalPos);
-            }
-        }
-    }
-    numInteractionPoints = m_tool1->getNumInteractionPoints();
-    for (int i=0; i<numInteractionPoints; i++)
-    {
-        // get pointer to next interaction point of tool
-        chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
-
-        // check primary contact point if available
-        if (interactionPoint->getNumCollisionEvents() > 0)
-        {
-            chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-            // given the mesh object we may be touching, we search for its owner which
-            // could be the mesh itself or a multi-mesh object. Once the owner found, we
-            // look for the parent that will point to the ODE object itself.
-            chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-            // cast to ODE object
-            cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-            // if ODE object, we apply interaction forces
-            if (ODEobject != NULL)
-            {
-                ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                   collisionEvent->m_globalPos);
-            }
-        }
-    }
-
-    ODEWorld->updateDynamics(timeInterval/5);*/
-}
 
 

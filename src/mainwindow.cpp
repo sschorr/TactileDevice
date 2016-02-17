@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <string.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,8 +18,9 @@ MainWindow::~MainWindow()
 void MainWindow::Initialize()
 {
     // Set our current state
-    p_CommonData->currentState = idle;
-    p_CommonData->currentEnvironmentState = none;
+    p_CommonData->currentControlState = idleControl;
+
+
 
     // Initialize shared memory for OpenGL widget
     ui->DisplayWidget->p_CommonData = p_CommonData;    
@@ -49,7 +51,7 @@ void MainWindow::onGUIchanged()
 {
     if(ui->sliderControl->isChecked())
     {
-        p_CommonData->currentState = sliderControlMode;
+        p_CommonData->currentControlState = sliderControlMode;
         double xSlider = this->ui->verticalSliderX->value()/25.0;
         double ySlider = this->ui->verticalSliderY->value()/25.0;
         double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
@@ -60,7 +62,7 @@ void MainWindow::onGUIchanged()
     else if(ui->VRControl->isChecked())
     {
         //let haptics thread determine desired position
-        p_CommonData->currentState = VRControlMode;
+        p_CommonData->currentControlState = VRControlMode;
     }
 
     double KpSlider = this->ui->KpSlider->value()/2.0;
@@ -111,6 +113,8 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
     ui->lcdKp->display(p_CommonData->Kp);
     ui->lcdKd->display(p_CommonData->Kd);
+    ui->trialNo->display(p_CommonData->trialNo);
+    ui->pairNo->display(p_CommonData->pairNo);
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
@@ -135,7 +139,7 @@ void MainWindow::on_ZeroSliders_clicked()
 
 void MainWindow::on_startSin_clicked()
 {
-    p_CommonData->currentState = sinControlMode;
+    p_CommonData->currentControlState = sinControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
 
@@ -146,7 +150,7 @@ void MainWindow::on_startSin_clicked()
 
 void MainWindow::on_startCircle_clicked()
 {
-    p_CommonData->currentState = circControlMode;
+    p_CommonData->currentControlState = circControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
 
@@ -164,7 +168,7 @@ void MainWindow::on_setDirectory_clicked()
 
 
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "C:/Users/Charm_Stars/Dropbox(Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Data/",
+                                        "../../",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     p_CommonData->fileName = QInputDialog::getText(0, "Input File Name",
                                      "File Name:", QLineEdit::Normal, " ",
@@ -173,7 +177,7 @@ void MainWindow::on_setDirectory_clicked()
 
 void MainWindow::on_turnOff_clicked()
 {
-    p_CommonData->currentState = idle;
+    p_CommonData->currentControlState = idleControl;
     ui->sliderControl->setAutoExclusive(false);
     ui->VRControl->setAutoExclusive(false);
 
@@ -237,8 +241,96 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     }
 
+    if (a_event->key() == Qt::Key_N)
+    {
+        if(p_CommonData->pairNo == 1)
+        {
+            p_CommonData->pairNo = 2;
+        }
+    }
 
+    if (a_event->key() == Qt::Key_Backspace)
+    {
+        if(p_CommonData->pairNo == 2)
+            p_CommonData->pairNo = 1;
+    }
 
+    if (a_event->key() == Qt::Key_1)
+    {
+        p_CommonData->subjectAnswer = 1;
+    }
+
+    if (a_event->key() == Qt::Key_2)
+    {
+        p_CommonData->subjectAnswer = 2;
+    }
+
+    if (a_event->key() == Qt::Key_L)
+    {
+        qDebug() << "made it";
+        WriteDataToFile();
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        p_CommonData->pairNo = 1;
+    }
+
+    // QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trial + 1)).toStdString().c_str(), "type", NULL /*default*/);
+}
+
+void MainWindow::WriteDataToFile()
+{
+    p_CommonData->recordFlag = false;
+
+    char buffer[33];
+    itoa(p_CommonData->trialNo,buffer,10);
+
+    //write data to file when we are done
+    std::ofstream file;
+    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + buffer + ".txt");
+    for (int i=0; i < p_CommonData->debugData.size(); i++)
+    {
+        //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
+        file << p_CommonData->debugData[i].time << "," << " "
+        << p_CommonData->debugData[i].pos[0] << "," << " "
+        << p_CommonData->debugData[i].pos[1] << "," << " "
+        << p_CommonData->debugData[i].pos[2] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[0] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[1] << "," << " "
+        << p_CommonData->debugData[i].desiredPos[2] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[0] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[1] << "," << " "
+        << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[0] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[1] << "," << " "
+        << p_CommonData->debugData[i].motorAngles[2] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[0] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[1] << "," << " "
+        << p_CommonData->debugData[i].jointAngles[2] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[0] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[1] << "," << " "
+        << p_CommonData->debugData[i].motorTorque[2] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[0] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[1] << "," << " "
+        << p_CommonData->debugData[i].voltageOut[2] << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
+        << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.x() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.y() << "," << " "
+        << p_CommonData->debugData[i].accelSignal.z() << "," << " "
+        << p_CommonData->debugData[i].referenceFirst << "," << " "
+        << p_CommonData->debugData[i].referenceFirst << "," << " "
+        << p_CommonData->debugData[i].pairNo << "," << " "
+        << p_CommonData->debugData[i].referenceFriction << "," << " "
+        << p_CommonData->debugData[i].comparisonFriction << "," << " "
+        << p_CommonData->debugData[i].subjectAnswer << "," << " "
+        << std::endl;
+    }
+    file.close();
+    p_CommonData->debugData.clear();
+    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::on_palpationButton_clicked()
@@ -265,4 +357,19 @@ void MainWindow::on_hoopHumpButton_clicked()
     p_CommonData->currentEnvironmentState = hoopHump;
 }
 
+void MainWindow::on_loadProtocol_clicked()
+{
+    //Open dialog box to get protocol file and save into variable
+    QString temp = QFileDialog::getOpenFileName();
+    p_CommonData->protocolLocation = temp;
+    p_CommonData->protocolFile.LoadFile(temp.toStdString().c_str());
+    qDebug() << p_CommonData->protocolLocation;
+}
 
+void MainWindow::on_startExperiment_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentExperimentState = trial;
+    p_CommonData->currentEnvironmentState = experimentFriction;
+    p_CommonData->currentControlState = VRControlMode;
+}

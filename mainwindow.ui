@@ -754,8 +754,8 @@
      <widget class="QPushButton" name="startSin">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>520</y>
+        <x>160</x>
+        <y>570</y>
         <width>111</width>
         <height>41</height>
        </rect>
@@ -767,7 +767,7 @@
      <widget class="QPushButton" name="setDirectory">
       <property name="geometry">
        <rect>
-        <x>160</x>
+        <x>30</x>
         <y>520</y>
         <width>111</width>
         <height>41</height>
@@ -781,7 +781,7 @@
       <property name="geometry">
        <rect>
         <x>160</x>
-        <y>580</y>
+        <y>520</y>
         <width>111</width>
         <height>41</height>
        </rect>
@@ -1003,13 +1003,85 @@
       <property name="geometry">
        <rect>
         <x>30</x>
-        <y>580</y>
+        <y>570</y>
         <width>111</width>
         <height>41</height>
        </rect>
       </property>
       <property name="text">
        <string>Start Circ</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="loadProtocol">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>620</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Protocol</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startExperiment">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>620</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Experiment</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="trialNo">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>540</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_23">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>520</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Trial No.</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="pairNo">
+      <property name="geometry">
+       <rect>
+        <x>290</x>
+        <y>620</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_24">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>600</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Pair No.</string>
       </property>
      </widget>
     </widget>
