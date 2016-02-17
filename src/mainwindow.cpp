@@ -54,7 +54,7 @@ void MainWindow::onGUIchanged()
         p_CommonData->currentControlState = sliderControlMode;
         double xSlider = this->ui->verticalSliderX->value()/25.0;
         double ySlider = this->ui->verticalSliderY->value()/25.0;
-        double zSlider = this->ui->verticalSliderZ->value()/25.0+12.73;
+        double zSlider = this->ui->verticalSliderZ->value()/25.0+p_CommonData->neutralPos[2];
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
@@ -80,13 +80,13 @@ void MainWindow::onGUIchanged()
 
 void MainWindow::UpdateGUIInfo()
 {
-    Eigen::Vector3d localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
-    Eigen::Vector3d localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
-    Eigen::Vector3d localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
-    Eigen::Vector3d localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    Eigen::Vector3d localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
-    Eigen::Vector3d localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
-    Eigen::Vector3d localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
+    localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
+    localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
+    localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
+    localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
+    localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
+    localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
+    localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
     ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
@@ -115,6 +115,27 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdKd->display(p_CommonData->Kd);
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
+
+    switch(p_CommonData->currentExperimentState)
+    {
+    case idleExperiment:
+        ui->directions->setText("No experiment currently running");
+        break;
+    case trial:
+        if(p_CommonData->pairNo == 1)
+        {
+            ui->directions->setText("Press 'N' to explore object 2.");
+            ui->objectNo->setText("Object 1");
+        } else if(p_CommonData->pairNo == 2)
+        {
+            ui->directions->setText("Which object had higher friction? \n Press '1' or '2', then press 'L' to lockin answer.");
+            ui->objectNo->setText("Object 2");
+        }
+        break;
+    case trialBreak:
+        ui->directions->setText("Please take a break. \n Press 'N' to continue.");
+        ui->selection->setText("Selection:");
+    }
 }
 
 void MainWindow::on_CalibratePushButton_clicked()
@@ -240,15 +261,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     }
-
     if (a_event->key() == Qt::Key_N)
     {
-        if(p_CommonData->pairNo == 1)
+        if(p_CommonData->currentExperimentState == trialBreak)
+        {
+            p_CommonData->currentExperimentState = trial;
+            p_CommonData->recordFlag = true;
+            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+
+        } else if(p_CommonData->pairNo == 1)
         {
             p_CommonData->pairNo = 2;
         }
     }
-
     if (a_event->key() == Qt::Key_Backspace)
     {
         if(p_CommonData->pairNo == 2)
@@ -258,22 +283,38 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     if (a_event->key() == Qt::Key_1)
     {
         p_CommonData->subjectAnswer = 1;
+        ui->selection->setText("Selection: 1");
     }
 
     if (a_event->key() == Qt::Key_2)
     {
         p_CommonData->subjectAnswer = 2;
+        ui->selection->setText("Selection: 2");
     }
 
     if (a_event->key() == Qt::Key_L)
     {
-        qDebug() << "made it";
-        WriteDataToFile();
-        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-        p_CommonData->pairNo = 1;
-    }
+        if(p_CommonData->pairNo == 2)
+        {
+            if(p_CommonData->currentExperimentState = trial)
+            {
+                qDebug() << "I am a dipshit writing to file" << p_CommonData->trialNo;
+                WriteDataToFile();
+            }
+            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            p_CommonData->pairNo = 1;
+            p_CommonData->subjectAnswer = 0;
+            ui->selection->setText("Selection:");
 
-    // QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trial + 1)).toStdString().c_str(), "type", NULL /*default*/);
+            // check if next trial is a break
+            QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/);
+            if (nextTrialType == "break")
+            {
+                p_CommonData->currentExperimentState = trialBreak;
+                p_CommonData->recordFlag = false;
+            }
+        }
+    }
 }
 
 void MainWindow::WriteDataToFile()
@@ -372,4 +413,11 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentExperimentState = trial;
     p_CommonData->currentEnvironmentState = experimentFriction;
     p_CommonData->currentControlState = VRControlMode;
+    p_CommonData->pairNo = 1;
+}
+
+void MainWindow::on_setNeutral_clicked()
+{
+    p_CommonData->neutralPos[2] = localCartesianPos[2];
+    on_ZeroSliders_clicked();
 }

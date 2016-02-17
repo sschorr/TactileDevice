@@ -32,9 +32,14 @@ public:
     ~MainWindow();
 
     void Initialize();
-
-
     shared_data* p_CommonData;
+    Eigen::Vector3d localMotorAngles;
+    Eigen::Vector3d localJointAngles;
+    Eigen::Vector3d localCartesianPos;
+    Eigen::Vector3d localDesiredForce;
+    Eigen::Vector3d localDesiredMotorTorques;
+    Eigen::Vector3d localOutputVoltages;
+    Eigen::Vector3d localDesiredPos;
 
 private:
     Ui::MainWindow *ui;
@@ -61,6 +66,7 @@ private slots:
     void on_loadProtocol_clicked();
     void on_startExperiment_clicked();
     void WriteDataToFile();
+    void on_setNeutral_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -155,8 +155,6 @@ typedef struct
 
     // the trial number of the experiment
     int trialNo;
-    // the trial number of the protocol
-    int trialNoProto;
     // are we doing the first or second of the comparison
     int pairNo;
     // Is this trial reference or comparison first
