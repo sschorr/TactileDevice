@@ -189,7 +189,7 @@ void MainWindow::on_setDirectory_clicked()
 
 
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "../../",
+                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/Friction Exp/Subjects",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     p_CommonData->fileName = QInputDialog::getText(0, "Input File Name",
                                      "File Name:", QLineEdit::Normal, " ",
@@ -294,26 +294,25 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_L)
     {
-        if(p_CommonData->pairNo == 2)
+        if(p_CommonData->currentExperimentState = trial)
         {
-            if(p_CommonData->currentExperimentState = trial)
-            {
-                qDebug() << "I am a dipshit writing to file" << p_CommonData->trialNo;
-                WriteDataToFile();
-            }
-            p_CommonData->trialNo = p_CommonData->trialNo + 1;
-            p_CommonData->pairNo = 1;
-            p_CommonData->subjectAnswer = 0;
-            ui->selection->setText("Selection:");
-
-            // check if next trial is a break
-            QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/);
-            if (nextTrialType == "break")
-            {
-                p_CommonData->currentExperimentState = trialBreak;
-                p_CommonData->recordFlag = false;
-            }
+            qDebug() << "I am a dipshit writing to file" << p_CommonData->trialNo;
+            WriteDataToFile();
         }
+
+        // check if next trial is a break
+        QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+        if (nextTrialType == "break")
+        {
+            p_CommonData->currentExperimentState = trialBreak;
+            p_CommonData->recordFlag = false;
+            p_CommonData->debugData.clear();
+        }
+
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        p_CommonData->pairNo = 1;
+        p_CommonData->subjectAnswer = 0;
+        ui->selection->setText("Selection:");
     }
 }
 
@@ -420,4 +419,13 @@ void MainWindow::on_setNeutral_clicked()
 {
     p_CommonData->neutralPos[2] = localCartesianPos[2];
     on_ZeroSliders_clicked();
+}
+
+void MainWindow::on_setTrial_clicked()
+{
+    bool ok;
+    QString TrialNoString = QInputDialog::getText(0, "Input Trial No",
+                                         "Trial #:", QLineEdit::Normal, " ",
+                                         &ok);
+    p_CommonData->trialNo = TrialNoString.toInt();
 }

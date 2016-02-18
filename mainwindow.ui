@@ -1041,7 +1041,7 @@
      <widget class="QLCDNumber" name="trialNo">
       <property name="geometry">
        <rect>
-        <x>1110</x>
+        <x>1080</x>
         <y>540</y>
         <width>64</width>
         <height>23</height>
@@ -1051,7 +1051,7 @@
      <widget class="QLabel" name="label_23">
       <property name="geometry">
        <rect>
-        <x>1120</x>
+        <x>1090</x>
         <y>520</y>
         <width>47</width>
         <height>13</height>
@@ -1064,7 +1064,7 @@
      <widget class="QLCDNumber" name="pairNo">
       <property name="geometry">
        <rect>
-        <x>1200</x>
+        <x>1280</x>
         <y>540</y>
         <width>64</width>
         <height>23</height>
@@ -1074,7 +1074,7 @@
      <widget class="QLabel" name="label_24">
       <property name="geometry">
        <rect>
-        <x>1210</x>
+        <x>1290</x>
         <y>520</y>
         <width>47</width>
         <height>13</height>
@@ -1152,6 +1152,19 @@
       </property>
       <property name="text">
        <string>Set Neutral Position</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="setTrial">
+      <property name="geometry">
+       <rect>
+        <x>1160</x>
+        <y>540</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Set Trial</string>
       </property>
      </widget>
     </widget>
