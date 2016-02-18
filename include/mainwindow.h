@@ -67,6 +67,7 @@ private slots:
     void on_startExperiment_clicked();
     void WriteDataToFile();
     void on_setNeutral_clicked();
+    void on_setTrial_clicked();
 };
 
 #endif // MAINWINDOW_H

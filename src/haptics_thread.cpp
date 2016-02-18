@@ -238,9 +238,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
 
     //convert device "force" to a mapped position
-    double forceToPosMult = 1;
+    double forceToPosMult = 1.0/1.588;
     chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
-    Eigen::Vector3d neutralPos = p_CommonData->wearableDelta->neutralPos;
+    Eigen::Vector3d neutralPos = p_CommonData->neutralPos;
     Eigen::Vector3d desiredPos(3);
     desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
 
@@ -369,12 +369,12 @@ void haptics_thread::InitFingerAndTool()
     finger->m_material->m_specular.set(1.0, 1.0, 1.0);
     finger->setUseMaterial(true);
     finger->setHapticEnabled(false);
-    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
-    if (size > 0)
-    {
-        finger->scale(1.0);
-        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
-    }
+//    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
+//    if (size > 0)
+//    {
+//        finger->scale(1.0);
+//        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
+//    }
 }
 
 void haptics_thread::InitEnvironments()
