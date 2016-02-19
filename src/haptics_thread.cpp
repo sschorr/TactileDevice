@@ -268,6 +268,7 @@ void haptics_thread::RecordData()
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
     dataRecorder.accelSignal = accelSignal;
+    dataRecorder.tactileFeedback = p_CommonData->tactileFeedback;
     dataRecorder.referenceFirst = p_CommonData->referenceFirst;
     dataRecorder.pairNo = p_CommonData->pairNo;
     dataRecorder.referenceFriction = p_CommonData->referenceFriction;
@@ -693,7 +694,7 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].accelSignal.x() << "," << " "
         << p_CommonData->debugData[i].accelSignal.y() << "," << " "
         << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-        << p_CommonData->debugData[i].referenceFirst << "," << " "
+        << p_CommonData->debugData[i].tactileFeedback << "," << " "
         << p_CommonData->debugData[i].referenceFirst << "," << " "
         << p_CommonData->debugData[i].pairNo << "," << " "
         << p_CommonData->debugData[i].referenceFriction << "," << " "
