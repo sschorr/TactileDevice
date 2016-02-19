@@ -436,7 +436,6 @@ void haptics_thread::RenderHump()
     p_CommonData->p_hump->setFriction(0.5, 0.5, true);
     world->addChild(p_CommonData->p_hump);
 
-
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
@@ -460,7 +459,6 @@ void haptics_thread::RenderHoopHump()
     p_CommonData->p_hoopHump->setUseMaterial(true);
     p_CommonData->p_hoopHump->setStiffness(200);
     p_CommonData->p_hoopHump->setFriction(0.5, 0.5, true);
-
 
     world->addChild(p_CommonData->p_hoopHump);
     world->addChild(m_tool0);
