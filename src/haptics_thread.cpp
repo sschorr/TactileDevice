@@ -32,6 +32,9 @@ void haptics_thread::initialize()
     p_CommonData->hapticsThreadActive = true;
     p_CommonData->environmentChange = false;
 
+    // set to provide feedback when running VR control mod
+    p_CommonData->tactileFeedback = true;
+
     // Set the clock that controls haptic rate
     rateClock.reset();
     rateClock.setTimeoutPeriodSeconds(0.00001);
