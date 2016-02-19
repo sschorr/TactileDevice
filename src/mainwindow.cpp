@@ -272,6 +272,10 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         } else if(p_CommonData->pairNo == 1)
         {
             p_CommonData->pairNo = 2;
+            double max = 0.03; double min = -0.03;
+            double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+            qDebug() << randPos;
+            p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
         }
     }
     if (a_event->key() == Qt::Key_Backspace)
