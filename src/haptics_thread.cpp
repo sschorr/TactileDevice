@@ -419,7 +419,7 @@ void haptics_thread::InitEnvironments()
 
 void haptics_thread::RenderHump()
 {
-    p_CommonData->p_hump->loadFromFile("./Resources/HumpImported.obj");
+    p_CommonData->p_hump->loadFromFile("./Resources/Hump.obj");
 
     p_CommonData->p_hump->computeBoundaryBox(true); //compute a boundary box
 
