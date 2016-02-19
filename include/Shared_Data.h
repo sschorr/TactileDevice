@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -61,6 +61,7 @@ typedef struct
     chai3d::cVector3d magTrackerPos0;
     chai3d::cVector3d magTrackerPos1;
     chai3d::cVector3d accelSignal;
+    int tactileFeedback;
     int referenceFirst;
     int pairNo;
     double referenceFriction;
@@ -163,7 +164,7 @@ typedef struct
     double comparisonFriction;
     double referenceFriction;
     // for reading in the experiment feedback condition
-    bool tactileFeedback;
+    int tactileFeedback;
 
     // answer to which was stiffer
     int subjectAnswer;
