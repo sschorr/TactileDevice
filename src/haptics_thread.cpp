@@ -27,7 +27,7 @@ void haptics_thread::initialize()
 
     p_CommonData->Kp = 0;
     p_CommonData->Kd = 0;
-    p_CommonData->jointKp = 1;
+    p_CommonData->jointKp = 0.4;
     p_CommonData->jointKd = 0;
 
     // set flag that says haptics thread is running
