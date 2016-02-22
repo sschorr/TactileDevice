@@ -103,13 +103,13 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double G3 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*(y*b-x*c) - pow(l,2.0);
 
     double t1 = (-F1 - sqrt(pow(E1,2.0) + pow(F1,2.0) - pow(G1,2.0)))/(G1 - E1);
-    double theta1 = 2*atan(t1)*180/PI;
+    double theta1 = 2.0*atan(t1);
 
     double t2 = (-F2 - sqrt(pow(E2,2.0) + pow(F2,2.0) - pow(G2,2.0)))/(G2 - E2);
-    double theta3 = 2.0*atan(t2)*180.0/PI;
+    double theta3 = 2.0*atan(t2);
 
     double t3 = (-F3 - sqrt(pow(E3,2.0) + pow(F3,2.0) - pow(G3,2.0)))/(G3 - E3);
-    double theta2 = 2.0*atan(t3)*180.0/PI;
+    double theta2 = 2.0*atan(t3);
 
     returnAngles << theta1, theta2, theta3;
     return returnAngles;
@@ -357,7 +357,6 @@ void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
     if (desiredPosArg[1] < -yLimit) desiredPosArg[1] = -yLimit;
     if (desiredPosArg[2] > (neutralPos[2] + zLimit)) desiredPosArg[2] = neutralPos[2] + zLimit;
     if (desiredPosArg[2] < (neutralPos[2] - zLimit)) desiredPosArg[2] = neutralPos[2] - zLimit;
-
 
     this->desiredPos = desiredPosArg;
 }
