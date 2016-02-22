@@ -70,6 +70,12 @@ public:
     // determine the required motor torques for a given force (positive torque pulls on tether)
     Eigen::Vector3d CalcDesiredMotorTorques(Eigen::Vector3d);
 
+    // determine required motor torques for a given joint torque desired
+    Eigen::Vector3d CalcDesiredMotorTorquesJointControl(Eigen::Vector3d);
+
+    // determine the inverse kinematics based on the stored desired position. Gives JOINT angles
+    Eigen::Vector3d CalcInverseKinJoint();
+
     // Set the desired forces
     void SetDesiredForce(Eigen::Vector3d);
 
@@ -82,14 +88,20 @@ public:
     // read the desired forces
     Eigen::Vector3d ReadDesiredForce();
 
-    // set the output Torques
-    void SetMotorTorqueOutput(Eigen::Vector3d torqueOutput);
+    // set the output Torques for a given cartesian force
+    void SetCartesianTorqueOutput(Eigen::Vector3d torqueOutput);
+
+    // set the motor torques for a given desired joint torque
+    void SetJointTorqueOutput(Eigen::Vector3d desJointTorqueOutput);
 
     // read the output voltages
     Eigen::Vector3d ReadVoltageOutput();
 
     // Commands a position to the 3DOF device
     void PositionController(double Kp, double Kd);
+
+    // Commands joint angles to the motors on the device
+    void JointController(double Kp, double Kd);
 
     // Commands a force to the 3DOF device
     void ForceController();

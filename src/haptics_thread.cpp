@@ -27,6 +27,8 @@ void haptics_thread::initialize()
 
     p_CommonData->Kp = 0;
     p_CommonData->Kd = 0;
+    p_CommonData->jointKp = 1;
+    p_CommonData->jointKd = 0;
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -99,7 +101,7 @@ void haptics_thread::run()
 
             case sliderControlMode:
                 UpdateVRGraphics();
-                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
+                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case sinControlMode:

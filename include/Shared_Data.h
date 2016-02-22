@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -153,6 +153,10 @@ typedef struct
     // position controller variables
     double Kp;
     double Kd;
+
+    // joint controller variables
+    double jointKp;
+    double jointKd;
 
     // the trial number of the experiment
     int trialNo;

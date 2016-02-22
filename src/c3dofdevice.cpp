@@ -75,6 +75,46 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
     return jointAngles;
 }
 
+Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
+{
+    Eigen::Vector3d returnAngles;
+    double x = this->desiredPos[0]; double y = this->desiredPos[1]; double z = this->desiredPos[2];
+    double l = 9; double L = 9;
+    double wb = 15;
+    double ub = 30;
+    double up = 15;
+    double wp = 7.5;
+    double sp = 25.93;
+
+    double a = wb - up;
+    double b = sp/2.0 - sqrt(3.0)/2.0*wb;
+    double c = wp - 0.5*wb;
+
+    double E1 = 2.0*L*(-x + a);
+    double F1 = 2.0*(-z)*L;
+    double G1 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(a,2.0) + pow(L,2.0) -2.0*x*a - pow(l,2.0);
+
+    double E2 = -L*(sqrt(3.0)*(-y+b) - x + c);
+    double F2 = -2.0*z*L;
+    double G2 =pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((-y)*b - x*c) - pow(l,2.0);
+
+    double E3 = L*(sqrt(3.0)*(-y-b) + x - c);
+    double F3 = 2.0*(-z)*L;
+    double G3 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*(y*b-x*c) - pow(l,2.0);
+
+    double t1 = (-F1 - sqrt(pow(E1,2.0) + pow(F1,2.0) - pow(G1,2.0)))/(G1 - E1);
+    double theta1 = 2*atan(t1)*180/PI;
+
+    double t2 = (-F2 - sqrt(pow(E2,2.0) + pow(F2,2.0) - pow(G2,2.0)))/(G2 - E2);
+    double theta3 = 2.0*atan(t2)*180.0/PI;
+
+    double t3 = (-F3 - sqrt(pow(E3,2.0) + pow(F3,2.0) - pow(G3,2.0)))/(G3 - E3);
+    double theta2 = 2.0*atan(t3)*180.0/PI;
+
+    returnAngles << theta1, theta2, theta3;
+    return returnAngles;
+}
+
 Eigen::Vector3d c3DOFDevice::GetCartesianPos()
 {
     Eigen::Vector3d pos(3);
@@ -261,6 +301,45 @@ Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorques(Eigen::Vector3d desiredForc
     return torque;
 }
 
+Eigen::Vector3d c3DOFDevice::CalcDesiredMotorTorquesJointControl(Eigen::Vector3d desiredJointTorqueOutput)
+{
+    Eigen::Vector3d jointTorquesNeeded = desiredJointTorqueOutput; // assumes we've already accounted for springs
+    Eigen::Vector3d jointAngles = GetJointAngles();
+
+    // Describe vector from joint to tether attachment point
+    Eigen::Vector3d vec_joint_teth1(ATTACHL*cos(jointAngles[0]), ATTACHL*sin(jointAngles[0]), 0);
+    Eigen::Vector3d vec_joint_teth2(ATTACHL*cos(jointAngles[1]), ATTACHL*sin(jointAngles[1]), 0);
+    Eigen::Vector3d vec_joint_teth3(ATTACHL*cos(jointAngles[2]), ATTACHL*sin(jointAngles[2]), 0);
+
+    // Describe vector from tether to motor pulley
+    Eigen::Vector3d vec_joint_mot1(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_joint_mot2(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_joint_mot3(HORIZOFFSET, VERTOFFSET, 0);
+    Eigen::Vector3d vec_teth_mot1 = vec_joint_mot1 - vec_joint_teth1;
+    Eigen::Vector3d vec_teth_mot2 = vec_joint_mot2 - vec_joint_teth2;
+    Eigen::Vector3d vec_teth_mot3 = vec_joint_mot3 - vec_joint_teth3;
+
+    // normalize that vector
+    vec_teth_mot1.normalize();
+    vec_teth_mot2.normalize();
+    vec_teth_mot3.normalize();
+
+    // find cross products in order to determine necessary motor torque (will be [0, 0, z] due to 2D cross product)
+    double cross1 = vec_joint_teth1.cross(vec_teth_mot1)[2];
+    double cross2 = vec_joint_teth2.cross(vec_teth_mot2)[2];
+    double cross3 = vec_joint_teth3.cross(vec_teth_mot3)[2];
+
+    // fill in torque needed by motors for desired force
+    Eigen::Vector3d torque;
+    torque[0] = jointTorquesNeeded[0]*MOTRAD/cross1;
+    torque[1] = jointTorquesNeeded[1]*MOTRAD/cross2;
+
+    // turning the 3rd motor in the opposite direction pulls the cable
+    torque[2] = -(jointTorquesNeeded[2]*MOTRAD/cross3);
+
+    return torque;
+}
+
 // Set the desired force
 void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 {
@@ -295,9 +374,18 @@ Eigen::Vector3d c3DOFDevice::ReadDesiredPos()
     return this->desiredPos;
 }
 
-void c3DOFDevice::SetMotorTorqueOutput(Eigen::Vector3d desiredForceOutput)
+void c3DOFDevice::SetCartesianTorqueOutput(Eigen::Vector3d desiredForceOutput)
 {
     Eigen::Vector3d desiredMotorTorques = CalcDesiredMotorTorques(desiredForceOutput);
+
+    this->motor_1->SetOutputTorque(desiredMotorTorques[0]);
+    this->motor_2->SetOutputTorque(desiredMotorTorques[1]);
+    this->motor_3->SetOutputTorque(desiredMotorTorques[2]);
+}
+
+void c3DOFDevice::SetJointTorqueOutput(Eigen::Vector3d desJointTorqueOutput)
+{
+    Eigen::Vector3d desiredMotorTorques = CalcDesiredMotorTorquesJointControl(desJointTorqueOutput);
 
     this->motor_1->SetOutputTorque(desiredMotorTorques[0]);
     this->motor_2->SetOutputTorque(desiredMotorTorques[1]);
@@ -312,7 +400,6 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
 
 void c3DOFDevice::PositionController(double Kp, double Kd)
 {    
-
     double K_p = Kp;
     double K_d = Kd;
 
@@ -336,10 +423,45 @@ void c3DOFDevice::PositionController(double Kp, double Kd)
     Eigen::Vector3d controllerForce = K_p*(desiredPos-currentPos) + K_d*(desiredVel-filteredVel);
 
     SetDesiredForce(controllerForce);
-    SetMotorTorqueOutput(ReadDesiredForce());
+    SetCartesianTorqueOutput(ReadDesiredForce());
 
     lastVel = filteredVel;
     lastPos = currentPos;
+}
+
+void c3DOFDevice::JointController(double Kp, double Kd)
+{
+    static bool firstTimeThrough = true;
+    static Eigen::Vector3d lastAngles;
+    static Eigen::Vector3d lastAngVel;
+    Eigen::Vector3d desAngleVel(0,0,0);
+    double alpha = 0.5;
+
+    Eigen::Vector3d jointAngles = GetJointAngles();
+    Eigen::Vector3d desJointAngles = CalcInverseKinJoint();
+
+    if(firstTimeThrough)
+    {
+        lastAngles = jointAngles;
+        lastAngVel << 0,0,0;
+        firstTimeThrough = false;
+    }
+
+    Eigen::Vector3d currAngVel = jointAngles-lastAngles;
+    Eigen::Vector3d filteredVel = alpha*currAngVel + (1-alpha)*lastAngVel;
+    Eigen::Vector3d jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
+
+    // Adjust the torque needed by the bias spring force
+    double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
+    Eigen::Vector3d Torque_Needed_WithSpring;
+    jointTorques << jointTorques[0]-springTorStiff*(PI-jointAngles[0]),
+                    jointTorques[1]-springTorStiff*(PI-jointAngles[1]),
+                    jointTorques[2]-springTorStiff*(PI-jointAngles[2]);
+
+    SetJointTorqueOutput(jointTorques);
+
+    lastAngVel = filteredVel;
+    lastAngles = jointAngles;
 }
 
 void c3DOFDevice::TurnOffControl()
@@ -349,12 +471,12 @@ void c3DOFDevice::TurnOffControl()
     // set the zero force as the desired force
     SetDesiredForce(nullForce);
     // set output torque based on zero force
-    SetMotorTorqueOutput(ReadDesiredForce());
+    SetCartesianTorqueOutput(ReadDesiredForce());
 }
 
 void c3DOFDevice::ForceController()
 {
-    SetMotorTorqueOutput(ReadDesiredForce());
+    SetCartesianTorqueOutput(ReadDesiredForce());
 }
 
 void c3DOFDevice::TestMotorTorqueController()
