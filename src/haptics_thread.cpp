@@ -498,7 +498,7 @@ void haptics_thread::RenderTwoFriction()
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(200);
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
-    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8);
+    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8*.9);
 
     world->addChild(p_CommonData->p_frictionBox1);
     world->addChild(p_CommonData->p_frictionBox2);
