@@ -191,7 +191,6 @@ public:
         you may do it here bellow.
     */
     ////////////////////////////////////////////////////////////////////////////
-
     magTracker ourMagTracker;
     int trackerNo; //start at 0
 

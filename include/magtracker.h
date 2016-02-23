@@ -8,13 +8,13 @@
 class magTracker
 {
 public:
-    magTracker();
+    magTracker(int trackerNum);
     ~magTracker();
 
     void InitMagTracker();
-    chai3d::cVector3d CheckPos(int);
-    chai3d::cMatrix3d CheckRot(int);
-    chai3d::cTransform CheckPose(int);
+    chai3d::cVector3d CheckPos();
+    chai3d::cMatrix3d CheckRot();
+    chai3d::cTransform CheckPose();
 
     // magnetic tracker variables
     CSystem     ATC3DG; // a pointer to a single instance of the system class
@@ -29,10 +29,7 @@ public:
     int         i;
     int         trackerNum;
     double      measFreq;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record0;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord0;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record1;
-    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD* pRecord1;
+    DOUBLE_POSITION_MATRIX_TIME_Q_BUTTON_RECORD record;
 };
 
 #endif // MAGTRACKER_H
