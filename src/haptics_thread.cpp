@@ -476,7 +476,7 @@ void haptics_thread::InitDynamicBodies()
     ODEWorld = new cODEWorld(world);
 
     //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 0));
     // define damping properties
     ODEWorld->setAngularDamping(0.00002);
     ODEWorld->setLinearDamping(0.00002);
