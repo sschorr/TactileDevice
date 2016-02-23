@@ -18,6 +18,7 @@ void haptics_thread::initialize()
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
+    InitDynamicBodies();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -50,6 +51,9 @@ void haptics_thread::initialize()
     // setup the overall program time clock
     p_CommonData->overallClock.reset();
     p_CommonData->overallClock.start(true);
+
+    currTime = 0;
+    lastTime = 0;
 
     //init counters to 0
     rateDisplayCounter = 0;
@@ -194,6 +198,11 @@ void haptics_thread::UpdateVRGraphics()
             world->clearAllChildren();
             RenderHoopHump();
             break;
+
+        case dynamicBodies:
+            world->clearAllChildren();
+            RenderDynamicBodies();
+            break;
         }
     }
 
@@ -227,6 +236,45 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalPos(position1);
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
+
+    if(p_CommonData->currentEnvironmentState == dynamicBodies)
+    {
+        currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+        double timeInterval = currTime - lastTime;
+        if(timeInterval > 0.01) timeInterval = 0.01;
+        //---------------------------------------------------
+        // Implement Dynamic simulation
+        //---------------------------------------------------
+        int numInteractionPoints = m_tool0->getNumInteractionPoints();
+        for (int i=0; i<numInteractionPoints; i++)
+        {
+            // get pointer to next interaction point of tool
+            chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
+
+            // check primary contact point if available
+            if (interactionPoint->getNumCollisionEvents() > 0)
+            {
+                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+                // given the mesh object we may be touching, we search for its owner which
+                // could be the mesh itself or a multi-mesh object. Once the owner found, we
+                // look for the parent that will point to the ODE object itself.
+                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+                // cast to ODE object
+                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+                // if ODE object, we apply interaction forces
+                if (ODEobject != NULL)
+                {
+                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+                }
+            }
+        }
+        ODEWorld->updateDynamics(timeInterval);
+        lastTime = currTime;
+    }
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -416,6 +464,86 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_hoopHump->rotateAboutGlobalAxisDeg(1,0,0,-90);
 
     p_CommonData->p_expFrictionBox = new chai3d::cMesh();
+}
+
+void haptics_thread::InitDynamicBodies()
+{
+    //--------------------------------------------------------------------------
+    // CREATING ODE World and Objects
+    //--------------------------------------------------------------------------
+
+    // create an ODE world to simulate dynamic bodies
+    ODEWorld = new cODEWorld(world);
+
+    //give world gravity
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
+    // define damping properties
+    ODEWorld->setAngularDamping(0.00002);
+    ODEWorld->setLinearDamping(0.00002);
+
+    // Create an ODE Block
+    double boxSize = 0.05;
+    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
+
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
+    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
+    chai3d::cMaterial mat0;
+    mat0.setBlueRoyal();
+    mat0.setStiffness(300);
+    mat0.setDynamicFriction(0.6);
+    mat0.setStaticFriction(0.6);
+    p_CommonData->p_dynamicBox->setMaterial(mat0);
+
+    // add mesh to ODE object
+    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
+
+    // set mass of box
+    p_CommonData->ODEBody0->setMass(0.5);
+
+    //--------------------------------------------------------------------------
+    // CREATING ODE INVISIBLE WALLS
+    //--------------------------------------------------------------------------
+    ODEGPlane0 = new cODEGenericBody(ODEWorld);
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+
+    //create ground
+    ground = new chai3d::cMesh();
+
+    //create a plane
+    double groundSize = 5;
+    chai3d::cCreatePlane(ground, groundSize, groundSize);
+
+    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
+    ground->setLocalPos(0,0,0.05);
+
+    //define some material properties
+    chai3d::cMaterial matGround;
+    matGround.setStiffness(300);
+    matGround.setDynamicFriction(0.4);
+    matGround.setStaticFriction(0.0);
+    matGround.setWhite();
+    matGround.m_emission.setGrayLevel(0.3);
+    ground->setMaterial(matGround);
+
+    // setup collision detector
+    ground->createAABBCollisionDetector(toolRadius);
+
+}
+
+void haptics_thread::RenderDynamicBodies()
+{
+    // set position of box
+    p_CommonData->ODEBody0->setLocalPos(0,0,0);
+    world->addChild(ODEWorld);
+    world->addChild(ground);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+
 }
 
 void haptics_thread::RenderHump()

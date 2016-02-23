@@ -68,6 +68,7 @@ private slots:
     void WriteDataToFile();
     void on_setNeutral_clicked();
     void on_setTrial_clicked();
+    void on_dynamicEnvironment_clicked();
 };
 
 #endif // MAINWINDOW_H

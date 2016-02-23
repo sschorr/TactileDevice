@@ -58,6 +58,8 @@ public:
     void RenderHoopHump();
     void RenderExpFriction();
     void WriteDataToFile();
+    void InitDynamicBodies();
+    void RenderDynamicBodies();
 
     void InitAccel();
     chai3d::cVector3d ReadAccel();
@@ -65,6 +67,9 @@ public:
     // clocks
     chai3d::cPrecisionClock rateClock;
     chai3d::cPrecisionClock rateDisplayClock;
+
+    double currTime;
+    double lastTime;
 
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
@@ -81,17 +86,10 @@ public:
     chai3d::cMesh* ground;
     chai3d::cMultiMesh* finger;
     chai3d::cEffectSurface* newEffect;
+    cODEGenericBody* ODEGPlane0;
 
     // ODE Module variables
     cODEWorld* ODEWorld;
-
-    // ODE Objects
-    cODEGenericBody* ODEBody0;
-    cODEGenericBody* ODEBody1;
-
-    // planes confining objects
-    cODEGenericBody* ODEGPlane0;
-    cODEGenericBody* ODEGPlane1;
 
     // vars for computed forces
     double toolRadius;
