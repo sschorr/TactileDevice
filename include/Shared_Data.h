@@ -30,6 +30,7 @@
 #include <vector>
 #include <Qt/qfiledialog.h>
 #include <Qt/qinputdialog.h>
+#include "CODE.h"
 
 #define POS_SCALE 6
 #define HAPTIC_X_TRANSLATE 0 //.12
@@ -95,7 +96,8 @@ typedef enum
     friction,
     hump,
     hoopHump,
-    experimentFriction
+    experimentFriction,
+    dynamicBodies
 } environment_states;
 
 
@@ -199,6 +201,16 @@ typedef struct
 
     // haptics thread objects for frictione experiment
     chai3d::cMesh* p_expFrictionBox;
+
+    // haptics thread objects for Dynamic (ODE) environments
+    cODEGenericBody* ODEBody0;
+    cODEGenericBody* ODEBody1;
+    // haptics thread objects for visual representation of dynamic objects
+    chai3d::cMesh* p_dynamicBox;
+
+    // planes confining objects
+    cODEGenericBody* ODEGPlane0;
+    cODEGenericBody* ODEGPlane1;
 
     // haptics thread objects for hump environment
     chai3d::cMultiMesh* p_hump;
