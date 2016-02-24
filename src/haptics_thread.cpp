@@ -376,6 +376,7 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     //m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
@@ -476,19 +477,17 @@ void haptics_thread::InitDynamicBodies()
     ODEWorld = new cODEWorld(world);
 
     //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 0));
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
     ODEWorld->setAngularDamping(0.00002);
     ODEWorld->setLinearDamping(0.00002);
 
     // Create an ODE Block
-    double boxSize = 0.05;
-    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
-    // create a dynamic model of the ODE object
-    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
+    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);    
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+    double boxSize = 0.05;
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();        
     cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
     p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
     chai3d::cMaterial mat0;
@@ -500,6 +499,9 @@ void haptics_thread::InitDynamicBodies()
 
     // add mesh to ODE object
     p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
+
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
 
     // set mass of box
     p_CommonData->ODEBody0->setMass(0.5);
@@ -514,7 +516,7 @@ void haptics_thread::InitDynamicBodies()
     ground = new chai3d::cMesh();
 
     //create a plane
-    double groundSize = 5;
+    double groundSize = 5.0;
     chai3d::cCreatePlane(ground, groundSize, groundSize);
 
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
