@@ -272,6 +272,33 @@ void haptics_thread::UpdateVRGraphics()
                 }
             }
         }
+        numInteractionPoints = m_tool1->getNumInteractionPoints();
+        for (int i=0; i<numInteractionPoints; i++)
+        {
+            // get pointer to next interaction point of tool
+            chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
+
+            // check primary contact point if available
+            if (interactionPoint->getNumCollisionEvents() > 0)
+            {
+                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
+
+                // given the mesh object we may be touching, we search for its owner which
+                // could be the mesh itself or a multi-mesh object. Once the owner found, we
+                // look for the parent that will point to the ODE object itself.
+                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+                // cast to ODE object
+                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+                // if ODE object, we apply interaction forces
+                if (ODEobject != NULL)
+                {
+                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+                }
+            }
+        }
         ODEWorld->updateDynamics(timeInterval);
         lastTime = currTime;
     }
@@ -385,6 +412,7 @@ void haptics_thread::InitFingerAndTool()
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
     //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool1->enableDynamicObjects(true);
     m_tool1->start();
 
     // Can use this to show frames on tool if so desired
@@ -479,8 +507,8 @@ void haptics_thread::InitDynamicBodies()
     //give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
-    ODEWorld->setAngularDamping(0.00002);
-    ODEWorld->setLinearDamping(0.00002);
+    ODEWorld->setAngularDamping(.2);
+    ODEWorld->setLinearDamping(.2);
 
     // Create an ODE Block
     p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);    
@@ -504,7 +532,7 @@ void haptics_thread::InitDynamicBodies()
     p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
 
     // set mass of box
-    p_CommonData->ODEBody0->setMass(0.5);
+    p_CommonData->ODEBody0->setMass(0.05);
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
