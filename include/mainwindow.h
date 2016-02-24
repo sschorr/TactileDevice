@@ -69,6 +69,7 @@ private slots:
     void on_setNeutral_clicked();
     void on_setTrial_clicked();
     void on_dynamicEnvironment_clicked();
+    void on_palpExp_clicked();
 };
 
 #endif // MAINWINDOW_H

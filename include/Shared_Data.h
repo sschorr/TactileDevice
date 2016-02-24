@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -97,6 +97,7 @@ typedef enum
     hump,
     hoopHump,
     experimentFriction,
+    experimentPalpation,
     dynamicBodies
 } environment_states;
 
@@ -199,8 +200,12 @@ typedef struct
     chai3d::cMesh* p_frictionBox1;
     chai3d::cMesh* p_frictionBox2;
 
-    // haptics thread objects for frictione experiment
+    // haptics thread objects for friction experiment
     chai3d::cMesh* p_expFrictionBox;
+
+    // haptics thread objects for palpation experiment
+    chai3d::cMesh* p_tissueCyl;
+    chai3d::cMesh* p_tissueLump;
 
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody0;

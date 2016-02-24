@@ -407,6 +407,12 @@ void MainWindow::on_dynamicEnvironment_clicked()
     p_CommonData->currentEnvironmentState = dynamicBodies;
 }
 
+void MainWindow::on_palpExp_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = experimentPalpation;
+}
+
 void MainWindow::on_loadProtocol_clicked()
 {
     //Open dialog box to get protocol file and save into variable
@@ -439,5 +445,7 @@ void MainWindow::on_setTrial_clicked()
                                          &ok);
     p_CommonData->trialNo = TrialNoString.toInt();
 }
+
+
 
 

@@ -179,6 +179,11 @@ void haptics_thread::UpdateVRGraphics()
             RenderExpFriction();
             break;
 
+        case experimentPalpation:
+            world->clearAllChildren();
+            RenderExpPalpation();
+            break;
+
         case friction:
             world->clearAllChildren();
             RenderTwoFriction();
@@ -493,6 +498,9 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_hoopHump->rotateAboutGlobalAxisDeg(1,0,0,-90);
 
     p_CommonData->p_expFrictionBox = new chai3d::cMesh();
+
+    p_CommonData->p_tissueCyl = new chai3d::cMesh();
+    p_CommonData->p_tissueLump = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
@@ -636,6 +644,30 @@ void haptics_thread::RenderExpFriction()
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
     world->addChild(p_CommonData->p_expFrictionBox);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+}
+
+void haptics_thread::RenderExpPalpation()
+{
+    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, 0.1);
+    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, 0.015);
+    p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
+    p_CommonData->p_tissueLump->setLocalPos(0,0,-0.000001);
+    p_CommonData->p_tissueCyl->m_material->setStiffness(200);
+    p_CommonData->p_tissueCyl->m_material->setStaticFriction(0.4);
+    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(0.4);
+    p_CommonData->p_tissueCyl->m_material->setBrownTan();
+    p_CommonData->p_tissueLump->m_material->setStiffness(300);
+    p_CommonData->p_tissueLump->m_material->setStaticFriction(0.4);
+    p_CommonData->p_tissueLump->m_material->setDynamicFriction(0.4);
+    p_CommonData->p_tissueLump->m_material->setBrownTan();
+
+    world->addChild(p_CommonData->p_tissueCyl);
+    world->addChild(p_CommonData->p_tissueLump);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);

@@ -1170,7 +1170,7 @@
      <widget class="QPushButton" name="dynamicEnvironment">
       <property name="geometry">
        <rect>
-        <x>1150</x>
+        <x>1220</x>
         <y>670</y>
         <width>131</width>
         <height>41</height>
@@ -1178,6 +1178,19 @@
       </property>
       <property name="text">
        <string>Dynamic Bodies</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="palpExp">
+      <property name="geometry">
+       <rect>
+        <x>1080</x>
+        <y>670</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Palp Exp Environ</string>
       </property>
      </widget>
     </widget>

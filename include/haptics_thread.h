@@ -57,6 +57,7 @@ public:
     void RenderHump();
     void RenderHoopHump();
     void RenderExpFriction();
+    void RenderExpPalpation();
     void WriteDataToFile();
     void InitDynamicBodies();
     void RenderDynamicBodies();
