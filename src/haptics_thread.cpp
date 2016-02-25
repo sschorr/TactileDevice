@@ -521,10 +521,10 @@ void haptics_thread::InitDynamicBodies()
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
     ODEWorld->setAngularDamping(.2);
-    ODEWorld->setLinearDamping(.2);
+    ODEWorld->setLinearDamping(.2);  
 
     // Create an ODE Block
-    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);    
+    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
