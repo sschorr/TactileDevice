@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include "windows.h"
+#include <time.h>
 
 #define RANGE_10V 0x00 // Range code for ADC ±10V range.
 #define RANGE_5V 0x10 // Range code for ADC ±5V range.
@@ -61,6 +62,7 @@ public:
     void WriteDataToFile();
     void InitDynamicBodies();
     void RenderDynamicBodies();
+    void RenderPaper();
 
     void InitAccel();
     chai3d::cVector3d ReadAccel();

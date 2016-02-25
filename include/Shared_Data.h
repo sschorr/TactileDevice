@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -74,7 +74,8 @@ typedef struct
 typedef enum
 {
     idleExperiment,
-    trial,
+    frictionTrial,
+    palpationTrial,
     trialBreak,
     end
 } experiment_states;
@@ -98,7 +99,8 @@ typedef enum
     hoopHump,
     experimentFriction,
     experimentPalpation,
-    dynamicBodies
+    dynamicBodies,
+    paperEnvironment
 } environment_states;
 
 
@@ -181,8 +183,10 @@ typedef struct
     Eigen::Vector3d neutralPos;
 
     // protocol loading
-    QString protocolLocation;
-    CSimpleIniA protocolFile;
+    QString frictionProtocolLocation;
+    QString palpationProtocolLocation;
+    CSimpleIniA frictionProtocolFile;
+    CSimpleIniA palpationProtocolFile;
 
     // haptics thread objects for palpation environment
     chai3d::cMultiMesh* p_table;
@@ -206,6 +210,10 @@ typedef struct
     // haptics thread objects for palpation experiment
     chai3d::cMesh* p_tissueCyl;
     chai3d::cMesh* p_tissueLump;
+
+    // random positions for lump in tissue
+    double xRandPos;
+    double yRandPos;
 
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody0;

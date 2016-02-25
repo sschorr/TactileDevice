@@ -21,18 +21,22 @@ void Experiment_Thread::run()
 {
     forever
     {
+        Sleep(50);
         switch(p_CommonData->currentExperimentState)
         {
 
         case idleExperiment:
             break;
 
-        case trial:
+        case palpationTrial:
+            break;
+
+        case frictionTrial:
             p_CommonData->recordFlag = true;
-            p_CommonData->referenceFriction = std::stod(p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Reference", NULL /*default*/));
-            p_CommonData->comparisonFriction = std::stod(p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Comparisons", NULL /*default*/));
-            p_CommonData->referenceFirst = atoi(p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "ReferenceFirst", NULL /*default*/));
-            p_CommonData->tactileFeedback = atoi(p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "SkinStretch", NULL /*default*/));
+            p_CommonData->referenceFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Reference", NULL /*default*/));
+            p_CommonData->comparisonFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Comparisons", NULL /*default*/));
+            p_CommonData->referenceFirst = atoi(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "ReferenceFirst", NULL /*default*/));
+            p_CommonData->tactileFeedback = atoi(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "SkinStretch", NULL /*default*/));
 
             if(p_CommonData->referenceFirst)
             {
@@ -63,6 +67,7 @@ void Experiment_Thread::run()
             break;
 
         case trialBreak:
+
             break;
         }
     }

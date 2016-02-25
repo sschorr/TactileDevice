@@ -1022,7 +1022,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Load Protocol</string>
+       <string>Load Friction Protocol</string>
       </property>
      </widget>
      <widget class="QPushButton" name="startExperiment">
@@ -1035,7 +1035,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Start Experiment</string>
+       <string>Start Friction Exp</string>
       </property>
      </widget>
      <widget class="QLCDNumber" name="trialNo">
@@ -1191,6 +1191,45 @@
       </property>
       <property name="text">
        <string>Palp Exp Environ</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="loadProtocol_2">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>670</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Palp Protocol</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startExperiment_2">
+      <property name="geometry">
+       <rect>
+        <x>960</x>
+        <y>670</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Palp Exp</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="paperEnvironment">
+      <property name="geometry">
+       <rect>
+        <x>1080</x>
+        <y>720</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Paper Environment</string>
       </property>
      </widget>
     </widget>

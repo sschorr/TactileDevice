@@ -20,8 +20,6 @@ void MainWindow::Initialize()
     // Set our current state
     p_CommonData->currentControlState = idleControl;
 
-
-
     // Initialize shared memory for OpenGL widget
     ui->DisplayWidget->p_CommonData = p_CommonData;    
 
@@ -121,7 +119,7 @@ void MainWindow::UpdateGUIInfo()
     case idleExperiment:
         ui->directions->setText("No experiment currently running");
         break;
-    case trial:
+    case frictionTrial:
         if(p_CommonData->pairNo == 1)
         {
             ui->directions->setText("Press 'N' to explore object 2.");
@@ -222,6 +220,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueFour->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueSix->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
         }
         else
         {
@@ -232,6 +231,8 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueFour->setTransparencyLevel(0.0, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(0.0, true);
             p_CommonData->p_tissueSix->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueCyl->setTransparencyLevel(0.4, true);
+
         }
     }
 
@@ -261,12 +262,23 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     }
+    if (a_event->key() == Qt::Key_R)
+    {
+        p_CommonData->recordFlag = false;
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        double tissueRad = 0.1; double lumpRad = 0.015;
+        double max = tissueRad - lumpRad; double min = 0;
+        double angMax = 2*PI; double angMin = 0;
+        double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+        double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
+        p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
+        p_CommonData->recordFlag = true;
+    }
     if (a_event->key() == Qt::Key_N)
     {
         if(p_CommonData->currentExperimentState == trialBreak)
         {
-            p_CommonData->currentExperimentState = trial;
-            p_CommonData->recordFlag = true;
+            p_CommonData->currentExperimentState = frictionTrial;
             p_CommonData->trialNo = p_CommonData->trialNo + 1;
 
         } else if(p_CommonData->pairNo == 1)
@@ -298,14 +310,13 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_L)
     {
-        if(p_CommonData->currentExperimentState = trial)
+        if(p_CommonData->currentExperimentState == frictionTrial)
         {
-            qDebug() << "I am a dipshit writing to file" << p_CommonData->trialNo;
             WriteDataToFile();
         }
 
         // check if next trial is a break
-        QString nextTrialType = p_CommonData->protocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+        QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
         if (nextTrialType == "break")
         {
             p_CommonData->currentExperimentState = trialBreak;
@@ -313,10 +324,15 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->debugData.clear();
         }
 
-        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+
         p_CommonData->pairNo = 1;
         p_CommonData->subjectAnswer = 0;
         ui->selection->setText("Selection:");
+        double max = 0.03; double min = -0.03;
+        double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+        qDebug() << randPos;
+        p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
     }
 }
 
@@ -407,6 +423,12 @@ void MainWindow::on_dynamicEnvironment_clicked()
     p_CommonData->currentEnvironmentState = dynamicBodies;
 }
 
+void MainWindow::on_paperEnvironment_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentEnvironmentState = paperEnvironment;
+}
+
 void MainWindow::on_palpExp_clicked()
 {
     p_CommonData->environmentChange = true;
@@ -417,18 +439,36 @@ void MainWindow::on_loadProtocol_clicked()
 {
     //Open dialog box to get protocol file and save into variable
     QString temp = QFileDialog::getOpenFileName();
-    p_CommonData->protocolLocation = temp;
-    p_CommonData->protocolFile.LoadFile(temp.toStdString().c_str());
-    qDebug() << p_CommonData->protocolLocation;
+    p_CommonData->frictionProtocolLocation = temp;
+    p_CommonData->frictionProtocolFile.LoadFile(temp.toStdString().c_str());
+    qDebug() << p_CommonData->frictionProtocolLocation;
+}
+
+void MainWindow::on_loadProtocol_2_clicked()
+{
+    //Open dialog box to get protocol file and save into variable
+    QString temp = QFileDialog::getOpenFileName();
+    p_CommonData->palpationProtocolLocation = temp;
+    p_CommonData->palpationProtocolFile.LoadFile(temp.toStdString().c_str());
+    qDebug() << p_CommonData->palpationProtocolLocation;
 }
 
 void MainWindow::on_startExperiment_clicked()
 {
     p_CommonData->environmentChange = true;
-    p_CommonData->currentExperimentState = trial;
+    p_CommonData->currentExperimentState = frictionTrial;
     p_CommonData->currentEnvironmentState = experimentFriction;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
+}
+
+void MainWindow::on_startExperiment_2_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentExperimentState = palpationTrial;
+    p_CommonData->currentEnvironmentState = experimentPalpation;
+    p_CommonData->currentControlState = VRControlMode;
+
 }
 
 void MainWindow::on_setNeutral_clicked()

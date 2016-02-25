@@ -208,6 +208,11 @@ void haptics_thread::UpdateVRGraphics()
             world->clearAllChildren();
             RenderDynamicBodies();
             break;
+
+        case paperEnvironment:
+            world->clearAllChildren();
+            RenderPaper();
+            break;
         }
     }
 
@@ -521,27 +526,6 @@ void haptics_thread::InitDynamicBodies()
     // Create an ODE Block
     p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);    
 
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    double boxSize = 0.05;
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();        
-    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
-    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
-    chai3d::cMaterial mat0;
-    mat0.setBlueRoyal();
-    mat0.setStiffness(300);
-    mat0.setDynamicFriction(0.6);
-    mat0.setStaticFriction(0.6);
-    p_CommonData->p_dynamicBox->setMaterial(mat0);
-
-    // add mesh to ODE object
-    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
-
-    // create a dynamic model of the ODE object
-    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
-
-    // set mass of box
-    p_CommonData->ODEBody0->setMass(0.05);
-
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
@@ -574,6 +558,59 @@ void haptics_thread::InitDynamicBodies()
 
 void haptics_thread::RenderDynamicBodies()
 {
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    double boxSize = 0.05;
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
+    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
+    chai3d::cMaterial mat0;
+    mat0.setBlueRoyal();
+    mat0.setStiffness(300);
+    mat0.setDynamicFriction(0.6);
+    mat0.setStaticFriction(0.6);
+    p_CommonData->p_dynamicBox->setMaterial(mat0);
+
+    // add mesh to ODE object
+    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
+
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
+
+    // set mass of box
+    p_CommonData->ODEBody0->setMass(0.05);
+
+    // set position of box
+    p_CommonData->ODEBody0->setLocalPos(0,0,0);
+    world->addChild(ODEWorld);
+    world->addChild(ground);
+    world->addChild(m_tool0);
+    world->addChild(m_tool1);
+    world->addChild(finger);
+}
+
+void haptics_thread::RenderPaper()
+{
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    double boxSize = 0.05;
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, .001); // make mesh a box
+    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
+    chai3d::cMaterial mat0;
+    mat0.setBlueRoyal();
+    mat0.setStiffness(300);
+    mat0.setDynamicFriction(0.6);
+    mat0.setStaticFriction(0.6);
+    p_CommonData->p_dynamicBox->setMaterial(mat0);
+
+    // add mesh to ODE object
+    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
+
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, .001);
+
+    // set mass of box
+    p_CommonData->ODEBody0->setMass(0.05);
+
     // set position of box
     p_CommonData->ODEBody0->setLocalPos(0,0,0);
     world->addChild(ODEWorld);
@@ -651,12 +688,12 @@ void haptics_thread::RenderExpFriction()
 
 void haptics_thread::RenderExpPalpation()
 {
-    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, 0.1);
-    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, 0.015);
+    double tissueRad = 0.1; double lumpRad = 0.015;
+    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, tissueRad);
+    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
     p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
-    p_CommonData->p_tissueLump->setLocalPos(0,0,-0.000001);
     p_CommonData->p_tissueCyl->m_material->setStiffness(200);
     p_CommonData->p_tissueCyl->m_material->setStaticFriction(0.4);
     p_CommonData->p_tissueCyl->m_material->setDynamicFriction(0.4);
@@ -666,6 +703,14 @@ void haptics_thread::RenderExpPalpation()
     p_CommonData->p_tissueLump->m_material->setStaticFriction(0.4);
     p_CommonData->p_tissueLump->m_material->setDynamicFriction(0.4);
     p_CommonData->p_tissueLump->m_material->setBrownTan();
+
+    // put the higher stiffness "lump" in a random location
+    srand (time(NULL));
+    double max = tissueRad - lumpRad; double min = 0;
+    double angMax = 2*PI; double angMin = 0;
+    double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+    double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
+    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
 
     world->addChild(p_CommonData->p_tissueCyl);
     world->addChild(p_CommonData->p_tissueLump);

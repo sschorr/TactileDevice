@@ -70,6 +70,9 @@ private slots:
     void on_setTrial_clicked();
     void on_dynamicEnvironment_clicked();
     void on_palpExp_clicked();
+    void on_loadProtocol_2_clicked();
+    void on_startExperiment_2_clicked();
+    void on_paperEnvironment_clicked();
 };
 
 #endif // MAINWINDOW_H
