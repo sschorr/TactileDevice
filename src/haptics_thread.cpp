@@ -247,7 +247,7 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
-    if(p_CommonData->currentEnvironmentState == dynamicBodies)
+    if((p_CommonData->currentEnvironmentState == dynamicBodies) | (p_CommonData->currentEnvironmentState == paperEnvironment))
     {
         currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
         double timeInterval = currTime - lastTime;
@@ -467,12 +467,6 @@ void haptics_thread::InitFingerAndTool()
     finger->m_material->m_specular.set(1.0, 1.0, 1.0);
     finger->setUseMaterial(true);
     finger->setHapticEnabled(false);
-//    double size = cSub(finger->getBoundaryMax(), finger->getBoundaryMin()).length();
-//    if (size > 0)
-//    {
-//        finger->scale(1.0);
-//        qDebug() << m_tool0->getWorkspaceRadius() << " " << size;
-//    }
 }
 
 void haptics_thread::InitEnvironments()
@@ -516,15 +510,17 @@ void haptics_thread::InitDynamicBodies()
 
     // create an ODE world to simulate dynamic bodies
     ODEWorld = new cODEWorld(world);
-
     //give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
     ODEWorld->setAngularDamping(.2);
-    ODEWorld->setLinearDamping(.2);  
+    ODEWorld->setLinearDamping(.02);
 
     // Create an ODE Block
     p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
+
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
@@ -545,23 +541,68 @@ void haptics_thread::InitDynamicBodies()
     //define some material properties
     chai3d::cMaterial matGround;
     matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.4);
+    matGround.setDynamicFriction(0.2);
     matGround.setStaticFriction(0.0);
-    matGround.setWhite();
+    matGround.setGrayLight();
+    matGround.m_emission.setGrayLevel(0.3);
+    ground->setMaterial(matGround);
+
+    // setup collision detector
+    ground->createAABBCollisionDetector(toolRadius);
+}
+
+void haptics_thread::RenderDynamicBodies()
+{
+    ODEWorld->deleteAllChildren();
+    //--------------------------------------------------------------------------
+    // CREATING ODE World and Objects
+    //--------------------------------------------------------------------------
+
+    // create an ODE world to simulate dynamic bodies
+    ODEWorld = new cODEWorld(world);
+    //give world gravity
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
+    // define damping properties
+    ODEWorld->setAngularDamping(.02);
+    ODEWorld->setLinearDamping(.00002);
+
+    // Create an ODE Block
+    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
+
+    // create a virtual mesh that will be used for the geometry representation of the dynamic body
+    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+
+    //--------------------------------------------------------------------------
+    // CREATING ODE INVISIBLE WALLS
+    //--------------------------------------------------------------------------
+    ODEGPlane0 = new cODEGenericBody(ODEWorld);
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+
+    //create ground
+    ground = new chai3d::cMesh();
+
+    //create a plane
+    double groundSize = 5.0;
+    chai3d::cCreatePlane(ground, groundSize, groundSize);
+
+    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
+    ground->setLocalPos(0,0,0.05);
+
+    //define some material properties
+    chai3d::cMaterial matGround;
+    matGround.setStiffness(300);
+    matGround.setDynamicFriction(0.2);
+    matGround.setStaticFriction(0.0);
+    matGround.setGrayLight();
     matGround.m_emission.setGrayLevel(0.3);
     ground->setMaterial(matGround);
 
     // setup collision detector
     ground->createAABBCollisionDetector(toolRadius);
 
-}
-
-void haptics_thread::RenderDynamicBodies()
-{
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
     double boxSize = 0.05;
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();
     cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
+
     p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
     chai3d::cMaterial mat0;
     mat0.setBlueRoyal();
@@ -581,6 +622,7 @@ void haptics_thread::RenderDynamicBodies()
 
     // set position of box
     p_CommonData->ODEBody0->setLocalPos(0,0,0);
+
     world->addChild(ODEWorld);
     world->addChild(ground);
     world->addChild(m_tool0);
@@ -590,10 +632,56 @@ void haptics_thread::RenderDynamicBodies()
 
 void haptics_thread::RenderPaper()
 {
+    ODEWorld->deleteAllChildren();
+    //--------------------------------------------------------------------------
+    // CREATING ODE World and Objects
+    //--------------------------------------------------------------------------
+
+    // create an ODE world to simulate dynamic bodies
+    ODEWorld = new cODEWorld(world);
+    //give world gravity
+    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 0));
+    // define damping properties
+    ODEWorld->setAngularDamping(.02);
+    ODEWorld->setLinearDamping(.00000002);
+
+    // Create an ODE Block
+    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
+
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    double boxSize = 0.05;
     p_CommonData->p_dynamicBox = new chai3d::cMesh();
-    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, .001); // make mesh a box
+
+    //--------------------------------------------------------------------------
+    // CREATING ODE INVISIBLE WALLS
+    //--------------------------------------------------------------------------
+    ODEGPlane0 = new cODEGenericBody(ODEWorld);
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+
+    //create ground
+    ground = new chai3d::cMesh();
+
+    //create a plane
+    double groundSize = 5.0;
+    chai3d::cCreatePlane(ground, groundSize, groundSize);
+
+    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
+    ground->setLocalPos(0,0,0.05);
+
+    //define some material properties
+    chai3d::cMaterial matGround;
+    matGround.setStiffness(300);
+    matGround.setDynamicFriction(1);
+    matGround.setStaticFriction(1);
+    matGround.setGrayLight();
+    matGround.m_emission.setGrayLevel(0.3);
+    ground->setMaterial(matGround);
+
+    // setup collision detector
+    ground->createAABBCollisionDetector(toolRadius);
+
+    double boxSize = 0.05;
+    cCreateBox(p_CommonData->p_dynamicBox, 2.0*boxSize, 2.0*boxSize, .005); // make mesh a box
+
     p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
     chai3d::cMaterial mat0;
     mat0.setBlueRoyal();
@@ -606,13 +694,14 @@ void haptics_thread::RenderPaper()
     p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
 
     // create a dynamic model of the ODE object
-    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, .001);
+    p_CommonData->ODEBody0->createDynamicBox(2.0*boxSize, 2.0*boxSize, .005);
 
     // set mass of box
     p_CommonData->ODEBody0->setMass(0.05);
 
     // set position of box
     p_CommonData->ODEBody0->setLocalPos(0,0,0);
+
     world->addChild(ODEWorld);
     world->addChild(ground);
     world->addChild(m_tool0);
