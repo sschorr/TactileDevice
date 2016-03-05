@@ -134,7 +134,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 20)
+            if(recordDataCounter == 1)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -954,7 +954,7 @@ void haptics_thread::InitAccel()
     // errors if your application ever modifies the number of items in the poll list.
 
     // Populate the poll list.
-    poll_list[0] = 0 | RANGE_5V | EOPL; // Chan 0, Â±5V range, mark as list end.
+    poll_list[0] = 2 | RANGE_5V | EOPL; // Chan 2, ±5V range, mark as list end.
     // Prepare for A/D conversions by passing the poll list to the driver.
     S626_ResetADC( 0, poll_list );
     // Digitize all items in the poll list. As long as the poll list is not modified,
@@ -968,8 +968,8 @@ chai3d::cVector3d haptics_thread::ReadAccel()
 {
 #ifdef SENSORAY626
     S626_ReadADC(0, databuf);
-    chai3d::cVector3d returnVec(databuf[0], databuf[1], databuf[2]);
-    //qDebug() << "Accel reading: " << returnVec.z();
+    chai3d::cVector3d returnVec;
+    returnVec.set(0,0,databuf[0]);
     return returnVec;
 #endif SENSORAY626
 
