@@ -530,7 +530,7 @@ void haptics_thread::InitDynamicBodies()
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0,-1.0));
 
     //create ground
     ground = new chai3d::cMesh();
@@ -545,7 +545,7 @@ void haptics_thread::InitDynamicBodies()
     //define some material properties
     chai3d::cMaterial matGround;
     matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.4);
+    matGround.setDynamicFriction(0.2);
     matGround.setStaticFriction(0.0);
     matGround.setWhite();
     matGround.m_emission.setGrayLevel(0.3);
