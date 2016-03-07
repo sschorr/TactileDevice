@@ -1024,6 +1024,8 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].referenceFriction << "," << " "
         << p_CommonData->debugData[i].comparisonFriction << "," << " "
         << p_CommonData->debugData[i].subjectAnswer << "," << " "
+        << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
+        << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << std::endl;
     }
     file.close();
