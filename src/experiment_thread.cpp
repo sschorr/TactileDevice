@@ -43,12 +43,12 @@ void Experiment_Thread::run()
                 if(p_CommonData->pairNo == 1)
                 {
                     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(p_CommonData->referenceFriction);
-                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->referenceFriction);
+                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->referenceFriction*0.9);
                 }
                 else if(p_CommonData->pairNo == 2)
                 {
                     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(p_CommonData->comparisonFriction);
-                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->comparisonFriction);
+                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->comparisonFriction*0.9);
                 }
             }
             else if(!p_CommonData->referenceFirst)
@@ -56,12 +56,12 @@ void Experiment_Thread::run()
                 if(p_CommonData->pairNo == 2)
                 {
                     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(p_CommonData->referenceFriction);
-                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->referenceFriction);
+                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->referenceFriction*0.9);
                 }
                 else if(p_CommonData->pairNo == 1)
                 {
                     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(p_CommonData->comparisonFriction);
-                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->comparisonFriction);
+                    p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->comparisonFriction*0.9);
                 }
             }
             break;

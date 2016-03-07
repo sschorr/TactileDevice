@@ -134,7 +134,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 1)
+            if(recordDataCounter == 10)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -363,6 +363,7 @@ void haptics_thread::RecordData()
     dataRecorder.referenceFriction = p_CommonData->referenceFriction;
     dataRecorder.comparisonFriction = p_CommonData->comparisonFriction;
     dataRecorder.subjectAnswer = p_CommonData->subjectAnswer;
+    dataRecorder.lumpLocation = p_CommonData->p_tissueLump->getLocalPos();
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
@@ -784,13 +785,13 @@ void haptics_thread::RenderExpPalpation()
     p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
     p_CommonData->p_tissueCyl->m_material->setStiffness(200);
-    p_CommonData->p_tissueCyl->m_material->setStaticFriction(0.4);
-    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(0.4);
+    p_CommonData->p_tissueCyl->m_material->setStaticFriction(0.5);
+    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(0.5*0.9);
     p_CommonData->p_tissueCyl->m_material->setBrownTan();
-    p_CommonData->p_tissueCyl->setTransparencyLevel(0.4, true, true);
+    //p_CommonData->p_tissueCyl->setTransparencyLevel(0.4, true, true);
     p_CommonData->p_tissueLump->m_material->setStiffness(300);
-    p_CommonData->p_tissueLump->m_material->setStaticFriction(0.4);
-    p_CommonData->p_tissueLump->m_material->setDynamicFriction(0.4);
+    p_CommonData->p_tissueLump->m_material->setStaticFriction(0.5);
+    p_CommonData->p_tissueLump->m_material->setDynamicFriction(0.5*0.9);
     p_CommonData->p_tissueLump->m_material->setBrownTan();
 
     // put the higher stiffness "lump" in a random location

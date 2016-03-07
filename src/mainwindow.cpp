@@ -264,15 +264,22 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     }
     if (a_event->key() == Qt::Key_R)
     {
-        p_CommonData->recordFlag = false;
-        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-        double tissueRad = 0.1; double lumpRad = 0.015;
-        double max = tissueRad - lumpRad; double min = 0;
-        double angMax = 2*PI; double angMin = 0;
-        double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-        double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-        p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
-        p_CommonData->recordFlag = true;
+        if(p_CommonData->currentExperimentState == palpationTrial)
+        {
+            WriteDataToFile();
+            p_CommonData->recordFlag = false;
+            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            double tissueRad = 0.1; double lumpRad = 0.015;
+            double max = tissueRad - lumpRad; double min = 0;
+            double angMax = 2*PI; double angMin = 0;
+            double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+            double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
+            p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
+            p_CommonData->recordFlag = true;
+            if(p_CommonData->trialNo > 30)
+                ui->directions->setText("Experiment Completed, please contact administrator");
+
+        }
     }
     if (a_event->key() == Qt::Key_N)
     {
@@ -284,16 +291,20 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         } else if(p_CommonData->pairNo == 1)
         {
             p_CommonData->pairNo = 2;
+            p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
             double max = 0.03; double min = -0.03;
             double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-            qDebug() << randPos;
             p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
         }
     }
     if (a_event->key() == Qt::Key_Backspace)
     {
         if(p_CommonData->pairNo == 2)
+        {
             p_CommonData->pairNo = 1;
+            p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+        }
+
     }
 
     if (a_event->key() == Qt::Key_1)
@@ -326,11 +337,11 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
 
         p_CommonData->pairNo = 1;
+        p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
         p_CommonData->subjectAnswer = 0;
         ui->selection->setText("Selection:");
         double max = 0.03; double min = -0.03;
         double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-        qDebug() << randPos;
         p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
     }
@@ -460,6 +471,7 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentEnvironmentState = experimentFriction;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
+    p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
 }
 
 void MainWindow::on_startExperiment_2_clicked()
