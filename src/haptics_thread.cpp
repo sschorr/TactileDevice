@@ -352,8 +352,8 @@ void haptics_thread::RecordData()
     dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
     dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
-    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    dataRecorder.motorTorque = p_CommonData->wearableDelta->CalcDesiredMotorTorques(p_CommonData->wearableDelta->ReadDesiredForce());
+    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce(); // only means something if doing J'F control
+    dataRecorder.motorTorque = p_CommonData->wearableDelta->motorTorques;
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
     dataRecorder.accelSignal = accelSignal;
@@ -955,7 +955,7 @@ void haptics_thread::InitAccel()
     // errors if your application ever modifies the number of items in the poll list.
 
     // Populate the poll list.
-    poll_list[0] = 2 | RANGE_5V | EOPL; // Chan 2, ±5V range, mark as list end.
+    poll_list[0] = 2 | RANGE_5V | EOPL; // Chan 2, Â±5V range, mark as list end.
     // Prepare for A/D conversions by passing the poll list to the driver.
     S626_ResetADC( 0, poll_list );
     // Digitize all items in the poll list. As long as the poll list is not modified,
