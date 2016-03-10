@@ -267,7 +267,6 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         if(p_CommonData->currentExperimentState == palpationTrial)
         {
             WriteDataToFile();
-            p_CommonData->recordFlag = false;
             p_CommonData->trialNo = p_CommonData->trialNo + 1;
             double tissueRad = 0.1; double lumpRad = 0.015;
             double max = tissueRad - lumpRad; double min = 0;
@@ -275,9 +274,9 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
             double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
             p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
-            p_CommonData->recordFlag = true;
             if(p_CommonData->trialNo > 30)
                 ui->directions->setText("Experiment Completed, please contact administrator");
+            p_CommonData->recordFlag = true;
 
         }
     }
@@ -344,6 +343,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
         p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        p_CommonData->recordFlag = true;
     }
 }
 
@@ -403,7 +403,6 @@ void MainWindow::WriteDataToFile()
     }
     file.close();
     p_CommonData->debugData.clear();
-    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::on_palpationButton_clicked()
@@ -473,7 +472,7 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentEnvironmentState = experimentFriction;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
-    p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+    p_CommonData->p_expFrictionBox->m_material->setBlueAqua();    
 }
 
 void MainWindow::on_startExperiment_2_clicked()
