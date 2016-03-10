@@ -32,7 +32,6 @@ void Experiment_Thread::run()
             break;
 
         case frictionTrial:
-            p_CommonData->recordFlag = true;
             p_CommonData->referenceFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Reference", NULL /*default*/));
             p_CommonData->comparisonFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Comparisons", NULL /*default*/));
             p_CommonData->referenceFirst = atoi(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "ReferenceFirst", NULL /*default*/));

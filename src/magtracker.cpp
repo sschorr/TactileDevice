@@ -77,7 +77,7 @@ chai3d::cTransform magTracker::CheckPose(){
     if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
     // get the status of the last data record
     // only report the data if everything is okay
-    x = (record.x - 200)/1000.0;
+    x = (record.x - 165)/1000.0;
     y = record.y/1000.0;
     z = record.z/1000.0;
     returnVec.set(x, y, z);
@@ -96,7 +96,7 @@ chai3d::cVector3d magTracker::CheckPos(){
 
     chai3d::cVector3d returnVec;
     double x,y,z;
-    x = (record.x - 200)/1000.0;
+    x = (record.x - 165)/1000.0;
     y = record.y/1000.0;
     z = record.z/1000.0;
     returnVec.set(x, y, z);

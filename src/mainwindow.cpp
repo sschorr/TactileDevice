@@ -119,6 +119,7 @@ void MainWindow::UpdateGUIInfo()
     case idleExperiment:
         ui->directions->setText("No experiment currently running");
         break;
+
     case frictionTrial:
         if(p_CommonData->pairNo == 1)
         {
@@ -130,9 +131,15 @@ void MainWindow::UpdateGUIInfo()
             ui->objectNo->setText("Object 2");
         }
         break;
+
+    case palpationTrial:
+        ui->directions->setText("Press 'R' to record answer and move to next trial");
+        break;
+
     case trialBreak:
         ui->directions->setText("Please take a break. \n Press 'N' to continue.");
         ui->selection->setText("Selection:");
+        break;
     }
 }
 
@@ -474,6 +481,7 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
     p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::on_startExperiment_2_clicked()
@@ -482,7 +490,7 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->currentExperimentState = palpationTrial;
     p_CommonData->currentEnvironmentState = experimentPalpation;
     p_CommonData->currentControlState = VRControlMode;
-
+    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::on_setNeutral_clicked()

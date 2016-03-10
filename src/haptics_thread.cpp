@@ -134,7 +134,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 5)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -821,7 +821,7 @@ void haptics_thread::RenderTwoFriction()
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(200);
     p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.4);
-    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.4);
+    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.4*0.9);
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(200);
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
