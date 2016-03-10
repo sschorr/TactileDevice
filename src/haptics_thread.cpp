@@ -26,8 +26,8 @@ void haptics_thread::initialize()
     p_CommonData->neutralPos << 0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180);
     p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos); // kinematic neutral position
 
-    p_CommonData->Kp = 0;
-    p_CommonData->Kd = 0;
+    p_CommonData->Kp = 0; //these are set by the window sliders
+    p_CommonData->Kd = 0; //these are set by the window sliders
     p_CommonData->jointKp = 1700.0;
     p_CommonData->jointKd = 3;
 
@@ -134,7 +134,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 1)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
