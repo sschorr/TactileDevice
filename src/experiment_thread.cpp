@@ -29,6 +29,7 @@ void Experiment_Thread::run()
             break;
 
         case palpationTrial:
+            p_CommonData->recordFlag = true;
             break;
 
         case frictionTrial:
@@ -63,6 +64,7 @@ void Experiment_Thread::run()
                     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(p_CommonData->comparisonFriction*0.9);
                 }
             }
+            p_CommonData->recordFlag = true;
             break;
 
         case trialBreak:

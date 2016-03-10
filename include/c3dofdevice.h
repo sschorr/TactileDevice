@@ -67,7 +67,7 @@ public:
     // determine the required joint torques for a given force (positive torque about joint pushes end effector)
     Eigen::Vector3d CalcDesiredJointTorques(Eigen::Vector3d);
 
-    // determine the required motor torques for a given force (positive torque pulls on tether)
+    // determine the required motor torques for a given force 
     Eigen::Vector3d CalcDesiredMotorTorques(Eigen::Vector3d);
 
     // determine required motor torques for a given joint torque desired
@@ -115,14 +115,17 @@ public:
 
     // Public Vars ==========================================
     Eigen::Vector3d neutralPos;
+    Eigen::Vector3d desiredForce;
+    Eigen::Vector3d desiredPos;
+    Eigen::Vector3d jointTorques;
+    Eigen::Vector3d motorTorques;
 
 
 private:
     cMotorController* motor_1;
     cMotorController* motor_2;
     cMotorController* motor_3;
-    Eigen::Vector3d desiredForce;
-    Eigen::Vector3d desiredPos;
+
 
 };
 

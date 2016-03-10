@@ -384,11 +384,11 @@ void c3DOFDevice::SetCartesianTorqueOutput(Eigen::Vector3d desiredForceOutput)
 
 void c3DOFDevice::SetJointTorqueOutput(Eigen::Vector3d desJointTorqueOutput)
 {
-    Eigen::Vector3d desiredMotorTorques = CalcDesiredMotorTorquesJointControl(desJointTorqueOutput);
+    motorTorques = CalcDesiredMotorTorquesJointControl(desJointTorqueOutput);
 
-    this->motor_1->SetOutputTorque(desiredMotorTorques[0]);
-    this->motor_2->SetOutputTorque(desiredMotorTorques[1]);
-    this->motor_3->SetOutputTorque(desiredMotorTorques[2]);
+    this->motor_1->SetOutputTorque(motorTorques[0]);
+    this->motor_2->SetOutputTorque(motorTorques[1]);
+    this->motor_3->SetOutputTorque(motorTorques[2]);
 }
 
 Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
@@ -448,7 +448,7 @@ void c3DOFDevice::JointController(double Kp, double Kd)
 
     Eigen::Vector3d currAngVel = jointAngles-lastAngles;
     Eigen::Vector3d filteredVel = alpha*currAngVel + (1-alpha)*lastAngVel;
-    Eigen::Vector3d jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
+    jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
 
     // Adjust the torque needed by the bias spring force
     double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
