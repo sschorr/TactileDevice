@@ -21,6 +21,7 @@
 
 // Define used for Encoder count to angle in radian
 #define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR)
+
 // Define the torque constant torque = I*KT
 #define KT 78.44 //mNm/A
 

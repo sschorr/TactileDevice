@@ -5,6 +5,8 @@ c3DOFDevice::c3DOFDevice()
 {
     this->desiredForce << 0,0,0;
     this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
+    this->motorTorques << 0,0,0;
+    this->jointTorques << 0,0,0;
 }
 
 c3DOFDevice::~c3DOFDevice()
