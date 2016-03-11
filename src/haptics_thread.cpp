@@ -971,6 +971,7 @@ chai3d::cVector3d haptics_thread::ReadAccel()
     S626_ReadADC(0, databuf);
     chai3d::cVector3d returnVec;
     returnVec.set(0,0,databuf[0]);
+    //qDebug() << returnVec.z();
     return returnVec;
 #endif SENSORAY626
 
