@@ -8,40 +8,12 @@
 #include "cMotorController.h"
 #include "windows.h"
 
-// DEFINES =================================================================
-
-// Define used for max Sensoray Encoder Count
-#define MAX_COUNT 16777215
-
-// Define used for DAC Voltage Conversion
-#define DAC_VSCALAR 819.1
-
-// Define the encoder counts per revolution
-#define ENCODER_CPR 360 // (12*30 for Pololu motor)
-
-// Define used for Encoder count to angle in radian
-#define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR)
-
-// Define the torque constant torque = I*KT
-#define KT 78.44 //mNm/A
-
-// Define the amplifier output to voltage input ratio I = I_RATIO*V
-#define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
-
-// Define the max amperage of the motor (for all 3 combined)
-#define MAX_AMPS 0.30
-
-
-
-
 // Constructor of motor controller =========================================
 cMotorController::cMotorController(int inputMotorID)
 {
     motorNum = inputMotorID;
     channelNum = MotorNumToChannelNum(motorNum);
 }
-
-
 
 
 // Get angle of motor ======================================================
@@ -189,8 +161,8 @@ void cMotorController::SetOffsetAngle()
 void cMotorController::SetOutputTorque(double desiredTorque)
 {
     double VoltOut = 0;
-    // we are limiting current output by railing power supply at nominal voltage;
-    double MaxVolt = 3.3; //MAX_AMPS*AMPS_TO_VOLTS;
+    // we need to limit the max voltage output to a corresponding max amperage;
+    double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS; //0.92
 
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;

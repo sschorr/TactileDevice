@@ -6,8 +6,8 @@
 
 // defines indicating what physical hardware is present
 
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -117,12 +117,17 @@ typedef struct
     chai3d::cVector3d lookatPos;
     chai3d::cVector3d upVector;
 
+    // camera vars for polar camera movement
     double azimuth;
     double polar;
     double camRadius;
 
     QMutex sharedMutex;
+
+    // the delta mechanism class
     c3DOFDevice* wearableDelta;
+
+    // the delta mechanism chai class
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
     chai3d::cGenericHapticDevicePtr chaiMagDevice1; // support two mag sensors
 
@@ -149,6 +154,8 @@ typedef struct
 
     bool hapticsThreadActive;
     double hapticRateEstimate;
+
+    // our data storage variable
     std::vector<DataRecordStruct> debugData;
 
     // bandwidth sin variables

@@ -29,15 +29,15 @@
 // Base joint angles during calibration procedure
 #define CALIBANGLE 0.785398 //45 [deg] to rad
 // length upper arm
-#define L_UA 9
+#define L_UA 9 // [mm]
 // length lower arm
-#define L_LA 9
+#define L_LA 9 // [mm]
 // length of base (center to joint)
-#define L_BASE 15
+#define L_BASE 15 // [mm]
 // length of end effector (center to joint)
-#define L_EE 15
+#define L_EE 15 // [mm]
 // Spring torque of spring at parallel
-#define SPRING_TORQUE 0.05 //is the old spring (will use .1 for new motors)
+#define SPRING_TORQUE 0.05 //is the old spring (will use .1 for new motors) [in-.lbs/180 deg]
 
 
 

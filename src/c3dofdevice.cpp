@@ -81,12 +81,12 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
 {
     Eigen::Vector3d returnAngles;
     double x = this->desiredPos[0]; double y = this->desiredPos[1]; double z = this->desiredPos[2];
-    double l = 9; double L = 9;
-    double wb = 15;
-    double ub = 30;
-    double up = 15;
-    double wp = 7.5;
-    double sp = 25.93;
+    double l = L_UA; double L = L_LA;
+    double wb = L_BASE;
+    double ub = 2*L_BASE;
+    double up = L_EE;
+    double wp = 0.5*L_EE;
+    double sp = L_EE*0.864;
 
     double a = wb - up;
     double b = sp/2.0 - sqrt(3.0)/2.0*wb;

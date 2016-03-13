@@ -334,6 +334,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     Eigen::Vector3d desiredPos(3);
     desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
 
+    // if the experimental condition is no feedback, tell it to move to neutral pos
     if(p_CommonData->tactileFeedback == 0)
     {
         desiredPos << neutralPos[0], neutralPos[1], neutralPos[2];
