@@ -87,7 +87,7 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
             accelSignal = ReadAccel();
-            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
 
@@ -973,6 +973,7 @@ chai3d::cVector3d haptics_thread::ReadAccel()
     S626_ReadADC(0, databuf);
     chai3d::cVector3d returnVec;
     returnVec.set(0,0,databuf[0]);
+    //qDebug() << returnVec.z();
     return returnVec;
 #endif SENSORAY626
 
