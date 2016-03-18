@@ -40,6 +40,7 @@ public:
     Eigen::Vector3d localDesiredMotorTorques;
     Eigen::Vector3d localOutputVoltages;
     Eigen::Vector3d localDesiredPos;
+    Eigen::Vector3d localDesiredJointAngle;
 
 private:
     Ui::MainWindow *ui;

@@ -186,8 +186,6 @@ void cMotorController::SetOutputTorque(double desiredTorque)
 
     //Setting for GUI
     this->voltageOutput = VoltOut;
-
-
 }
 
 

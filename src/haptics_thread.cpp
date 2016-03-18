@@ -29,7 +29,7 @@ void haptics_thread::initialize()
     p_CommonData->Kp = 0; //these are set by the window sliders
     p_CommonData->Kd = 0; //these are set by the window sliders
     p_CommonData->jointKp = 1700.0;
-    p_CommonData->jointKd = 3;
+    p_CommonData->jointKd = 3.0;
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -110,13 +110,13 @@ void haptics_thread::run()
             case sinControlMode:
                 UpdateVRGraphics();                
                 CommandSinPos(inputAxis);
-                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
+                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case circControlMode:
                 UpdateVRGraphics();
                 CommandCircPos(inputAxis);
-                p_CommonData->wearableDelta->PositionController(p_CommonData->Kp, p_CommonData->Kd);
+                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
             }
 

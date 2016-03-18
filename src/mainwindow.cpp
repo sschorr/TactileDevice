@@ -82,9 +82,11 @@ void MainWindow::UpdateGUIInfo()
     localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
     localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
     localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    localDesiredMotorTorques = p_CommonData->wearableDelta->CalcDesiredMotorTorques(localDesiredForce);
     localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
     localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
+    localDesiredJointAngle = p_CommonData->wearableDelta->CalcInverseKinJoint();
+
+
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
     ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
@@ -94,12 +96,12 @@ void MainWindow::UpdateGUIInfo()
     ui->CartesianXLCDNumber->display(localCartesianPos[0]);
     ui->CartesianYLCDNumber->display(localCartesianPos[1]);
     ui->CartesianZLCDNumber->display(localCartesianPos[2]);
+    ui->desAngle1->display(localDesiredJointAngle[0]*180/PI);
+    ui->desAngle2->display(localDesiredJointAngle[1]*180/PI);
+    ui->desAngle3->display(localDesiredJointAngle[2]*180/PI);
     ui->DesiredForceX->display(localDesiredForce[0]);
     ui->DesiredForceY->display(localDesiredForce[1]);
     ui->DesiredForceZ->display(localDesiredForce[2]);
-    ui->MotorTorque1->display(localDesiredMotorTorques[0]);
-    ui->MotorTorque2->display(localDesiredMotorTorques[1]);
-    ui->MotorTorque3->display(localDesiredMotorTorques[2]);
     ui->VoltageLCD1->display((double)(localOutputVoltages[0]));
     ui->VoltageLCD2->display((double)(localOutputVoltages[1]));
     ui->VoltageLCD3->display((double)(localOutputVoltages[2]));
