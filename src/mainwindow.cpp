@@ -37,7 +37,8 @@ void MainWindow::Initialize()
 
     // init slider values
     this->ui->KpSlider->setValue(50);
-    this->ui->KdSlider->setValue(10);
+    this->ui->KdSlider->setValue(50);
+
     this->ui->bandwidthAmpSlider->setValue(50);
     this->ui->bandwidthFreqSlider->setValue(10);
 
@@ -50,9 +51,9 @@ void MainWindow::onGUIchanged()
     if(ui->sliderControl->isChecked())
     {
         p_CommonData->currentControlState = sliderControlMode;
-        double xSlider = this->ui->verticalSliderX->value()/25.0;
-        double ySlider = this->ui->verticalSliderY->value()/25.0;
-        double zSlider = this->ui->verticalSliderZ->value()/25.0+p_CommonData->neutralPos[2];
+        double xSlider = this->ui->verticalSliderX->value()/22.2;
+        double ySlider = this->ui->verticalSliderY->value()/22.2;
+        double zSlider = this->ui->verticalSliderZ->value()/22.2+p_CommonData->neutralPos[2];
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
         p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
     }
@@ -63,13 +64,14 @@ void MainWindow::onGUIchanged()
         p_CommonData->currentControlState = VRControlMode;
     }
 
-    double KpSlider = this->ui->KpSlider->value()/2.0;
-    double KdSlider = this->ui->KdSlider->value()/50.0;
+    double KpSlider = this->ui->KpSlider->value()*40.0;
+    double KdSlider = this->ui->KdSlider->value()/10.0;
+
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/10.0;
 
-    p_CommonData->Kp = KpSlider;
-    p_CommonData->Kd = KdSlider;
+    p_CommonData->jointKp = KpSlider;
+    p_CommonData->jointKd = KdSlider;
     p_CommonData->bandSinAmpDisp = bandwidthAmp;
     p_CommonData->bandSinFreqDisp = bandwidthFreq;
 
@@ -111,8 +113,8 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
     ui->lcdBandAmp->display(p_CommonData->bandSinAmpDisp);
     ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
-    ui->lcdKp->display(p_CommonData->Kp);
-    ui->lcdKd->display(p_CommonData->Kd);
+    ui->lcdKp->display(p_CommonData->jointKp);
+    ui->lcdKd->display(p_CommonData->jointKd);
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
 

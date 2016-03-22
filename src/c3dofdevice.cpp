@@ -357,7 +357,7 @@ void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
 {
     // limit workspace motion (plus or minus)
-    double xLimit = 4; double yLimit = 4; double zLimit = 4;
+    double xLimit = 4.5; double yLimit = 4.5; double zLimit = 4.5;
     if (desiredPosArg[0] > xLimit) desiredPosArg[0] = xLimit;
     if (desiredPosArg[0] < -xLimit) desiredPosArg[0] = -xLimit;
     if (desiredPosArg[1] > yLimit) desiredPosArg[1] = yLimit;

@@ -19,7 +19,7 @@
 
 // Physical parameters of build [mm] =======================================
 // radius of motor pulley
-#define MOTRAD 2 // [mm]
+#define MOTRAD 1.5 // [mm]
 // horizontal offset of motorshaft from base joint
 #define HORIZOFFSET 6.25 // [mm]
 // vertical offset of motorshaft from base joint

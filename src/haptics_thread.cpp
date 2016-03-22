@@ -29,7 +29,7 @@ void haptics_thread::initialize()
     p_CommonData->Kp = 0; //these are set by the window sliders
     p_CommonData->Kd = 0; //these are set by the window sliders
     p_CommonData->jointKp = 1700.0;
-    p_CommonData->jointKd = 3.0;
+    p_CommonData->jointKd = 10;
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -87,7 +87,7 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
             accelSignal = ReadAccel();
-            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
 
