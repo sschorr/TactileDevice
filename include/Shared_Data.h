@@ -1,13 +1,11 @@
 // This file defines the shared data structure which is shared with threads
 // throughout the program.
-
 #ifndef SHARED_DATA_H
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-
 #define SENSORAY626
-#define MAGTRACKER
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
