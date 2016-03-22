@@ -3,6 +3,7 @@
 #include "shared_data.h"
 #include "haptics_thread.h"
 #include "experiment_thread.h"
+#include "magTracker_thread.h"
 
 
 // This code runs the pololu motor driven device stably
@@ -18,6 +19,7 @@ shared_data shared; //create the shared_data structure for sharing
 // Create Threads ===================================================
 haptics_thread hapticsThread;
 Experiment_Thread experimentThread;
+magTracker_thread magTrackerThread;
 
 // MAIN FUNCTION ====================================================
 int main(int argc, char *argv[])
@@ -36,9 +38,12 @@ int main(int argc, char *argv[])
     // Initialize and set the haptics thread data pointer to the shared data
     hapticsThread.p_CommonData = &shared;
     experimentThread.p_CommonData = &shared;
+    magTrackerThread.p_CommonData = &shared;
 
+    // Initialize the threads
     hapticsThread.initialize();
     experimentThread.initialize();
+    magTrackerThread.initialize();
 
     // Initialize and set the window thread data pointer to the shared data
     window.p_CommonData = &shared;
@@ -46,6 +51,7 @@ int main(int argc, char *argv[])
 
     hapticsThread.start();
     experimentThread.start();
+    magTrackerThread.start();
     window.show();
 
     return a.exec();

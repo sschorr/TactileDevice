@@ -178,11 +178,6 @@ public:
     //! Returns the number of devices available from this class of device.
     static unsigned int getNumDevices();
 
-
-    //--------------------------------------------------------------------------
-    // PROTECTED MEMBERS:
-    //--------------------------------------------------------------------------
-
     ////////////////////////////////////////////////////////////////////////////
     /*
         INTERNAL VARIABLES:
@@ -193,6 +188,10 @@ public:
     ////////////////////////////////////////////////////////////////////////////
     magTracker ourMagTracker;
     int trackerNo; //start at 0
+    chai3d::cTransform pose;
+    chai3d::cTransform poseCache;
+
+
 
 protected:
 
@@ -201,7 +200,7 @@ protected:
 
     //! a short description of my variable
     int m_MyVariable;
-    chai3d::cTransform pose;
+
 };
 
 //------------------------------------------------------------------------------

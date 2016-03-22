@@ -278,13 +278,12 @@ bool c3dofChaiDevice::open()
     // *** INSERT YOUR CODE HERE ***
     // result = openConnectionToMyDevice();
 
-#ifdef MAGTRACKER
+/*#ifdef MAGTRACKER
     if(trackerNo == 0)
     {
         ourMagTracker.InitMagTracker();
     }
-
-#endif
+#endif*/
 
     result = C_SUCCESS; // my code saying connection success
     // update device status
@@ -450,7 +449,7 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // these axes align assuming the box is facing you and the chord of the tracker faces the box.
 #ifdef MAGTRACKER
-    pose = ourMagTracker.CheckPose();
+    pose = poseCache;
     chai3d::cVector3d pos = pose.getLocalPos();
     x = pos.x(); y = pos.y(); z = pos.z();
 #endif
@@ -519,7 +518,7 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
 
 #ifdef MAGTRACKER
     // try setting rotation from mag tracker
-    frame = pose.getLocalRot();    
+    frame = poseCache.getLocalRot();
 #endif
 
     if (trackerNo == 0)
