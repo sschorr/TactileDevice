@@ -7,7 +7,7 @@
 // defines indicating what physical hardware is present
 
 #define SENSORAY626
-//#define MAGTRACKER
+#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>

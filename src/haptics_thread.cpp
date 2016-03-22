@@ -872,6 +872,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         p_CommonData->wearableDelta->TurnOffControl();
         WriteDataToFile();
 
+
         p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
         p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
 
@@ -984,9 +985,11 @@ chai3d::cVector3d haptics_thread::ReadAccel()
 void haptics_thread::WriteDataToFile()
 {
     p_CommonData->recordFlag = false;
+    QString tempFreq;
+    tempFreq.setNum(p_CommonData->bandSinFreq);
     //write data to file when we are done
     std::ofstream file;
-    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + ".txt");
+    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + tempFreq.toStdString() + ".txt");
     for (int i=0; i < p_CommonData->debugData.size(); i++)
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
