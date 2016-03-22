@@ -849,13 +849,13 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     // case that we want to stay still at beginning
     if (currTime < stillTime)
     {
-        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
-        p_CommonData->recordFlag = true;
+        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);        
     }
 
     // case that we want to be ramping and then oscillating
     else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
     {
+        p_CommonData->recordFlag = true;
         double scaledBandSinAmp = (currTime-stillTime)/rampTime*p_CommonData->bandSinAmp;
         if ((currTime - stillTime) > rampTime)
         {
