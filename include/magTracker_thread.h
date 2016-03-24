@@ -6,6 +6,7 @@
 #include "chai3d.h"
 #include <qDebug.h>
 #include "Shared_Data.h"
+#include <QTimer>
 
 class magTracker_thread : public QThread
 {
@@ -20,7 +21,7 @@ public:
 
     shared_data* p_CommonData;
 
-
+    chai3d::cPrecisionClock runTimer;
 
     // magnetic tracker variables
     CSystem     ATC3DG; // a pointer to a single instance of the system class

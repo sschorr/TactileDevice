@@ -36,10 +36,10 @@ void MainWindow::Initialize()
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     // init slider values
-    this->ui->KpSlider->setValue(50);
-    this->ui->KdSlider->setValue(50);
+    this->ui->KpSlider->setValue(45);
+    this->ui->KdSlider->setValue(30);
 
-    this->ui->bandwidthAmpSlider->setValue(50);
+    this->ui->bandwidthAmpSlider->setValue(70);
     this->ui->bandwidthFreqSlider->setValue(10);
 
     GraphicsTimer.start(20);
@@ -68,7 +68,7 @@ void MainWindow::onGUIchanged()
     double KdSlider = this->ui->KdSlider->value()/10.0;
 
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
-    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/10.0;
+    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
     p_CommonData->jointKp = KpSlider;
     p_CommonData->jointKd = KdSlider;
@@ -169,6 +169,7 @@ void MainWindow::on_ZeroSliders_clicked()
 
 void MainWindow::on_startSin_clicked()
 {
+    p_CommonData->debugData.clear();
     p_CommonData->currentControlState = sinControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
@@ -180,6 +181,7 @@ void MainWindow::on_startSin_clicked()
 
 void MainWindow::on_startCircle_clicked()
 {
+    p_CommonData->debugData.clear();
     p_CommonData->currentControlState = circControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);

@@ -14,13 +14,21 @@ void magTracker_thread::run()
 {
     forever
     {
-        CheckTrackerPoses();
+        if(runTimer.timeoutOccurred())
+        {
+            CheckTrackerPoses();
+            runTimer.reset();
+            runTimer.start();
+        }
     }
 
 }
 
 void magTracker_thread::initialize()
 {
+
+    runTimer.setTimeoutPeriodSeconds(0.001);
+
 #ifdef MAGTRACKER
     // initialize the magnetic tracker
     qDebug("Initializing the ATC3DG system...\n");
@@ -76,6 +84,8 @@ void magTracker_thread::initialize()
     }
     SET_TRANSMITTER_PARAMETER(transmitterID, XYZ_REFERENCE_FRAME, false);
 #endif
+
+    runTimer.start();
 }
 
 void magTracker_thread::CheckTrackerPoses()
@@ -93,7 +103,7 @@ void magTracker_thread::CheckTrackerPoses()
         double x,y,z;
 
         // test the reading of the magnetic tracker
-        errorCode = GetAsynchronousRecord(0, &record, sizeof(record));
+        errorCode = GetAsynchronousRecord(tracker, &record, sizeof(record));
         if(errorCode!=BIRD_ERROR_SUCCESS) {errorHandler(errorCode);}
         // get the status of the last data record
         // only report the data if everything is okay
@@ -115,5 +125,6 @@ void magTracker_thread::CheckTrackerPoses()
         else if (tracker == 1)
            ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->poseCache = returnTransform;
     }
+
 #endif
 }

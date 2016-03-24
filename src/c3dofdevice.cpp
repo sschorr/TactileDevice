@@ -77,6 +77,9 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
         double theta = -(-phiMinusTheta - phi);
 
         jointAngles[i] = theta;
+
+        /*if (i == 2)
+            qDebug() << "CalcJointAngle" << theta*180/PI;*/
     }
 
     return jointAngles;
@@ -159,7 +162,7 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
     double zQ = 0.5*(b+sqrt(d))/a;
     double xQ = (a2*zQ+b2)/dnm;
     double yQ = (a1*zQ+b1)/dnm;
-    pos << xQ, yQ, zQ;
+    pos << xQ, -yQ, zQ;
 
     return pos;
 }

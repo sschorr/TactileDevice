@@ -842,15 +842,20 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     // set the current time to "0"
     // scale to avoid abrupt starting input
     // make a dynamic ramp time of 2 periods
-    double stillTime = 1.0;
+    double stillTime = 0.5;
     double rampTime = 6.0*1.0/p_CommonData->bandSinFreq;
     double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->sinStartTime;
+    double finalFreq = 40;
+
+    // start recording after centering oscillation dies out
+    if (currTime > 0.75*stillTime)
+        p_CommonData->recordFlag = true;
 
     // case that we want to stay still at beginning
     if (currTime < stillTime)
     {
         p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);        
-    }
+    }    
 
     // case that we want to be ramping and then oscillating
     else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
@@ -866,17 +871,23 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         p_CommonData->wearableDelta->SetDesiredPos(sinPos);
     }
 
-    // If time is greater than 12 pause and write to file, then reset for next frequency sin
+    // If time is greater than 20 periods + stillTime reset to neutral pos
     else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
+    {
+        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
+        p_CommonData->recordFlag = false;
+    }
+
+    // If time is greater than 20 periods + 2*stillTime, pause and write to file
+    if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + 2*stillTime))
     {
         p_CommonData->wearableDelta->TurnOffControl();
         WriteDataToFile();
 
-
         p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
         p_CommonData->bandSinFreqDisp = p_CommonData->bandSinFreq;
 
-        if (p_CommonData->bandSinFreq > 15)
+        if (p_CommonData->bandSinFreq > finalFreq)
         {
             p_CommonData->currentControlState = idleControl;
         }
@@ -888,7 +899,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 
 void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
 {
-    double circleR = 4.0;
+    double circleR = 3.0;
     double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
     double revTime = 2.5;
     double waitTime = 0.1;
