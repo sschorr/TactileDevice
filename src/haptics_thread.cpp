@@ -240,12 +240,12 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
     //use this if two tools (haptic proxies) are desired
-    m_tool1->updatePose();
-    p_CommonData->chaiMagDevice1->getPosition(position1);
-    p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    m_curSphere1->setLocalPos(position1);
-    m_curSphere1->setLocalRot(rotation1);
-    m_tool1->computeInteractionForces();
+//    m_tool1->updatePose();
+//    p_CommonData->chaiMagDevice1->getPosition(position1);
+//    p_CommonData->chaiMagDevice1->getRotation(rotation1);
+//    m_curSphere1->setLocalPos(position1);
+//    m_curSphere1->setLocalRot(rotation1);
+//    m_tool1->computeInteractionForces();
 
     // perform our dynamic body updates if we are in a dynamic environment
     if((p_CommonData->currentEnvironmentState == dynamicBodies) | (p_CommonData->currentEnvironmentState == paperEnvironment))
@@ -416,17 +416,17 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool0->enableDynamicObjects(true);
+    //m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
-    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool1); //insert the tool into the world
-    m_tool1->setRadius(toolRadius);
-    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
-    //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    m_tool1->enableDynamicObjects(true);
-    m_tool1->start();
+//    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
+//    world->addChild(m_tool1); //insert the tool into the world
+//    m_tool1->setRadius(toolRadius);
+//    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
+//    //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+//    //m_tool1->enableDynamicObjects(true);
+//    m_tool1->start();
 
     // Can use this to show frames on tool if so desired
     //create a sphere to represent the tool
@@ -436,11 +436,11 @@ void haptics_thread::InitFingerAndTool()
     m_curSphere0->setShowFrame(true);
     m_curSphere0->setFrameSize(0.05);
 
-    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere1);
-    m_curSphere1->m_material->setBlueAqua();
-    m_curSphere1->setShowFrame(true);
-    m_curSphere1->setFrameSize(0.05);
+//    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+//    world->addChild(m_curSphere1);
+//    m_curSphere1->m_material->setBlueAqua();
+//    m_curSphere1->setShowFrame(true);
+//    m_curSphere1->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------
@@ -781,16 +781,17 @@ void haptics_thread::RenderExpFriction()
 void haptics_thread::RenderExpPalpation()
 {
     double tissueRad = 0.1; double lumpRad = 0.015;
+
     cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, tissueRad);
-    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
     p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
     p_CommonData->p_tissueCyl->m_material->setStiffness(200);
     p_CommonData->p_tissueCyl->m_material->setStaticFriction(0.5);
     p_CommonData->p_tissueCyl->m_material->setDynamicFriction(0.5*0.9);
     p_CommonData->p_tissueCyl->m_material->setBrownTan();
-    //p_CommonData->p_tissueCyl->setTransparencyLevel(0.4, true, true);
+
+    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
+    p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_tissueLump->m_material->setStiffness(300);
     p_CommonData->p_tissueLump->m_material->setStaticFriction(0.5);
     p_CommonData->p_tissueLump->m_material->setDynamicFriction(0.5*0.9);
@@ -802,14 +803,13 @@ void haptics_thread::RenderExpPalpation()
     double angMax = 2*PI; double angMin = 0;
     double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
     double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
+    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.05); //-0.000001
 
     world->addChild(p_CommonData->p_tissueCyl);
     world->addChild(p_CommonData->p_tissueLump);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
-
 }
 
 void haptics_thread::RenderTwoFriction()
