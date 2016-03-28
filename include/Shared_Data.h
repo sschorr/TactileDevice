@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -217,6 +217,7 @@ typedef struct
     // haptics thread objects for palpation experiment
     chai3d::cMesh* p_tissueCyl;
     chai3d::cMesh* p_tissueLump;
+    chai3d::cMesh* p_tissueLumpCenter;
 
     // random positions for lump in tissue
     double xRandPos;
