@@ -412,7 +412,7 @@ void haptics_thread::InitFingerAndTool()
     //--------------------------------------------------------------------------
     m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
     world->addChild(m_tool0); //insert the tool into the world
-    toolRadius = 0.006; // set tool radius
+    toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
