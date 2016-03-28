@@ -396,7 +396,7 @@ void haptics_thread::InitGeneralChaiStuff()
 
     p_CommonData->azimuth = 0.0;
     p_CommonData->polar = 120.0;
-    p_CommonData->camRadius = 0.3;
+    p_CommonData->camRadius = 0.2;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -415,7 +415,7 @@ void haptics_thread::InitFingerAndTool()
     toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     //m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
@@ -765,7 +765,6 @@ void haptics_thread::RenderHoopHump()
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
-
 }
 
 void haptics_thread::RenderExpFriction()
@@ -786,10 +785,10 @@ void haptics_thread::RenderExpPalpation()
 {
     // define sizes of the palpation tissue
     double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
-    double lumpCenterRad = tissueRad*.15*0.8;
-    double lumpCenterRad1 = tissueRad*.15*0.6;
-    double lumpCenterRad2 = tissueRad*.15*0.4;
-    double lumpCenterRad3 = tissueRad*.15*0.2;
+    double lumpCenterRad = tissueRad*.15*0.9;
+    double lumpCenterRad1 = tissueRad*.15*0.8;
+    double lumpCenterRad2 = tissueRad*.15*0.7;
+    double lumpCenterRad3 = tissueRad*.15*0.6;
 
     double tissueNomStiffness = 200; double nomFriction = 0.5;
 
@@ -843,11 +842,11 @@ void haptics_thread::RenderExpPalpation()
     double angMax = 2*PI; double angMin = 0;
     double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
     double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
-    p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000002);
-    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000003);
-    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000004);
-    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000005);
+    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
+    p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000011);
+    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
+    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
+    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
 
     world->addChild(p_CommonData->p_tissueCyl);
     world->addChild(p_CommonData->p_tissueLump);

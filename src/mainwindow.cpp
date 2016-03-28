@@ -290,12 +290,17 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         {
             WriteDataToFile();
             p_CommonData->trialNo = p_CommonData->trialNo + 1;
-            double tissueRad = 0.1; double lumpRad = 0.015;
+            double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
             double max = tissueRad - lumpRad; double min = 0;
             double angMax = 2*PI; double angMin = 0;
             double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
             double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-            p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
+            p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
+            p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
+            p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
+            p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
+            p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000015);
+
             if(p_CommonData->trialNo > 30)
                 ui->directions->setText("Experiment Completed, please contact administrator");
             p_CommonData->recordFlag = true;

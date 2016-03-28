@@ -95,7 +95,7 @@ void magTracker_thread::CheckTrackerPoses()
     for(int tracker = 0; tracker <=1; tracker = tracker + 1)
     {
         double posScale = 1000.0;
-        double depthOffset = 165;
+        double depthOffset = 160;
 
         chai3d::cTransform returnTransform;
         chai3d::cVector3d returnVec;

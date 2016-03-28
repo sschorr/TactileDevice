@@ -5,6 +5,8 @@
 #include "TrakSTAR.h"
 #include <qDebug.h>
 
+// THIS CODE IS DEPRECATED AND ALL MAG TRACKER FUNCTIONALITY IS IN  magTracker_thread.cpp
+
 class magTracker
 {
 public:
