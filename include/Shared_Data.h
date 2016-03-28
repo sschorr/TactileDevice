@@ -218,6 +218,9 @@ typedef struct
     chai3d::cMesh* p_tissueCyl;
     chai3d::cMesh* p_tissueLump;
     chai3d::cMesh* p_tissueLumpCenter;
+    chai3d::cMesh* p_tissueLumpCenter1;
+    chai3d::cMesh* p_tissueLumpCenter2;
+    chai3d::cMesh* p_tissueLumpCenter3;
 
     // random positions for lump in tissue
     double xRandPos;

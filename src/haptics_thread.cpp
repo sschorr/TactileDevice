@@ -504,6 +504,9 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueCyl = new chai3d::cMesh();
     p_CommonData->p_tissueLump = new chai3d::cMesh();
     p_CommonData->p_tissueLumpCenter = new chai3d::cMesh();
+    p_CommonData->p_tissueLumpCenter1 = new chai3d::cMesh();
+    p_CommonData->p_tissueLumpCenter2 = new chai3d::cMesh();
+    p_CommonData->p_tissueLumpCenter3 = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
@@ -782,7 +785,12 @@ void haptics_thread::RenderExpFriction()
 void haptics_thread::RenderExpPalpation()
 {
     // define sizes of the palpation tissue
-    double tissueRad = 0.08; double lumpRad = tissueRad*0.15; double lumpCenterRad = tissueRad*0.075;
+    double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
+    double lumpCenterRad = tissueRad*.15*0.8;
+    double lumpCenterRad1 = tissueRad*.15*0.6;
+    double lumpCenterRad2 = tissueRad*.15*0.4;
+    double lumpCenterRad3 = tissueRad*.15*0.2;
+
     double tissueNomStiffness = 200; double nomFriction = 0.5;
 
     // create the meshes for the tissue rendering
@@ -796,17 +804,38 @@ void haptics_thread::RenderExpPalpation()
 
     cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
     p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLump->m_material->setStiffness(tissueNomStiffness*1.25);
+    p_CommonData->p_tissueLump->m_material->setStiffness(tissueNomStiffness*1.1);
     p_CommonData->p_tissueLump->m_material->setStaticFriction(nomFriction);
     p_CommonData->p_tissueLump->m_material->setDynamicFriction(nomFriction*0.9);
     p_CommonData->p_tissueLump->m_material->setBrownTan();
 
     cCreateCylinder(p_CommonData->p_tissueLumpCenter, 0.05, lumpCenterRad);
     p_CommonData->p_tissueLumpCenter->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLumpCenter->m_material->setStiffness(tissueNomStiffness*1.5);
+    p_CommonData->p_tissueLumpCenter->m_material->setStiffness(tissueNomStiffness*1.2);
     p_CommonData->p_tissueLumpCenter->m_material->setStaticFriction(0.5);
     p_CommonData->p_tissueLumpCenter->m_material->setDynamicFriction(0.5*0.9);
     p_CommonData->p_tissueLumpCenter->m_material->setBrownTan();
+
+    cCreateCylinder(p_CommonData->p_tissueLumpCenter1, 0.05, lumpCenterRad1);
+    p_CommonData->p_tissueLumpCenter1->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueLumpCenter1->m_material->setStiffness(tissueNomStiffness*1.3);
+    p_CommonData->p_tissueLumpCenter1->m_material->setStaticFriction(0.5);
+    p_CommonData->p_tissueLumpCenter1->m_material->setDynamicFriction(0.5*0.9);
+    p_CommonData->p_tissueLumpCenter1->m_material->setBrownTan();
+
+    cCreateCylinder(p_CommonData->p_tissueLumpCenter2, 0.05, lumpCenterRad2);
+    p_CommonData->p_tissueLumpCenter2->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueLumpCenter2->m_material->setStiffness(tissueNomStiffness*1.4);
+    p_CommonData->p_tissueLumpCenter2->m_material->setStaticFriction(0.5);
+    p_CommonData->p_tissueLumpCenter2->m_material->setDynamicFriction(0.5*0.9);
+    p_CommonData->p_tissueLumpCenter2->m_material->setBrownTan();
+
+    cCreateCylinder(p_CommonData->p_tissueLumpCenter3, 0.05, lumpCenterRad3);
+    p_CommonData->p_tissueLumpCenter3->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueLumpCenter3->m_material->setStiffness(tissueNomStiffness*1.5);
+    p_CommonData->p_tissueLumpCenter3->m_material->setStaticFriction(0.5);
+    p_CommonData->p_tissueLumpCenter3->m_material->setDynamicFriction(0.5*0.9);
+    p_CommonData->p_tissueLumpCenter3->m_material->setBrownTan();
 
     // put the higher stiffness "lump" in a random location
     srand (time(NULL));
@@ -816,10 +845,16 @@ void haptics_thread::RenderExpPalpation()
     double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
     p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000001);
     p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000002);
+    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000003);
+    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000004);
+    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.000005);
 
     world->addChild(p_CommonData->p_tissueCyl);
     world->addChild(p_CommonData->p_tissueLump);
     world->addChild(p_CommonData->p_tissueLumpCenter);
+    world->addChild(p_CommonData->p_tissueLumpCenter1);
+    world->addChild(p_CommonData->p_tissueLumpCenter2);
+    world->addChild(p_CommonData->p_tissueLumpCenter3);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);

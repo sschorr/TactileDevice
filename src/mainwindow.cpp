@@ -236,6 +236,9 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
         }
         else
         {
@@ -246,9 +249,12 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueFour->setTransparencyLevel(0.0, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(0.0, true);
             p_CommonData->p_tissueSix->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueCyl->setTransparencyLevel(0.4, true);
-            p_CommonData->p_tissueLump->setTransparencyLevel(0.7, true);
-            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
+            p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
+            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
+            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
+            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
         }
     }
 
