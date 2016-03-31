@@ -18,7 +18,7 @@ void haptics_thread::initialize()
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
-    InitDynamicBodies();
+    //InitDynamicBodies();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -35,8 +35,12 @@ void haptics_thread::initialize()
     p_CommonData->hapticsThreadActive = true;
     p_CommonData->environmentChange = false;
 
-    // set to provide feedback when running VR control mod
+    // set to provide feedback when running VR control mode
     p_CommonData->tactileFeedback = true;
+
+    // set up palpation post trial clock
+    p_CommonData->palpPostTrialClock.reset();
+    p_CommonData->palpPostTrialClock.setTimeoutPeriodSeconds(2.0);
 
     // Set the clock that controls haptic rate
     rateClock.reset();
@@ -134,7 +138,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 1)
+            if(recordDataCounter == 10)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -216,6 +220,35 @@ void haptics_thread::UpdateVRGraphics()
         }
     }
 
+    // mainwindow makes the lump visible after trial, this makes it opaque again and starts the next trial
+    if(p_CommonData->palpPostTrialClock.timeoutOccurred())
+    {
+        p_CommonData->palpPostTrialClock.stop();
+        p_CommonData->palpPostTrialClock.reset();
+        // increment trial no
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        // make tissue opaque again
+        p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
+        // move lump to a different location
+        double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
+        double max = tissueRad - lumpRad; double min = 0;
+        double angMax = 2*PI; double angMin = 0;
+        double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+        double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
+        p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
+        p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
+        p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
+        p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
+        p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000015);
+        p_CommonData->recordFlag = true;
+        p_CommonData->currentExperimentState = palpationTrial;
+    }
+
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
 
@@ -225,6 +258,7 @@ void haptics_thread::UpdateVRGraphics()
     // get position and rotation of the magTracker
     p_CommonData->chaiMagDevice0->getPosition(position0);
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
+
     // set the visual representation to match
     m_curSphere0->setLocalPos(position0);
     m_curSphere0->setLocalRot(rotation0);
@@ -340,7 +374,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         desiredPos << neutralPos[0], neutralPos[1], neutralPos[2];
     }
 
-
     // Perform position controller based on desired position
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 }
@@ -415,7 +448,7 @@ void haptics_thread::InitFingerAndTool()
     toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     //m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
@@ -460,7 +493,7 @@ void haptics_thread::InitFingerAndTool()
 
     // set params
     finger->setShowEnabled(true);
-    finger->computeBoundaryBox(true); //compute a boundary box
+    //finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
     fingerColor.setBrownSandy();
@@ -784,7 +817,8 @@ void haptics_thread::RenderExpFriction()
 void haptics_thread::RenderExpPalpation()
 {
     // define sizes of the palpation tissue
-    double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
+    double tissueRad = 0.08;
+    double lumpRad = tissueRad*0.15;
     double lumpCenterRad = tissueRad*.15*0.9;
     double lumpCenterRad1 = tissueRad*.15*0.8;
     double lumpCenterRad2 = tissueRad*.15*0.7;
@@ -855,7 +889,6 @@ void haptics_thread::RenderExpPalpation()
     world->addChild(p_CommonData->p_tissueLumpCenter2);
     world->addChild(p_CommonData->p_tissueLumpCenter3);
     world->addChild(m_tool0);
-    world->addChild(m_tool1);
     world->addChild(finger);
 }
 

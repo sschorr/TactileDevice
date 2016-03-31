@@ -200,7 +200,7 @@ void MainWindow::on_setDirectory_clicked()
 
 
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/Friction Exp/Subjects",
+                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/Palpation Exp/Subjects",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     p_CommonData->fileName = QInputDialog::getText(0, "Input File Name",
                                      "File Name:", QLineEdit::Normal, " ",
@@ -288,23 +288,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == palpationTrial)
         {
+            p_CommonData->currentExperimentState = idleExperiment;
             WriteDataToFile();
-            p_CommonData->trialNo = p_CommonData->trialNo + 1;
-            double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
-            double max = tissueRad - lumpRad; double min = 0;
-            double angMax = 2*PI; double angMin = 0;
-            double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-            double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-            p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
-            p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
-            p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
-            p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
-            p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000015);
-
             if(p_CommonData->trialNo > 30)
                 ui->directions->setText("Experiment Completed, please contact administrator");
-            p_CommonData->recordFlag = true;
+            p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
+            p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
+            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
+            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
+            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
 
+            p_CommonData->palpPostTrialClock.reset();
+            p_CommonData->palpPostTrialClock.start();
         }
     }
     if (a_event->key() == Qt::Key_N)

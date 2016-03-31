@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define SENSORAY626
-//#define MAGTRACKER
+#define SENSORAY626
+#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -132,6 +132,9 @@ typedef struct
     //clock for all threads
     chai3d::cPrecisionClock overallClock;
 
+    //clock for showing temp transparent, then moving to next trial
+    chai3d::cPrecisionClock palpPostTrialClock;
+
     // determine start time for bandwidth sin
     double sinStartTime;
 
@@ -152,6 +155,9 @@ typedef struct
 
     bool hapticsThreadActive;
     double hapticRateEstimate;
+
+    // have window thread tell haptics thread to render transparent temporarily
+    bool tempTransparentFlag;
 
     // our data storage variable
     std::vector<DataRecordStruct> debugData;

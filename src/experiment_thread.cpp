@@ -29,7 +29,6 @@ void Experiment_Thread::run()
             break;
 
         case palpationTrial:
-            p_CommonData->recordFlag = true;
             break;
 
         case frictionTrial:

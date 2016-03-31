@@ -42,6 +42,8 @@ public:
     Eigen::Vector3d localDesiredPos;
     Eigen::Vector3d localDesiredJointAngle;
 
+
+
 private:
     Ui::MainWindow *ui;
 
