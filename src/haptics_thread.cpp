@@ -229,6 +229,7 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
         // make tissue opaque again
         p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
+        p_CommonData->p_tissueBox->setTransparencyLevel(1.0, true);
         p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
         p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
         p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
@@ -236,15 +237,18 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
         // move lump to a different location
         double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
-        double max = tissueRad - lumpRad; double min = 0;
-        double angMax = 2*PI; double angMin = 0;
-        double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-        double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-        p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
-        p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
-        p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
-        p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
-        p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000015);
+        double boxWidth = 2.0*tissueRad;
+        double boxDepth = 0.1;
+        double boxHeight = 0.05;
+        double widthMax = boxWidth/2-lumpRad; double widthMin = -boxWidth/2+lumpRad;
+        double depthMax = boxDepth/2-lumpRad; double depthMin = -boxDepth/2+lumpRad;
+        double y = ((double) rand()*(widthMax-widthMin)/(double)RAND_MAX+widthMin);
+        double x = ((double) rand()*(depthMax-depthMin)/(double)RAND_MAX+depthMin);
+        p_CommonData->p_tissueLump->setLocalPos(x,y,-0.0000001);
+        p_CommonData->p_tissueLumpCenter->setLocalPos(x,y,-0.00000011);
+        p_CommonData->p_tissueLumpCenter1->setLocalPos(x,y,-0.00000012);
+        p_CommonData->p_tissueLumpCenter2->setLocalPos(x,y,-0.00000013);
+        p_CommonData->p_tissueLumpCenter3->setLocalPos(x,y,-0.00000014);
         p_CommonData->recordFlag = true;
         p_CommonData->currentExperimentState = palpationTrial;
     }
@@ -541,6 +545,7 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueLumpCenter1 = new chai3d::cMesh();
     p_CommonData->p_tissueLumpCenter2 = new chai3d::cMesh();
     p_CommonData->p_tissueLumpCenter3 = new chai3d::cMesh();
+    p_CommonData->p_tissueBox = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
@@ -825,16 +830,29 @@ void haptics_thread::RenderExpPalpation()
     double lumpCenterRad2 = tissueRad*.15*0.7;
     double lumpCenterRad3 = tissueRad*.15*0.6;
 
+    double boxWidth = 2.0*tissueRad;
+    double boxDepth = 0.1;
+    double boxHeight = 0.05;
+
     double tissueNomStiffness = 200; double nomFriction = 0.5;
 
     // create the meshes for the tissue rendering
-    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, tissueRad);
-    p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
-    p_CommonData->p_tissueCyl->m_material->setStiffness(tissueNomStiffness);
-    p_CommonData->p_tissueCyl->m_material->setStaticFriction(nomFriction);
-    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(nomFriction*0.9);
-    p_CommonData->p_tissueCyl->m_material->setBrownTan();
+//    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, tissueRad);
+//    p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
+//    p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
+//    p_CommonData->p_tissueCyl->m_material->setStiffness(tissueNomStiffness);
+//    p_CommonData->p_tissueCyl->m_material->setStaticFriction(nomFriction);
+//    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(nomFriction*0.9);
+//    p_CommonData->p_tissueCyl->m_material->setBrownTan();
+
+    // create the main body of tissue (box rather than cylinder)
+    cCreateBox(p_CommonData->p_tissueBox, boxDepth, boxWidth, boxHeight);
+    p_CommonData->p_tissueBox->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_tissueBox->setLocalPos(0,0,boxHeight/2);
+    p_CommonData->p_tissueBox->m_material->setStiffness(tissueNomStiffness);
+    p_CommonData->p_tissueBox->m_material->setStaticFriction(nomFriction);
+    p_CommonData->p_tissueBox->m_material->setDynamicFriction(nomFriction*0.9);
+    p_CommonData->p_tissueBox->m_material->setBrownTan();
 
     cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
     p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
@@ -871,19 +889,31 @@ void haptics_thread::RenderExpPalpation()
     p_CommonData->p_tissueLumpCenter3->m_material->setDynamicFriction(0.5*0.9);
     p_CommonData->p_tissueLumpCenter3->m_material->setBrownTan();
 
-    // put the higher stiffness "lump" in a random location
-    srand (time(NULL));
-    double max = tissueRad - lumpRad; double min = 0;
-    double angMax = 2*PI; double angMin = 0;
-    double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-    double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
-    p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000011);
-    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
-    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
-    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
+    // put the higher stiffness "lump" in a random location (cyl)
+//    srand (time(NULL));
+//    double max = tissueRad - lumpRad; double min = 0;
+//    double angMax = 2*PI; double angMin = 0;
+//    double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+//    double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
+//    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
+//    p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000011);
+//    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
+//    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
+//    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
 
-    world->addChild(p_CommonData->p_tissueCyl);
+    // put the higher stiffness "lump" in a random location (box)
+    srand (time(NULL));
+    double widthMax = boxWidth/2-lumpRad; double widthMin = -boxWidth/2+lumpRad;
+    double depthMax = boxDepth/2-lumpRad; double depthMin = -boxDepth/2+lumpRad;
+    double y = ((double) rand()*(widthMax-widthMin)/(double)RAND_MAX+widthMin);
+    double x = ((double) rand()*(depthMax-depthMin)/(double)RAND_MAX+depthMin);
+    p_CommonData->p_tissueLump->setLocalPos(x,y,-0.0000001);
+    p_CommonData->p_tissueLumpCenter->setLocalPos(x,y,-0.00000011);
+    p_CommonData->p_tissueLumpCenter1->setLocalPos(x,y,-0.00000012);
+    p_CommonData->p_tissueLumpCenter2->setLocalPos(x,y,-0.00000013);
+    p_CommonData->p_tissueLumpCenter3->setLocalPos(x,y,-0.00000014);
+
+    world->addChild(p_CommonData->p_tissueBox);
     world->addChild(p_CommonData->p_tissueLump);
     world->addChild(p_CommonData->p_tissueLumpCenter);
     world->addChild(p_CommonData->p_tissueLumpCenter1);
