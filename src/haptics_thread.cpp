@@ -360,6 +360,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
     deviceLastLastComputedForce0 = deviceLastComputedForce0;
     deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
+    deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588;
@@ -387,7 +388,7 @@ void haptics_thread::RecordData()
     dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
     dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
-    dataRecorder.desiredForce = p_CommonData->wearableDelta->ReadDesiredForce(); // only means something if doing J'F control
+    dataRecorder.VRInteractionForce = deviceLastForceRecord; // last force on tool0
     dataRecorder.motorTorque = p_CommonData->wearableDelta->motorTorques;
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
@@ -802,7 +803,7 @@ void haptics_thread::RenderHoopHump()
 
 void haptics_thread::RenderExpFriction()
 {
-    cCreateBox(p_CommonData->p_expFrictionBox, .13, .13, .01);
+    cCreateBox(p_CommonData->p_expFrictionBox, .065, .13, .01);
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
     p_CommonData->p_expFrictionBox->m_material->setStiffness(200);
@@ -1091,9 +1092,9 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].desiredPos[0] << "," << " "
         << p_CommonData->debugData[i].desiredPos[1] << "," << " "
         << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
         << p_CommonData->debugData[i].motorAngles[0] << "," << " "
         << p_CommonData->debugData[i].motorAngles[1] << "," << " "
         << p_CommonData->debugData[i].motorAngles[2] << "," << " "

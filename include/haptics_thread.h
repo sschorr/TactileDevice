@@ -99,6 +99,7 @@ public:
     chai3d::cVector3d lastComputedForce0;
     chai3d::cVector3d magTrackerLastComputedForce0;
     chai3d::cVector3d deviceLastComputedForce0;
+    Eigen::Vector3d deviceLastForceRecord;
     chai3d::cVector3d deviceLastLastComputedForce0;
     chai3d::cVector3d estimatedVel0;
 

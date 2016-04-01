@@ -137,7 +137,10 @@ void MainWindow::UpdateGUIInfo()
         break;
 
     case palpationTrial:
-        ui->directions->setText("Press 'R' to record answer and move to next trial");
+        if (p_CommonData->trialNo < 30)
+        {
+            ui->directions->setText("Press 'R' to record answer and move to next trial");
+        }
         break;
 
     case trialBreak:
@@ -305,28 +308,40 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     }
     if (a_event->key() == Qt::Key_N)
     {
-        if(p_CommonData->currentExperimentState == trialBreak)
+        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
         {
-            p_CommonData->currentExperimentState = frictionTrial;
-            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            if(p_CommonData->pairNo == 1)
+            {
+                p_CommonData->pairNo = 2;
+                p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
+                double max = 0.03; double min = -0.01;
+                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            }
 
-        } else if(p_CommonData->pairNo == 1)
-        {
-            p_CommonData->pairNo = 2;
-            p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
-            double max = 0.03; double min = -0.03;
-            double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-            p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            else if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->pairNo = 1;
+                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                double max = 0.03; double min = -0.01;
+                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            }
         }
     }
     if (a_event->key() == Qt::Key_Backspace)
     {
-        if(p_CommonData->pairNo == 2)
+        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
         {
-            p_CommonData->pairNo = 1;
-            p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->pairNo = 1;
+                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                double max = 0.03; double min = -0.01;
+                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            }
         }
-
     }
 
     if (a_event->key() == Qt::Key_1)
@@ -343,30 +358,32 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_L)
     {
-        if(p_CommonData->currentExperimentState == frictionTrial)
+        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
         {
-            WriteDataToFile();
+            if(p_CommonData->currentExperimentState == frictionTrial)
+            {
+                WriteDataToFile();
+            }
+
+            // check if next trial is a break
+            QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+            if (nextTrialType == "break")
+            {
+                p_CommonData->currentExperimentState = trialBreak;
+                p_CommonData->recordFlag = false;
+                p_CommonData->debugData.clear();
+            }
+
+            p_CommonData->pairNo = 1;
+            p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+            p_CommonData->subjectAnswer = 0;
+            ui->selection->setText("Selection:");
+            double max = 0.03; double min = -0.03;
+            double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+            p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            p_CommonData->recordFlag = true;
         }
-
-        // check if next trial is a break
-        QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
-        if (nextTrialType == "break")
-        {
-            p_CommonData->currentExperimentState = trialBreak;
-            p_CommonData->recordFlag = false;
-            p_CommonData->debugData.clear();
-        }
-
-
-        p_CommonData->pairNo = 1;
-        p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-        p_CommonData->subjectAnswer = 0;
-        ui->selection->setText("Selection:");
-        double max = 0.03; double min = -0.03;
-        double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-        p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-        p_CommonData->recordFlag = true;
     }
 }
 
@@ -390,9 +407,9 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].desiredPos[0] << "," << " "
         << p_CommonData->debugData[i].desiredPos[1] << "," << " "
         << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[0] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[1] << "," << " "
-        << p_CommonData->debugData[i].desiredForce[2] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
         << p_CommonData->debugData[i].motorAngles[0] << "," << " "
         << p_CommonData->debugData[i].motorAngles[1] << "," << " "
         << p_CommonData->debugData[i].motorAngles[2] << "," << " "

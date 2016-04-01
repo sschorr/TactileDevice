@@ -56,7 +56,7 @@ typedef struct
     Eigen::Vector3d jointAngles;
     Eigen::Vector3d motorTorque;
     Eigen::Vector3d voltageOut;
-    Eigen::Vector3d desiredForce;
+    Eigen::Vector3d VRInteractionForce;
     chai3d::cVector3d magTrackerPos0;
     chai3d::cVector3d magTrackerPos1;
     chai3d::cVector3d accelSignal;
