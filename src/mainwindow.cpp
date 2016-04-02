@@ -293,19 +293,23 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == palpationTrial)
         {
-            p_CommonData->currentExperimentState = idleExperiment;
-            WriteDataToFile();
-            if(p_CommonData->trialNo > 30)
-                ui->directions->setText("Experiment Completed, please contact administrator");
-            p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
-            p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
-            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
-            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
-            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
-            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
+            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            {
+                p_CommonData->currentExperimentState = idleExperiment;
+                WriteDataToFile();
+                if(p_CommonData->trialNo > 30)
+                    ui->directions->setText("Experiment Completed, please contact administrator");
+                p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
+                p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
+                p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
+                p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
+                p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
+                p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
+                p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
 
-            p_CommonData->palpPostTrialClock.reset();
-            p_CommonData->palpPostTrialClock.start();
+                p_CommonData->palpPostTrialClock.reset();
+                p_CommonData->palpPostTrialClock.start();
+            }
         }
     }
     if (a_event->key() == Qt::Key_N)
