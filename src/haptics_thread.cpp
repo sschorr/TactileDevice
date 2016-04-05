@@ -227,14 +227,17 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->palpPostTrialClock.reset();
         // increment trial no
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
-        // make tissue opaque again
-        p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueBox->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(1.0, true);
-        p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
+         // make tissue opaque again if done with visible training trials
+        if (p_CommonData->trialNo > 3)
+        {
+            p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueBox->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
+        }
         // move lump to a different location
         double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
         double boxWidth = 2.0*tissueRad;

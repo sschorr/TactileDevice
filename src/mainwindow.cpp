@@ -75,6 +75,8 @@ void MainWindow::onGUIchanged()
     p_CommonData->bandSinAmpDisp = bandwidthAmp;
     p_CommonData->bandSinFreqDisp = bandwidthFreq;
 
+    ui->directions->setText("No experiment currently running");
+
     UpdateGUIInfo();
 }
 
@@ -121,7 +123,7 @@ void MainWindow::UpdateGUIInfo()
     switch(p_CommonData->currentExperimentState)
     {
     case idleExperiment:
-        ui->directions->setText("No experiment currently running");
+        ///ui->directions->setText("No experiment currently running");
         break;
 
     case frictionTrial:
@@ -297,7 +299,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->currentExperimentState = idleExperiment;
                 WriteDataToFile();
-                if(p_CommonData->trialNo > 30)
+                if(p_CommonData->trialNo > 34)
                     ui->directions->setText("Experiment Completed, please contact administrator");
                 p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
                 p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
@@ -528,6 +530,14 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->currentEnvironmentState = experimentPalpation;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->recordFlag = true;
+
+    p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
+    p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
+    p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
+    p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
+    p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
+    p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
+    p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
 }
 
 void MainWindow::on_setNeutral_clicked()
