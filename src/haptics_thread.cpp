@@ -370,11 +370,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
 
     //convert device "force" to a mapped position
-    double forceToPosMult = 1.0/1.588;
+    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger
+    double vertForceToPos = 1.0/1.588; // based on normal stiffness?  Need to scale this?
     chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
+    double vertPosMovement = vertForceToPos*deviceLastComputedForce0.z();
     Eigen::Vector3d neutralPos = p_CommonData->neutralPos;
     Eigen::Vector3d desiredPos(3);
-    desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
+    desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], vertPosMovement+neutralPos[2];
 
     // if the experimental condition is no feedback, tell it to move to neutral pos
     if(p_CommonData->tactileFeedback == 0)
