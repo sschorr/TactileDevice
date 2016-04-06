@@ -456,7 +456,7 @@ void haptics_thread::InitFingerAndTool()
     toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool0->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     //m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
