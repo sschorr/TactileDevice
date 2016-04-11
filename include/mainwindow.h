@@ -76,6 +76,10 @@ private slots:
     void on_loadProtocol_2_clicked();
     void on_startExperiment_2_clicked();
     void on_paperEnvironment_clicked();
+    void rotateTissueLineDisp(double angle);
+    void rotateTissueLine(double angle);
+    void on_startExperiment_3_clicked();
+    void on_loadProtocol_3_clicked();
 };
 
 #endif // MAINWINDOW_H

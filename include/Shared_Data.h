@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -29,15 +29,6 @@
 #include <Qt/qfiledialog.h>
 #include <Qt/qinputdialog.h>
 #include "CODE.h"
-
-#define POS_SCALE 6
-#define HAPTIC_X_TRANSLATE 0 //.12
-#define HAPTIC_Y_TRANSLATE 0
-#define HAPTIC_Z_TRANSLATE 0 // -0.05
-
-#define CAMERA_X_TRANSLATE 0 //0.15
-#define CAMERA_Y_TRANSLATE 0.00
-#define CAMERA_Z_TRANSLATE 0
 
 #define STIFFNESS_BASELINE 50
 #define STIFFNESS_INCREMENT 10
@@ -68,6 +59,7 @@ typedef struct
     int subjectAnswer;
     chai3d::cVector3d lumpLocation;
     chai3d::cVector3d lumpAnswerLocation;
+    double lineAngle;
 
 } DataRecordStruct;
 
@@ -76,6 +68,9 @@ typedef enum
     idleExperiment,
     frictionTrial,
     palpationTrial,
+    palpationLineTrial,
+    palpationLineWritingToFile,
+    palpationLineBreak,
     trialBreak,
     end
 } experiment_states;
@@ -99,6 +94,7 @@ typedef enum
     hoopHump,
     experimentFriction,
     experimentPalpation,
+    experimentPalpationLine,
     dynamicBodies,
     paperEnvironment
 } environment_states;
@@ -198,8 +194,10 @@ typedef struct
     // protocol loading
     QString frictionProtocolLocation;
     QString palpationProtocolLocation;
+    QString palpationLineProtocolLocation;
     CSimpleIniA frictionProtocolFile;
     CSimpleIniA palpationProtocolFile;
+    CSimpleIniA palpationLineProtocolFile;
 
     // haptics thread objects for palpation environment
     chai3d::cMultiMesh* p_table;
@@ -232,6 +230,10 @@ typedef struct
     // random positions for lump in tissue
     double xRandPos;
     double yRandPos;
+
+    // rotation of line in tissue
+    double tissueRot;
+    double indicatorRot;
 
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody0;

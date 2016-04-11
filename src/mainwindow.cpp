@@ -42,6 +42,8 @@ void MainWindow::Initialize()
     this->ui->bandwidthAmpSlider->setValue(70);
     this->ui->bandwidthFreqSlider->setValue(10);
 
+    p_CommonData->indicatorRot = 0;
+
     GraphicsTimer.start(20);
     UpdateGUIInfo();
 }
@@ -145,6 +147,18 @@ void MainWindow::UpdateGUIInfo()
         }
         break;
 
+    case palpationLineTrial:
+        ui->directions->setText("Press 'Z' or 'X' to rotate answer.  Press 'R' to lock in choice");
+        break;
+
+    case end:
+        ui->directions->setText("Experiment over, please contact administrator");
+        break;
+
+    case palpationLineBreak:
+        ui->directions->setText("Please take a break.  Press 'R' to continue");
+        break;
+
     case trialBreak:
         ui->directions->setText("Please take a break. \n Press 'N' to continue.");
         ui->selection->setText("Selection:");
@@ -237,7 +251,8 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueThree->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1.0, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+
             p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
@@ -249,12 +264,13 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         else
         {
             p_CommonData->m_flagTissueTransparent = true;
-            p_CommonData->p_tissueOne->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueTwo->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueThree->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueFour->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueFive->setTransparencyLevel(0.0, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0.0, true);
+            p_CommonData->p_tissueOne->setTransparencyLevel(0.1, true);
+            p_CommonData->p_tissueTwo->setTransparencyLevel(0.2, true);
+            p_CommonData->p_tissueThree->setTransparencyLevel(0.3, true);
+            p_CommonData->p_tissueFour->setTransparencyLevel(0.4, true);
+            p_CommonData->p_tissueFive->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+
             p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
             p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
             p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
@@ -293,6 +309,40 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     }
     if (a_event->key() == Qt::Key_R)
     {
+        // palpation Line experiment
+        if(p_CommonData->currentExperimentState == palpationLineTrial)
+        {
+            // check that we are not currently embedded in tissue
+            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            {
+                p_CommonData->currentExperimentState = palpationLineWritingToFile;
+                p_CommonData->recordFlag = false;
+                WriteDataToFile();
+                p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
+                p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
+                p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
+                p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
+                p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
+                p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+
+                p_CommonData->palpPostTrialClock.reset();
+                p_CommonData->palpPostTrialClock.start();
+            }
+        }
+
+        else if(p_CommonData->currentExperimentState == palpationLineBreak)
+        {
+            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            {
+                p_CommonData->currentExperimentState = palpationLineWritingToFile;
+                p_CommonData->recordFlag = false;
+
+                p_CommonData->palpPostTrialClock.reset();
+                p_CommonData->palpPostTrialClock.start();
+            }
+        }
+
+        // standard palpation experiment
         if(p_CommonData->currentExperimentState == palpationTrial)
         {
             if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
@@ -393,6 +443,20 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->recordFlag = true;
         }
     }
+
+    double angle = 10.0;
+    if (a_event->key() == Qt::Key_Z)
+    {
+        rotateTissueLineDisp(-angle);
+        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->indicatorRot = p_CommonData->indicatorRot-angle;
+    }
+    if (a_event->key() == Qt::Key_X)
+    {
+        rotateTissueLineDisp(angle);
+        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->indicatorRot = p_CommonData->indicatorRot+angle;
+    }
 }
 
 void MainWindow::WriteDataToFile()
@@ -447,6 +511,7 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].subjectAnswer << "," << " "
         << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
         << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
+        << p_CommonData->debugData[i].lineAngle << "," << " "
         << std::endl;
     }
     file.close();
@@ -513,6 +578,15 @@ void MainWindow::on_loadProtocol_2_clicked()
     qDebug() << p_CommonData->palpationProtocolLocation;
 }
 
+void MainWindow::on_loadProtocol_3_clicked()
+{
+    //Open dialog box to get protocol file and save into variable
+    QString temp = QFileDialog::getOpenFileName();
+    p_CommonData->palpationLineProtocolLocation = temp;
+    p_CommonData->palpationLineProtocolFile.LoadFile(temp.toStdString().c_str());
+    qDebug() << p_CommonData->palpationLineProtocolLocation;
+}
+
 void MainWindow::on_startExperiment_clicked()
 {
     p_CommonData->environmentChange = true;
@@ -540,6 +614,27 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
 }
 
+void MainWindow::on_startExperiment_3_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentExperimentState = palpationLineTrial;
+    p_CommonData->currentEnvironmentState = experimentPalpationLine;
+    p_CommonData->currentControlState = VRControlMode;
+    p_CommonData->recordFlag = true;
+
+    p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
+    p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
+    p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
+    p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
+    p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
+    p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+
+    p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
+    rotateTissueLine(p_CommonData->tissueRot);
+}
+
+
+
 void MainWindow::on_setNeutral_clicked()
 {
     p_CommonData->neutralPos[2] = localCartesianPos[2];
@@ -554,6 +649,25 @@ void MainWindow::on_setTrial_clicked()
                                          &ok);
     p_CommonData->trialNo = TrialNoString.toInt();
 }
+
+void MainWindow::rotateTissueLineDisp(double angle)
+{
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->indicatorRot = p_CommonData->indicatorRot + angle;
+}
+
+void MainWindow::rotateTissueLine(double angle)
+{
+    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(0,0,-1,angle);
+}
+
+
+
+
 
 
 

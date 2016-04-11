@@ -63,6 +63,9 @@ public:
     void InitDynamicBodies();
     void RenderDynamicBodies();
     void RenderPaper();
+    void haptics_thread::rotateTissueLineDisp(double angle);
+    void haptics_thread::rotateTissueLine(double angle);
+
 
     void InitAccel();
     chai3d::cVector3d ReadAccel();

@@ -31,6 +31,16 @@ void Experiment_Thread::run()
         case palpationTrial:
             break;
 
+        case palpationLineTrial:
+            p_CommonData->recordFlag = true;
+            break;
+
+        case palpationLineWritingToFile:
+            break;
+
+        case palpationLineBreak:
+            break;
+
         case frictionTrial:
             p_CommonData->referenceFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Reference", NULL /*default*/));
             p_CommonData->comparisonFriction = std::stod(p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Comparisons", NULL /*default*/));

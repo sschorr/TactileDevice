@@ -27,7 +27,7 @@ void magTracker_thread::run()
 void magTracker_thread::initialize()
 {
 
-    runTimer.setTimeoutPeriodSeconds(0.005);
+    runTimer.setTimeoutPeriodSeconds(0.002);
 
 #ifdef MAGTRACKER
     // initialize the magnetic tracker

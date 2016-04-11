@@ -879,7 +879,7 @@
        </rect>
       </property>
       <property name="text">
-       <string>Palpation Environment</string>
+       <string>Palpation Line Environ</string>
       </property>
      </widget>
      <widget class="QPushButton" name="frictionButton">
@@ -1021,7 +1021,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Object No. </string>
+       <string/>
       </property>
      </widget>
      <widget class="QLabel" name="directions">
@@ -1029,8 +1029,8 @@
        <rect>
         <x>0</x>
         <y>680</y>
-        <width>601</width>
-        <height>91</height>
+        <width>781</width>
+        <height>101</height>
        </rect>
       </property>
       <property name="font">
@@ -1230,6 +1230,32 @@
       </property>
       <property name="text">
        <string>Des Angle 3</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="loadProtocol_3">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>720</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Load Line Protocol</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="startExperiment_3">
+      <property name="geometry">
+       <rect>
+        <x>960</x>
+        <y>720</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Start Palp Line Exp</string>
       </property>
      </widget>
     </widget>
