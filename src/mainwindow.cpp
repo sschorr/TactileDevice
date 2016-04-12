@@ -513,6 +513,7 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
         << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
+        << p_CommonData->debugData[i].lineAngleTruth << "," << " "
         << std::endl;
     }
     file.close();

@@ -232,6 +232,11 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->palpPostTrialClock.stop();
         p_CommonData->palpPostTrialClock.reset();
 
+
+        // rotate tissue line indicator back to 0
+        double lastDispRotation = p_CommonData->indicatorRot;
+        rotateTissueLineDisp(-lastDispRotation);
+
         // increment trial no
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
 
@@ -245,6 +250,7 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
         }
 
         else if(type == "trial")
@@ -262,6 +268,7 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
             p_CommonData->recordFlag = true;
         }
 
@@ -284,6 +291,7 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
         }
     }
 
@@ -437,10 +445,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
 
     //convert device "force" to a mapped position
-    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger
-    double vertForceToPos = 1.0/1.588; // based on normal stiffness?  Need to scale this?
+    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
     chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0;
-    double vertPosMovement = vertForceToPos*deviceLastComputedForce0.z();
+    double vertPosMovement = log(8.7636*deviceLastComputedForce0.z()+1); //linear fit exp data from normal displacement paper
     Eigen::Vector3d neutralPos = p_CommonData->neutralPos;
     Eigen::Vector3d desiredPos(3);
     desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], vertPosMovement+neutralPos[2];
@@ -477,6 +484,7 @@ void haptics_thread::RecordData()
     dataRecorder.subjectAnswer = p_CommonData->subjectAnswer;
     dataRecorder.lumpLocation = p_CommonData->p_tissueLump->getLocalPos();
     dataRecorder.lineAngle = p_CommonData->indicatorRot;
+    dataRecorder.lineAngleTruth = p_CommonData->tissueRot;
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
@@ -1224,6 +1232,7 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
         << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
+        << p_CommonData->debugData[i].lineAngleTruth << "," << " "
         << std::endl;
     }
     file.close();

@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -60,6 +60,7 @@ typedef struct
     chai3d::cVector3d lumpLocation;
     chai3d::cVector3d lumpAnswerLocation;
     double lineAngle;
+    double lineAngleTruth;
 
 } DataRecordStruct;
 
@@ -186,7 +187,6 @@ typedef struct
 
     // answer to which was stiffer
     int subjectAnswer;
-
 
     // updatable neutral position
     Eigen::Vector3d neutralPos;
