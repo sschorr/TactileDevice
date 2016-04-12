@@ -43,6 +43,7 @@ void MainWindow::Initialize()
     this->ui->bandwidthFreqSlider->setValue(10);
 
     p_CommonData->indicatorRot = 0;
+    p_CommonData->tissueRot = 0;
 
     GraphicsTimer.start(20);
     UpdateGUIInfo();
@@ -121,6 +122,8 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdKd->display(p_CommonData->jointKd);
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
+
+    //qDebug() << "indicator Rot: " << p_CommonData->indicatorRot << "tissue rot: " << p_CommonData->tissueRot;
 
     switch(p_CommonData->currentExperimentState)
     {
@@ -449,14 +452,11 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         rotateTissueLineDisp(-angle);
         p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
-        p_CommonData->indicatorRot = p_CommonData->indicatorRot-angle;
-        qDebug() << p_CommonData->indicatorRot;
     }
     if (a_event->key() == Qt::Key_X)
     {
         rotateTissueLineDisp(angle);
         p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
-        p_CommonData->indicatorRot = p_CommonData->indicatorRot+angle;
     }
 }
 
@@ -655,6 +655,7 @@ void MainWindow::on_setTrial_clicked()
 void MainWindow::rotateTissueLineDisp(double angle)
 {
     p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+
     p_CommonData->indicatorRot = p_CommonData->indicatorRot + angle;
 }
 
