@@ -506,8 +506,8 @@ void haptics_thread::InitGeneralChaiStuff()
                                  p_CommonData->upVector);   // direction of the "up" vector
 
     p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 120.0;
-    p_CommonData->camRadius = 0.2;
+    p_CommonData->polar = 140.0;
+    p_CommonData->camRadius = 0.15;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);

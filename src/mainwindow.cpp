@@ -450,6 +450,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         rotateTissueLineDisp(-angle);
         p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
         p_CommonData->indicatorRot = p_CommonData->indicatorRot-angle;
+        qDebug() << p_CommonData->indicatorRot;
     }
     if (a_event->key() == Qt::Key_X)
     {
