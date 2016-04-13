@@ -103,6 +103,7 @@ public:
     chai3d::cVector3d magTrackerLastComputedForce0;
     chai3d::cVector3d deviceLastComputedForce0;
     Eigen::Vector3d deviceLastForceRecord;
+    Eigen::Vector3d globalLastForceRecord;
     chai3d::cVector3d deviceLastLastComputedForce0;
     chai3d::cVector3d estimatedVel0;
 
@@ -111,6 +112,8 @@ public:
     chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
     chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
     chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
+
+    chai3d::cMatrix3d deviceFinalRotation;
 
     //vars for contact vibration
     bool firstTouch;

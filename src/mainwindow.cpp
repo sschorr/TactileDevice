@@ -36,7 +36,7 @@ void MainWindow::Initialize()
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     // init slider values
-    this->ui->KpSlider->setValue(50);
+    this->ui->KpSlider->setValue(60);
     this->ui->KdSlider->setValue(30);
 
     this->ui->bandwidthAmpSlider->setValue(70);
@@ -483,6 +483,9 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
         << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
         << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[0] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[1] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[2] << "," << " "
         << p_CommonData->debugData[i].motorAngles[0] << "," << " "
         << p_CommonData->debugData[i].motorAngles[1] << "," << " "
         << p_CommonData->debugData[i].motorAngles[2] << "," << " "

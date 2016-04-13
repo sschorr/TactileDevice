@@ -445,7 +445,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
     deviceLastLastComputedForce0 = deviceLastComputedForce0;
     deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
+
     deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
+    globalLastForceRecord << lastComputedForce0.x(), lastComputedForce0.y(), lastComputedForce0.z();
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
@@ -467,7 +469,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     Eigen::Vector3d neutralPos = p_CommonData->neutralPos;
     Eigen::Vector3d desiredPos(3);
-    desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], desiredPosMovement.z()+neutralPos[2];
+    desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], vertPosMovement+neutralPos[2];
 
     // if the experimental condition is no feedback, tell it to move to neutral pos
     if(p_CommonData->tactileFeedback == 0)
@@ -489,6 +491,7 @@ void haptics_thread::RecordData()
     dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
     dataRecorder.VRInteractionForce = deviceLastForceRecord; // last force on tool0
+    dataRecorder.VRInteractionForceGlobal = globalLastForceRecord; // last force on tool0 in global coords
     dataRecorder.motorTorque = p_CommonData->wearableDelta->motorTorques;
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
@@ -1219,6 +1222,9 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
         << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
         << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[0] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[1] << "," << " "
+        << p_CommonData->debugData[i].VRInteractionForceGlobal[2] << "," << " "
         << p_CommonData->debugData[i].motorAngles[0] << "," << " "
         << p_CommonData->debugData[i].motorAngles[1] << "," << " "
         << p_CommonData->debugData[i].motorAngles[2] << "," << " "
