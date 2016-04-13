@@ -44,7 +44,7 @@ void haptics_thread::initialize()
 
     // Set the clock that controls haptic rate
     rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.00001);
+    rateClock.setTimeoutPeriodSeconds(0.00000000013);
     rateClock.start(true);
 
     // setup the clock that will enable display of the haptic rate
@@ -90,6 +90,7 @@ void haptics_thread::run()
         {
             // stop clock while we perform haptic calcs
             rateClock.stop();
+
             accelSignal = ReadAccel();
             Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
@@ -233,10 +234,6 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->palpPostTrialClock.stop();
         p_CommonData->palpPostTrialClock.reset();
 
-        // rotate tissue line indicator back to 0
-        double lastDispRotation = p_CommonData->indicatorRot;
-        rotateTissueLineDisp(-lastDispRotation);
-
         // increment trial no
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
 
@@ -295,6 +292,10 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
             p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
         }
+
+        // rotate tissue line indicator back to 0
+        double lastDispRotation = p_CommonData->indicatorRot;
+        rotateTissueLineDisp(-lastDispRotation);
     }
 
 //    // mainwindow makes the lump visible after trial, this makes it opaque again and starts the next trial
@@ -450,7 +451,12 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
     chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0; //this is only for lateral
 
-    /*double vertPosMovement;
+    // don't allow the tactor to move away from finger
+
+    double vertPosMovement = desiredPosMovement.z();
+    if(vertPosMovement > 0)
+        vertPosMovement = 0;
+    /*
     if(deviceLastComputedForce0.z() > 0)
         vertPosMovement = log(8.6736*deviceLastComputedForce0.z()+1.0); //linear fit exp data from normal displacement paper
     else

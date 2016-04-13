@@ -622,17 +622,21 @@ void MainWindow::on_startExperiment_3_clicked()
     p_CommonData->currentExperimentState = palpationLineTrial;
     p_CommonData->currentEnvironmentState = experimentPalpationLine;
     p_CommonData->currentControlState = VRControlMode;
-    p_CommonData->recordFlag = true;
 
-    p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
-    p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
-    p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
-    p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
-    p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
-    p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+    // check that we are not currently embedded in tissue
+    if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+    {
+        p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
+        p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
+        p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
+        p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
+        p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
+        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->trialNo = p_CommonData->trialNo - 1;
 
-    p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
-    rotateTissueLine(p_CommonData->tissueRot);
+        p_CommonData->palpPostTrialClock.reset();
+        p_CommonData->palpPostTrialClock.start();
+    }
 }
 
 
