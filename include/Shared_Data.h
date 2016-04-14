@@ -62,6 +62,7 @@ typedef struct
     chai3d::cVector3d lumpAnswerLocation;
     double lineAngle;
     double lineAngleTruth;
+    chai3d::cMatrix3d deviceRotation;
 
 } DataRecordStruct;
 

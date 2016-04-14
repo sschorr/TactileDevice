@@ -442,9 +442,12 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     deviceRotation0.identity();
     deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
     deviceRotation0.trans();
-    magTrackerLastComputedForce0 = rotation0*lastComputedForce0;
+    magTrackerLastComputedForce0 = rotation0*lastComputedForce0; //rotation between force in world and tracker frame
     deviceLastLastComputedForce0 = deviceLastComputedForce0;
-    deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0;
+    deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0; // rotation between force in world and device frame
+
+    //set deviceRotation for recording
+    deviceRotation = deviceRotation0*rotation0;
 
     deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
     globalLastForceRecord << lastComputedForce0.x(), lastComputedForce0.y(), lastComputedForce0.z();
@@ -505,6 +508,7 @@ void haptics_thread::RecordData()
     dataRecorder.lumpLocation = p_CommonData->p_tissueLump->getLocalPos();
     dataRecorder.lineAngle = p_CommonData->indicatorRot;
     dataRecorder.lineAngleTruth = p_CommonData->tissueRot;
+    dataRecorder.deviceRotation = deviceRotation;
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
