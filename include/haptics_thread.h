@@ -113,7 +113,7 @@ public:
     chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
     chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
 
-    chai3d::cMatrix3d deviceFinalRotation;
+    chai3d::cMatrix3d deviceRotation;
 
     //vars for contact vibration
     bool firstTouch;
