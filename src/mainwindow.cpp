@@ -517,15 +517,15 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
         << p_CommonData->debugData[i].lineAngleTruth << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,1) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,2) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(1,0) << "," << " "
         << p_CommonData->debugData[i].deviceRotation(1,1) << "," << " "
         << p_CommonData->debugData[i].deviceRotation(1,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,3) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(2,0) << "," << " "
         << p_CommonData->debugData[i].deviceRotation(2,1) << "," << " "
         << p_CommonData->debugData[i].deviceRotation(2,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,3) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(3,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(3,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(3,3) << "," << " "
         << std::endl;
     }
     file.close();
