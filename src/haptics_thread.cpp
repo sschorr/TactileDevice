@@ -346,6 +346,7 @@ void haptics_thread::UpdateVRGraphics()
 
     //set deviceRotation for recording
     deviceRotation = rotation0; //the chai device already rotates the tracker return based on the finger harness
+    qDebug() << deviceRotation(1,2);
 
     // set the visual representation to match
     m_curSphere0->setLocalPos(position0);
