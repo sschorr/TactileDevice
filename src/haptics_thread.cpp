@@ -344,6 +344,9 @@ void haptics_thread::UpdateVRGraphics()
     p_CommonData->chaiMagDevice0->getPosition(position0);
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
 
+    //set deviceRotation for recording
+    deviceRotation = rotation0; //the chai device already rotates the tracker return based on the finger harness
+
     // set the visual representation to match
     m_curSphere0->setLocalPos(position0);
     m_curSphere0->setLocalRot(rotation0);
@@ -446,9 +449,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     deviceLastLastComputedForce0 = deviceLastComputedForce0;
     deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0; // rotation between force in world and device frame
 
-    //set deviceRotation for recording
-    deviceRotation = deviceRotation0*rotation0;
-
     deviceLastForceRecord << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
     globalLastForceRecord << lastComputedForce0.x(), lastComputedForce0.y(), lastComputedForce0.z();
 
@@ -509,6 +509,7 @@ void haptics_thread::RecordData()
     dataRecorder.lineAngle = p_CommonData->indicatorRot;
     dataRecorder.lineAngleTruth = p_CommonData->tissueRot;
     dataRecorder.deviceRotation = deviceRotation;
+
     p_CommonData->debugData.push_back(dataRecorder);
 }
 
