@@ -321,12 +321,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                 p_CommonData->currentExperimentState = palpationLineWritingToFile;
                 p_CommonData->recordFlag = false;
                 WriteDataToFile();
-                p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
-                p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
-                p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
-                p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
-                p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
-                p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+                p_CommonData->p_tissueOne->setTransparencyLevel(0.1, true);
+                p_CommonData->p_tissueTwo->setTransparencyLevel(0.15, true);
+                p_CommonData->p_tissueThree->setTransparencyLevel(0.2, true);
+                p_CommonData->p_tissueFour->setTransparencyLevel(0.25, true);
+                p_CommonData->p_tissueFive->setTransparencyLevel(0.3, true);
+                p_CommonData->p_tissueSix->setTransparencyLevel(0.35, true);
+                p_CommonData->p_tissueSeven->setTransparencyLevel(0.4, true);
+                p_CommonData->p_tissueEight->setTransparencyLevel(0.45, true);
+                p_CommonData->p_tissueNine->setTransparencyLevel(0.5, true);
+                p_CommonData->p_tissueTen->setTransparencyLevel(0.55, true);
+                p_CommonData->p_tissueEleven->setTransparencyLevel(0.6, true);
+                p_CommonData->p_tissueTwelve->setTransparencyLevel(0.65, true);
+                p_CommonData->p_indicator->setTransparencyLevel(1);
 
                 p_CommonData->palpPostTrialClock.reset();
                 p_CommonData->palpPostTrialClock.start();
@@ -638,12 +645,19 @@ void MainWindow::on_startExperiment_3_clicked()
     // check that we are not currently embedded in tissue
     if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
     {
-        p_CommonData->p_tissueOne->setTransparencyLevel(0.2, true);
-        p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
-        p_CommonData->p_tissueThree->setTransparencyLevel(0.4, true);
-        p_CommonData->p_tissueFour->setTransparencyLevel(0.5, true);
-        p_CommonData->p_tissueFive->setTransparencyLevel(0.6, true);
-        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->p_tissueOne->setTransparencyLevel(0.1, true);
+        p_CommonData->p_tissueTwo->setTransparencyLevel(0.15, true);
+        p_CommonData->p_tissueThree->setTransparencyLevel(0.2, true);
+        p_CommonData->p_tissueFour->setTransparencyLevel(0.25, true);
+        p_CommonData->p_tissueFive->setTransparencyLevel(0.3, true);
+        p_CommonData->p_tissueSix->setTransparencyLevel(0.35, true);
+        p_CommonData->p_tissueSeven->setTransparencyLevel(0.4, true);
+        p_CommonData->p_tissueEight->setTransparencyLevel(0.45, true);
+        p_CommonData->p_tissueNine->setTransparencyLevel(0.5, true);
+        p_CommonData->p_tissueTen->setTransparencyLevel(0.55, true);
+        p_CommonData->p_tissueEleven->setTransparencyLevel(0.6, true);
+        p_CommonData->p_tissueTwelve->setTransparencyLevel(0.65, true);
+        p_CommonData->p_indicator->setTransparencyLevel(1, true);
         p_CommonData->trialNo = p_CommonData->trialNo - 1;
 
         p_CommonData->palpPostTrialClock.reset();
@@ -670,7 +684,7 @@ void MainWindow::on_setTrial_clicked()
 
 void MainWindow::rotateTissueLineDisp(double angle)
 {
-    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(0,0,-1,angle);
 
     p_CommonData->indicatorRot = p_CommonData->indicatorRot + angle;
 }
@@ -682,6 +696,13 @@ void MainWindow::rotateTissueLine(double angle)
     p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(0,0,-1,angle);
 }
 
 
