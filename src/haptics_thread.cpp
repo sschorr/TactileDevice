@@ -238,7 +238,21 @@ void haptics_thread::UpdateVRGraphics()
 
         QString type = (p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/));
 
-        if(type == "break")
+        if (type == "training")
+        {
+            p_CommonData->currentExperimentState = palpationLineTrial;
+            // rotate line to new location
+            double lastRotation = p_CommonData->tissueRot;
+            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
+
+            rotateTissueLine(-lastRotation);
+            rotateTissueLine(p_CommonData->tissueRot);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+
+            p_CommonData->recordFlag = true;
+        }
+
+        else if(type == "break")
         {
             p_CommonData->currentExperimentState = palpationLineBreak;
             p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
@@ -246,7 +260,14 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSeven->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueEight->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueNine->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueTen->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueEleven->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueTwelve->setTransparencyLevel(1, true);
+            p_CommonData->p_indicator->setTransparencyLevel(0, true);
         }
 
         else if(type == "trial")
@@ -259,37 +280,25 @@ void haptics_thread::UpdateVRGraphics()
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
 
+            p_CommonData->currentExperimentState = palpationLineBreak;
             p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
             p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
-            p_CommonData->recordFlag = true;
+            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSeven->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueEight->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueNine->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueTen->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueEleven->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueTwelve->setTransparencyLevel(1, true);
+            p_CommonData->p_indicator->setTransparencyLevel(0, true);
         }
 
-        else if (type == "training")
-        {
-            p_CommonData->currentExperimentState = palpationLineTrial;
-            // rotate line to new location
-            double lastRotation = p_CommonData->tissueRot;
-            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
-
-            rotateTissueLine(-lastRotation);
-            rotateTissueLine(p_CommonData->tissueRot);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
-
-            p_CommonData->recordFlag = true;
-        }
         else if (type == "end")
         {
             p_CommonData->currentExperimentState = end;
-            p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
         }
 
         // rotate tissue line indicator back to 0
@@ -626,12 +635,26 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
     p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
     p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueEight = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueNine = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTen = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueEleven = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTwelve = new chai3d::cMultiMesh();
+    p_CommonData->p_indicator = new chai3d::cMultiMesh();
     p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
 
     p_CommonData->p_hump = new chai3d::cMultiMesh();
     p_CommonData->p_hoopHump = new chai3d::cMultiMesh();
@@ -1277,7 +1300,7 @@ void haptics_thread::WriteDataToFile()
 
 void haptics_thread::rotateTissueLineDisp(double angle)
 {
-    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->indicatorRot = p_CommonData->indicatorRot + angle;
 }
 
@@ -1288,6 +1311,13 @@ void haptics_thread::rotateTissueLine(double angle)
     p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(0,0,-1,angle);
+    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(0,0,-1,angle);
 }
 
 void haptics_thread::RenderPalpation()
@@ -1336,7 +1366,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueTwo->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueTwo->setStiffness(tissueNomStiffness*1.125, true);
+    p_CommonData->p_tissueTwo->setStiffness(tissueNomStiffness*1.05, true);
     p_CommonData->p_tissueTwo->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Three---------------------------------------------------
     // add object to world
@@ -1373,7 +1403,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueFour->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFour->setStiffness(tissueNomStiffness*1.375, true);
+    p_CommonData->p_tissueFour->setStiffness(tissueNomStiffness*1.1, true);
     p_CommonData->p_tissueFour->setFriction(staticFriction, dynamicFriction, TRUE);
 
     //----------------------------------------------Create Tissue Five---------------------------------------------------
@@ -1392,23 +1422,151 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueFive->createAABBCollisionDetector(toolRadius);
 
     // define a default stiffness for the object
-    p_CommonData->p_tissueFive->setStiffness(tissueNomStiffness*1.5, true);
+    p_CommonData->p_tissueFive->setStiffness(tissueNomStiffness*1.15, true);
     p_CommonData->p_tissueFive->setFriction(staticFriction, dynamicFriction, TRUE);
-
-    //----------------------------------------------Create Tissue Indicator---------------------------------------------------
+    //----------------------------------------------Create Tissue Six---------------------------------------------------
     // add object to world
     world->addChild(p_CommonData->p_tissueSix);
 
-    p_CommonData->p_tissueSix->setLocalPos(0,0,-.026+vertOffset);
+    p_CommonData->p_tissueSix->setLocalPos(0,0,-.025+vertOffset);
 
     //load the object from file
-    p_CommonData->p_tissueSix->loadFromFile("./Resources/tissue_5 OBJ/tissue_5.obj");
+    p_CommonData->p_tissueSix->loadFromFile("./Resources/tissue_6 OBJ/tissue_6.obj");
 
-    p_CommonData->p_tissueSix->setHapticEnabled(false);
+    // compute a boundary box
+    p_CommonData->p_tissueSix->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueSix->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueSix->setStiffness(tissueNomStiffness*1.2, true);
+    p_CommonData->p_tissueSix->setFriction(staticFriction, dynamicFriction, TRUE);
+    //----------------------------------------------Create Tissue Seven---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueSeven);
+
+    p_CommonData->p_tissueSeven->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueSeven->loadFromFile("./Resources/tissue_7 OBJ/tissue_7.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueSeven->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueSeven->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueSeven->setStiffness(tissueNomStiffness*1.25, true);
+    p_CommonData->p_tissueSeven->setFriction(staticFriction, dynamicFriction, TRUE);
+    //----------------------------------------------Create Tissue Eight---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueEight);
+
+    p_CommonData->p_tissueEight->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueEight->loadFromFile("./Resources/tissue_8 OBJ/tissue_8.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueEight->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueEight->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueEight->setStiffness(tissueNomStiffness*1.3, true);
+    p_CommonData->p_tissueEight->setFriction(staticFriction, dynamicFriction, TRUE);
+    //----------------------------------------------Create Tissue Nine---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueNine);
+
+    p_CommonData->p_tissueNine->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueNine->loadFromFile("./Resources/tissue_9 OBJ/tissue_9.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueNine->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueNine->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueNine->setStiffness(tissueNomStiffness*1.35, true);
+    p_CommonData->p_tissueNine->setFriction(staticFriction, dynamicFriction, TRUE);
+    //----------------------------------------------Create Tissue Ten---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueTen);
+
+    p_CommonData->p_tissueTen->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueTen->loadFromFile("./Resources/tissue_10 OBJ/tissue_10.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueTen->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueTen->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueTen->setStiffness(tissueNomStiffness*1.4, true);
+    p_CommonData->p_tissueTen->setFriction(staticFriction, dynamicFriction, TRUE);
+
+    //----------------------------------------------Create Tissue Eleven---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueEleven);
+
+    p_CommonData->p_tissueEleven->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueEleven->loadFromFile("./Resources/tissue_11 OBJ/tissue_11.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueEleven->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueEleven->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueEleven->setStiffness(tissueNomStiffness*1.45, true);
+    p_CommonData->p_tissueEleven->setFriction(staticFriction, dynamicFriction, TRUE);
+
+    //----------------------------------------------Create Tissue Twelve---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_tissueTwelve);
+
+    p_CommonData->p_tissueTwelve->setLocalPos(0,0,-.025+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_tissueTwelve->loadFromFile("./Resources/tissue_12 OBJ/tissue_12.obj");
+
+    // compute a boundary box
+    p_CommonData->p_tissueTwelve->computeBoundaryBox(true);
+
+    // compute collision detection algorithm
+    p_CommonData->p_tissueTwelve->createAABBCollisionDetector(toolRadius);
+
+    // define a default stiffness for the object
+    p_CommonData->p_tissueTwelve->setStiffness(tissueNomStiffness*1.5, true);
+    p_CommonData->p_tissueTwelve->setFriction(staticFriction, dynamicFriction, TRUE);
+
+    //----------------------------------------------Create Tissue Indicator---------------------------------------------------
+    // add object to world
+    world->addChild(p_CommonData->p_indicator);
+
+    p_CommonData->p_indicator->setLocalPos(0,0,-.026+vertOffset);
+
+    //load the object from file
+    p_CommonData->p_indicator->loadFromFile("./Resources/tissue_indicator OBJ/tissue_indicator.obj");
+
+    p_CommonData->p_indicator->setHapticEnabled(false);
     chai3d::cMaterial mat0;
     mat0.setRed();
-    p_CommonData->p_tissueSix->setMaterial(mat0);
-    p_CommonData->p_tissueSix->setTransparencyLevel(0);
+    p_CommonData->p_indicator->setMaterial(mat0);
+    p_CommonData->p_indicator->setTransparencyLevel(1);
 
 }
 
