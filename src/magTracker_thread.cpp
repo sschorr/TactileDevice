@@ -92,7 +92,7 @@ void magTracker_thread::CheckTrackerPoses()
 {
 #ifdef MAGTRACKER
     // change to <= 1 if we want to use both trackers
-    for(int tracker = 0; tracker <=0; tracker = tracker + 1)
+    for(int tracker = 0; tracker <=1; tracker = tracker + 1)
     {
         double posScale = 1000.0;
         double depthOffset = 150;

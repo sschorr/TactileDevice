@@ -92,7 +92,7 @@ void haptics_thread::run()
             rateClock.stop();
 
             accelSignal = ReadAccel();
-            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
 
@@ -139,13 +139,12 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 2)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
                 {
                     RecordData();
-                    //qDebug() << "indicator Rot: " << p_CommonData->indicatorRot << "tissue rot: " << p_CommonData->tissueRot;
                 }
             }
 
@@ -362,12 +361,12 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
     //use this if two tools (haptic proxies) are desired
-//    m_tool1->updatePose();
-//    p_CommonData->chaiMagDevice1->getPosition(position1);
-//    p_CommonData->chaiMagDevice1->getRotation(rotation1);
-//    m_curSphere1->setLocalPos(position1);
-//    m_curSphere1->setLocalRot(rotation1);
-//    m_tool1->computeInteractionForces();
+    m_tool1->updatePose();
+    p_CommonData->chaiMagDevice1->getPosition(position1);
+    p_CommonData->chaiMagDevice1->getRotation(rotation1);
+    m_curSphere1->setLocalPos(position1);
+    m_curSphere1->setLocalRot(rotation1);
+    m_tool1->computeInteractionForces();
 
     // perform our dynamic body updates if we are in a dynamic environment
     if((p_CommonData->currentEnvironmentState == dynamicBodies) | (p_CommonData->currentEnvironmentState == paperEnvironment))
@@ -564,13 +563,13 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
-//    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
-//    world->addChild(m_tool1); //insert the tool into the world
-//    m_tool1->setRadius(toolRadius);
-//    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
-//    //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-//    //m_tool1->enableDynamicObjects(true);
-//    m_tool1->start();
+    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
+    world->addChild(m_tool1); //insert the tool into the world
+    m_tool1->setRadius(toolRadius);
+    m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
+    //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    //m_tool1->enableDynamicObjects(true);
+    m_tool1->start();
 
     // Can use this to show frames on tool if so desired
     //create a sphere to represent the tool
@@ -580,11 +579,11 @@ void haptics_thread::InitFingerAndTool()
     m_curSphere0->setShowFrame(true);
     m_curSphere0->setFrameSize(0.05);
 
-//    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
-//    world->addChild(m_curSphere1);
-//    m_curSphere1->m_material->setBlueAqua();
-//    m_curSphere1->setShowFrame(true);
-//    m_curSphere1->setFrameSize(0.05);
+    m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_curSphere1);
+    m_curSphere1->m_material->setBlueAqua();
+    m_curSphere1->setShowFrame(true);
+    m_curSphere1->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------
@@ -1261,6 +1260,15 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
         << p_CommonData->debugData[i].lineAngleTruth << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,1) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(0,2) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(1,0) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(1,1) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(1,2) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(2,0) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(2,1) << "," << " "
+        << p_CommonData->debugData[i].deviceRotation(2,2) << "," << " "
         << std::endl;
     }
     file.close();
