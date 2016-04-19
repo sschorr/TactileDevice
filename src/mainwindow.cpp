@@ -254,7 +254,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueThree->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(1.0, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueSeven->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueEight->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueNine->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueTen->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueEleven->setTransparencyLevel(1.0, true);
+            p_CommonData->p_tissueTwelve->setTransparencyLevel(1, true);
+            p_CommonData->p_indicator->setTransparencyLevel(0, true);
 
             p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
             p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
@@ -272,7 +279,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->p_tissueThree->setTransparencyLevel(0.3, true);
             p_CommonData->p_tissueFour->setTransparencyLevel(0.4, true);
             p_CommonData->p_tissueFive->setTransparencyLevel(0.5, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+            p_CommonData->p_tissueSix->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueSeven->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueEight->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueNine->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueTen->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueEleven->setTransparencyLevel(0.5, true);
+            p_CommonData->p_tissueTwelve->setTransparencyLevel(0.5, true);
+            p_CommonData->p_indicator->setTransparencyLevel(1, true);
 
             p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
             p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
@@ -321,19 +335,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                 p_CommonData->currentExperimentState = palpationLineWritingToFile;
                 p_CommonData->recordFlag = false;
                 WriteDataToFile();
-                p_CommonData->p_tissueOne->setTransparencyLevel(0.1, true);
-                p_CommonData->p_tissueTwo->setTransparencyLevel(0.15, true);
-                p_CommonData->p_tissueThree->setTransparencyLevel(0.2, true);
-                p_CommonData->p_tissueFour->setTransparencyLevel(0.25, true);
-                p_CommonData->p_tissueFive->setTransparencyLevel(0.3, true);
-                p_CommonData->p_tissueSix->setTransparencyLevel(0.35, true);
-                p_CommonData->p_tissueSeven->setTransparencyLevel(0.4, true);
-                p_CommonData->p_tissueEight->setTransparencyLevel(0.45, true);
-                p_CommonData->p_tissueNine->setTransparencyLevel(0.5, true);
-                p_CommonData->p_tissueTen->setTransparencyLevel(0.55, true);
-                p_CommonData->p_tissueEleven->setTransparencyLevel(0.6, true);
-                p_CommonData->p_tissueTwelve->setTransparencyLevel(0.65, true);
-                p_CommonData->p_indicator->setTransparencyLevel(1);
+                p_CommonData->p_tissueOne->setTransparencyLevel(0.25, true);
+                p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
+                p_CommonData->p_tissueThree->setTransparencyLevel(0.35, true);
+                p_CommonData->p_tissueFour->setTransparencyLevel(0.4, true);
+                p_CommonData->p_tissueFive->setTransparencyLevel(0.45, true);
+                p_CommonData->p_tissueSix->setTransparencyLevel(0.5, true);
+                p_CommonData->p_tissueSeven->setTransparencyLevel(0.55, true);
+                p_CommonData->p_tissueEight->setTransparencyLevel(0.6, true);
+                p_CommonData->p_tissueNine->setTransparencyLevel(0.65, true);
+                p_CommonData->p_tissueTen->setTransparencyLevel(0.7, true);
+                p_CommonData->p_tissueEleven->setTransparencyLevel(0.75, true);
+                p_CommonData->p_tissueTwelve->setTransparencyLevel(0.8, true);
+                p_CommonData->p_indicator->setTransparencyLevel(1, true);
 
                 p_CommonData->palpPostTrialClock.reset();
                 p_CommonData->palpPostTrialClock.start();
@@ -458,12 +472,12 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     if (a_event->key() == Qt::Key_Z)
     {
         rotateTissueLineDisp(-angle);
-        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->p_indicator->setTransparencyLevel(1, true);
     }
     if (a_event->key() == Qt::Key_X)
     {
         rotateTissueLineDisp(angle);
-        p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
+        p_CommonData->p_indicator->setTransparencyLevel(1, true);
     }
 }
 
@@ -645,18 +659,18 @@ void MainWindow::on_startExperiment_3_clicked()
     // check that we are not currently embedded in tissue
     if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
     {
-        p_CommonData->p_tissueOne->setTransparencyLevel(0.1, true);
-        p_CommonData->p_tissueTwo->setTransparencyLevel(0.15, true);
-        p_CommonData->p_tissueThree->setTransparencyLevel(0.2, true);
-        p_CommonData->p_tissueFour->setTransparencyLevel(0.25, true);
-        p_CommonData->p_tissueFive->setTransparencyLevel(0.3, true);
-        p_CommonData->p_tissueSix->setTransparencyLevel(0.35, true);
-        p_CommonData->p_tissueSeven->setTransparencyLevel(0.4, true);
-        p_CommonData->p_tissueEight->setTransparencyLevel(0.45, true);
-        p_CommonData->p_tissueNine->setTransparencyLevel(0.5, true);
-        p_CommonData->p_tissueTen->setTransparencyLevel(0.55, true);
-        p_CommonData->p_tissueEleven->setTransparencyLevel(0.6, true);
-        p_CommonData->p_tissueTwelve->setTransparencyLevel(0.65, true);
+        p_CommonData->p_tissueOne->setTransparencyLevel(0.25, true);
+        p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
+        p_CommonData->p_tissueThree->setTransparencyLevel(0.35, true);
+        p_CommonData->p_tissueFour->setTransparencyLevel(0.4, true);
+        p_CommonData->p_tissueFive->setTransparencyLevel(0.45, true);
+        p_CommonData->p_tissueSix->setTransparencyLevel(0.5, true);
+        p_CommonData->p_tissueSeven->setTransparencyLevel(0.55, true);
+        p_CommonData->p_tissueEight->setTransparencyLevel(0.6, true);
+        p_CommonData->p_tissueNine->setTransparencyLevel(0.65, true);
+        p_CommonData->p_tissueTen->setTransparencyLevel(0.7, true);
+        p_CommonData->p_tissueEleven->setTransparencyLevel(0.75, true);
+        p_CommonData->p_tissueTwelve->setTransparencyLevel(0.8, true);
         p_CommonData->p_indicator->setTransparencyLevel(1, true);
         p_CommonData->trialNo = p_CommonData->trialNo - 1;
 

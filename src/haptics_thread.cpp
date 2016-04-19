@@ -247,8 +247,7 @@ void haptics_thread::UpdateVRGraphics()
 
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
-            p_CommonData->p_tissueSix->setTransparencyLevel(0, true);
-
+            p_CommonData->p_indicator->setTransparencyLevel(0, true);
             p_CommonData->recordFlag = true;
         }
 
