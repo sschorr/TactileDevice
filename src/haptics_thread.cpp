@@ -139,7 +139,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 2)
+            if(recordDataCounter == 10)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -279,7 +279,6 @@ void haptics_thread::UpdateVRGraphics()
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
 
-            p_CommonData->currentExperimentState = palpationLineBreak;
             p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
             p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
