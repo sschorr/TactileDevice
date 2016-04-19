@@ -93,7 +93,6 @@ void MainWindow::UpdateGUIInfo()
     localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
     localDesiredJointAngle = p_CommonData->wearableDelta->CalcInverseKinJoint();
 
-
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
     ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
@@ -222,7 +221,7 @@ void MainWindow::on_setDirectory_clicked()
 
 
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/Palpation Exp/Subjects",
+                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/PalpationLine Exp/Subjects",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     p_CommonData->fileName = QInputDialog::getText(0, "Input File Name",
                                      "File Name:", QLineEdit::Normal, " ",
