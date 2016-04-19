@@ -238,6 +238,8 @@ void haptics_thread::UpdateVRGraphics()
 
         QString type = (p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/));
 
+        qDebug() << type;
+
         if (type == "training")
         {
             p_CommonData->currentExperimentState = palpationLineTrial;
@@ -279,7 +281,6 @@ void haptics_thread::UpdateVRGraphics()
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
 
-            p_CommonData->currentExperimentState = palpationLineBreak;
             p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
             p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
             p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
