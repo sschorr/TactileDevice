@@ -1134,33 +1134,76 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
 
 void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
 {
-    double circleR = 3.0;
     double currTime = p_CommonData->overallClock.getCurrentTimeSeconds() - p_CommonData->circStartTime;
-    double revTime = 2.5;
-    double waitTime = 0.1;
-    double theta = 2.0*PI/revTime*currTime; //the angle grows as one rev every revTime seconds
-    Eigen::Vector3d desPos(0,0,p_CommonData->neutralPos.z());
+    double smallR = 1;
+    double medR = 2;
+    double largeR = 3;
 
-    double rampTime = 2.0*revTime; //ramp the amplitude over 2 revolutions
-    double finalTime = 10.0*revTime; // ending time, then write to file
-    double amp;
-    p_CommonData->recordFlag = true;
+    double moveStartTime = 1;
+    double tactorSpeed = 3; // [mm/s]
 
-    if (currTime < waitTime)
+    double smallCircTime = 2*PI*smallR/tactorSpeed;
+    double medCircTime = 2*PI*medR/tactorSpeed;
+    double largeCircTime = 2*PI*largeR/tactorSpeed;
+
+    double theta;
+    double X;
+    double Y;
+
+    Eigen::Vector3d desPos;
+
+    p_CommonData->recordFlag = false;
+
+    // move to start small circle
+    if (currTime < moveStartTime)
     {
-        amp = 0;
-    }
-    else if (currTime < rampTime)
-    {
-        amp = circleR*currTime/rampTime;
-    }
-    else if (currTime > rampTime)
-    {
-        amp = circleR;        
+        p_CommonData->recordFlag = false;
+        X = currTime/moveStartTime*smallR;
+        Y = 0;
     }
 
-    double X = amp*cos(theta);
-    double Y = amp*sin(theta);
+    // perform small circle
+    else if (currTime < (moveStartTime + smallCircTime))
+    {
+        p_CommonData->recordFlag = true;
+        theta = 2*PI*(currTime - moveStartTime)/smallCircTime;
+        X = smallR*cos(theta);
+        Y = smallR*sin(theta);
+    }
+
+    // move to start med circle
+    else if (currTime < (2*moveStartTime + smallCircTime))
+    {
+        p_CommonData->recordFlag = false;
+        X = smallR + (currTime-(moveStartTime + smallCircTime))/moveStartTime*smallR;
+        Y = 0;
+    }
+
+    // perform medium circle
+    else if (currTime < (2*moveStartTime + smallCircTime + medCircTime))
+    {
+        p_CommonData->recordFlag = true;
+        theta = 2*PI*(currTime - (2*moveStartTime+smallCircTime))/medCircTime;
+        X = medR*cos(theta);
+        Y = medR*sin(theta);
+    }
+
+    // move to start large circle
+    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime))
+    {
+        p_CommonData->recordFlag = false;
+        X = 2*smallR + (currTime-(2*moveStartTime + smallCircTime + medCircTime))/moveStartTime*smallR;
+        Y = 0;
+    }
+
+    // perform large circle
+    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime + largeCircTime))
+    {
+        p_CommonData->recordFlag = true;
+        theta = 2*PI*(currTime - (3*moveStartTime + smallCircTime + medCircTime))/largeCircTime;
+        X = largeR*cos(theta);
+        Y = largeR*sin(theta);
+    }
 
     if (inputMotionAxis.x() == 1)
     {
@@ -1184,7 +1227,7 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     p_CommonData->wearableDelta->SetDesiredPos(desPos);
 
 
-    if (currTime > finalTime)
+    if (currTime > 3*moveStartTime + smallCircTime + medCircTime + largeCircTime)
     {
         p_CommonData->wearableDelta->TurnOffControl();
         WriteDataToFile();
