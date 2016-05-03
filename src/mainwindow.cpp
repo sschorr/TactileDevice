@@ -186,6 +186,7 @@ void MainWindow::UpdateGUIInfo()
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
+    p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
     onGUIchanged();
 }
 
