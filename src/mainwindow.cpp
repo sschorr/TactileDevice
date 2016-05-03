@@ -702,6 +702,15 @@ void MainWindow::rotateTissueLineDisp(double angle)
     p_CommonData->indicatorRot = p_CommonData->indicatorRot + angle;
 }
 
+void MainWindow::on_pushButton_clicked()
+{
+    bool ok;
+    QString TrialNoString = QInputDialog::getText(0, "Input Circle Radius",
+                                         "Circle Rad:", QLineEdit::Normal, " ",
+                                         &ok);
+    p_CommonData->circRadius = TrialNoString.toDouble();
+}
+
 void MainWindow::rotateTissueLine(double angle)
 {
     p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(0,0,-1,angle);
@@ -717,6 +726,8 @@ void MainWindow::rotateTissueLine(double angle)
     p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(0,0,-1,angle);
 }
+
+
 
 
 

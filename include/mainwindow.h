@@ -80,6 +80,7 @@ private slots:
     void rotateTissueLine(double angle);
     void on_startExperiment_3_clicked();
     void on_loadProtocol_3_clicked();
+    void on_pushButton_clicked();
 };
 
 #endif // MAINWINDOW_H

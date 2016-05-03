@@ -139,7 +139,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 5)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -1140,11 +1140,12 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     double largeR = 3;
 
     double moveStartTime = 1;
-    double tactorSpeed = 3; // [mm/s]
+    double tactorSpeed = 5; // [mm/s]
 
     double smallCircTime = 2*PI*smallR/tactorSpeed;
     double medCircTime = 2*PI*medR/tactorSpeed;
     double largeCircTime = 2*PI*largeR/tactorSpeed;
+    double circTime = 2*PI*p_CommonData->circRadius/tactorSpeed;
 
     double theta;
     double X;
@@ -1153,57 +1154,73 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     Eigen::Vector3d desPos;
 
     p_CommonData->recordFlag = false;
-
     // move to start small circle
     if (currTime < moveStartTime)
     {
-        p_CommonData->recordFlag = false;
-        X = currTime/moveStartTime*smallR;
+        X = currTime/moveStartTime*p_CommonData->circRadius;
         Y = 0;
     }
 
     // perform small circle
-    else if (currTime < (moveStartTime + smallCircTime))
+    else if (currTime < (moveStartTime + 2*circTime))
     {
         p_CommonData->recordFlag = true;
-        theta = 2*PI*(currTime - moveStartTime)/smallCircTime;
-        X = smallR*cos(theta);
-        Y = smallR*sin(theta);
+        theta = 2*PI*(currTime - moveStartTime)/circTime;
+        X = p_CommonData->circRadius*cos(theta);
+        Y = p_CommonData->circRadius*sin(theta);
     }
 
-    // move to start med circle
-    else if (currTime < (2*moveStartTime + smallCircTime))
-    {
-        p_CommonData->recordFlag = false;
-        X = smallR + (currTime-(moveStartTime + smallCircTime))/moveStartTime*smallR;
-        Y = 0;
-    }
+    // this code puts all 3 circle radius draws together
+//    p_CommonData->recordFlag = false;
+//    // move to start small circle
+//    if (currTime < moveStartTime)
+//    {
+//        X = currTime/moveStartTime*smallR;
+//        Y = 0;
+//    }
 
-    // perform medium circle
-    else if (currTime < (2*moveStartTime + smallCircTime + medCircTime))
-    {
-        p_CommonData->recordFlag = true;
-        theta = 2*PI*(currTime - (2*moveStartTime+smallCircTime))/medCircTime;
-        X = medR*cos(theta);
-        Y = medR*sin(theta);
-    }
+//    // perform small circle
+//    else if (currTime < (moveStartTime + smallCircTime))
+//    {
+//        p_CommonData->recordFlag = true;
+//        theta = 2*PI*(currTime - moveStartTime)/smallCircTime;
+//        X = smallR*cos(theta);
+//        Y = smallR*sin(theta);
+//    }
 
-    // move to start large circle
-    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime))
-    {
-        p_CommonData->recordFlag = false;
-        X = 2*smallR + (currTime-(2*moveStartTime + smallCircTime + medCircTime))/moveStartTime*smallR;
-        Y = 0;
-    }
+//    // move to start med circle
+//    else if (currTime < (2*moveStartTime + smallCircTime))
+//    {
+//        p_CommonData->recordFlag = false;
+//        X = smallR + (currTime-(moveStartTime + smallCircTime))/moveStartTime*smallR;
+//        Y = 0;
+//    }
 
-    // perform large circle
-    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime + largeCircTime))
-    {
-        p_CommonData->recordFlag = true;
-        theta = 2*PI*(currTime - (3*moveStartTime + smallCircTime + medCircTime))/largeCircTime;
-        X = largeR*cos(theta);
-        Y = largeR*sin(theta);
-    }
+//    // perform medium circle
+//    else if (currTime < (2*moveStartTime + smallCircTime + medCircTime))
+//    {
+//        p_CommonData->recordFlag = true;
+//        theta = 2*PI*(currTime - (2*moveStartTime+smallCircTime))/medCircTime;
+//        X = medR*cos(theta);
+//        Y = medR*sin(theta);
+//    }
+
+//    // move to start large circle
+//    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime))
+//    {
+//        p_CommonData->recordFlag = false;
+//        X = 2*smallR + (currTime-(2*moveStartTime + smallCircTime + medCircTime))/moveStartTime*smallR;
+//        Y = 0;
+//    }
+
+//    // perform large circle
+//    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime + largeCircTime))
+//    {
+//        p_CommonData->recordFlag = true;
+//        theta = 2*PI*(currTime - (3*moveStartTime + smallCircTime + medCircTime))/largeCircTime;
+//        X = largeR*cos(theta);
+//        Y = largeR*sin(theta);
+//    }
 
     if (inputMotionAxis.x() == 1)
     {
@@ -1227,7 +1244,7 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     p_CommonData->wearableDelta->SetDesiredPos(desPos);
 
 
-    if (currTime > 3*moveStartTime + smallCircTime + medCircTime + largeCircTime)
+    if (currTime > (moveStartTime + 2*circTime))
     {
         p_CommonData->wearableDelta->TurnOffControl();
         WriteDataToFile();
