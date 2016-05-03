@@ -43,8 +43,8 @@
      <widget class="QLCDNumber" name="lcdNumberHapticRate">
       <property name="geometry">
        <rect>
-        <x>1200</x>
-        <y>100</y>
+        <x>1260</x>
+        <y>110</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -69,8 +69,8 @@
      <widget class="QLabel" name="label_22">
       <property name="geometry">
        <rect>
-        <x>1200</x>
-        <y>80</y>
+        <x>1260</x>
+        <y>90</y>
         <width>81</width>
         <height>16</height>
        </rect>
@@ -147,8 +147,8 @@
      <widget class="QRadioButton" name="sliderControl">
       <property name="geometry">
        <rect>
-        <x>1190</x>
-        <y>130</y>
+        <x>1250</x>
+        <y>160</y>
         <width>91</width>
         <height>17</height>
        </rect>
@@ -402,8 +402,8 @@
      <widget class="QPushButton" name="ZeroSliders">
       <property name="geometry">
        <rect>
-        <x>1090</x>
-        <y>110</y>
+        <x>1150</x>
+        <y>140</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -519,8 +519,8 @@
      <widget class="QPushButton" name="CalibratePushButton">
       <property name="geometry">
        <rect>
-        <x>1090</x>
-        <y>80</y>
+        <x>1150</x>
+        <y>110</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -663,8 +663,8 @@
      <widget class="QRadioButton" name="VRControl">
       <property name="geometry">
        <rect>
-        <x>1190</x>
-        <y>150</y>
+        <x>1250</x>
+        <y>180</y>
         <width>82</width>
         <height>17</height>
        </rect>
@@ -715,8 +715,8 @@
      <widget class="QPushButton" name="turnOff">
       <property name="geometry">
        <rect>
-        <x>1090</x>
-        <y>140</y>
+        <x>1150</x>
+        <y>170</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -1066,7 +1066,7 @@
      <widget class="QPushButton" name="setNeutral">
       <property name="geometry">
        <rect>
-        <x>1100</x>
+        <x>1160</x>
         <y>200</y>
         <width>191</width>
         <height>51</height>
@@ -1269,6 +1269,97 @@
       </property>
       <property name="text">
        <string>Set Rad</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="OneUp">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>150</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1+</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="OneDown">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>180</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>1-</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="TwoUp">
+      <property name="geometry">
+       <rect>
+        <x>960</x>
+        <y>150</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2+</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="TwoDown">
+      <property name="geometry">
+       <rect>
+        <x>960</x>
+        <y>180</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>2-</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ThreeDown">
+      <property name="geometry">
+       <rect>
+        <x>1030</x>
+        <y>180</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3-</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="ThreeUp">
+      <property name="geometry">
+       <rect>
+        <x>1030</x>
+        <y>150</y>
+        <width>21</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>3+</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="initJoints">
+      <property name="geometry">
+       <rect>
+        <x>1250</x>
+        <y>140</y>
+        <width>82</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Init Calib Joints</string>
       </property>
      </widget>
     </widget>

@@ -112,6 +112,9 @@ public:
     // Set motors to stop outputting
     void TurnOffControl();
 
+    // allows setting individual joints on startup
+    void IndivJointController(Eigen::Vector3d desJointAnglesArg, double Kp, double Kd);
+
 
     // Public Vars ==========================================
     Eigen::Vector3d neutralPos;

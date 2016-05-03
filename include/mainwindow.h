@@ -81,6 +81,12 @@ private slots:
     void on_startExperiment_3_clicked();
     void on_loadProtocol_3_clicked();
     void on_pushButton_clicked();
+    void on_OneUp_clicked();
+    void on_OneDown_clicked();
+    void on_TwoUp_clicked();
+    void on_TwoDown_clicked();
+    void on_ThreeUp_clicked();
+    void on_ThreeDown_clicked();
 };
 
 #endif // MAINWINDOW_H

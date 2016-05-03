@@ -31,6 +31,13 @@ void MainWindow::Initialize()
     connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthFreqSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
 
+    connect(this->ui->OneUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->OneDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->TwoUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->TwoDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->ThreeUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->ThreeDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
@@ -45,12 +52,18 @@ void MainWindow::Initialize()
     p_CommonData->indicatorRot = 0;
     p_CommonData->tissueRot = 0;
 
+    p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
+
     GraphicsTimer.start(20);
     UpdateGUIInfo();
 }
 
 void MainWindow::onGUIchanged()
 {
+    if(ui->initJoints->isChecked())
+    {
+        p_CommonData->currentControlState = initCalibControl;
+    }
     if(ui->sliderControl->isChecked())
     {
         p_CommonData->currentControlState = sliderControlMode;
@@ -66,6 +79,8 @@ void MainWindow::onGUIchanged()
         //let haptics thread determine desired position
         p_CommonData->currentControlState = VRControlMode;
     }
+
+
 
     double KpSlider = this->ui->KpSlider->value()*20.0;
     double KdSlider = this->ui->KdSlider->value()/30.0;
@@ -91,7 +106,7 @@ void MainWindow::UpdateGUIInfo()
     localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
     localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
     localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-    localDesiredJointAngle = p_CommonData->wearableDelta->CalcInverseKinJoint();
+    localDesiredJointAngle = p_CommonData->desJointInits;//p_CommonData->wearableDelta->CalcInverseKinJoint();
 
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
@@ -728,11 +743,62 @@ void MainWindow::rotateTissueLine(double angle)
 }
 
 
+void MainWindow::on_OneUp_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
 
+    curr1 = curr1 + 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}
 
+void MainWindow::on_OneDown_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
 
+    curr1 = curr1 - 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}
 
+void MainWindow::on_TwoUp_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
 
+    curr2 = curr2 + 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}
 
+void MainWindow::on_TwoDown_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
 
+    curr2 = curr2 - 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}
 
+void MainWindow::on_ThreeUp_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
+
+    curr3 = curr3 + 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}
+
+void MainWindow::on_ThreeDown_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
+
+    curr3 = curr3 - 1*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+}

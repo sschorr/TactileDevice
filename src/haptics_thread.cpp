@@ -95,6 +95,10 @@ void haptics_thread::run()
             Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
+            case initCalibControl:
+                UpdateVRGraphics();
+                p_CommonData->wearableDelta->IndivJointController(p_CommonData->desJointInits, p_CommonData->jointKp, p_CommonData->jointKd);
+                break;
 
             case idleControl:
                 UpdateVRGraphics();

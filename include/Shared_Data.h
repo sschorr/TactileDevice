@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -85,7 +85,8 @@ typedef enum
     sliderControlMode,
     VRControlMode,
     sinControlMode,
-    circControlMode    
+    circControlMode,
+    initCalibControl
 } control_states;
 
 typedef enum
@@ -265,6 +266,9 @@ typedef struct
     // recording variables
     QString dir;
     QString fileName;
+
+    // init joint angles
+    Eigen::Vector3d desJointInits;
 
 } shared_data;
 

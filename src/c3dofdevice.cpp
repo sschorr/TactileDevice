@@ -438,6 +438,36 @@ void c3DOFDevice::PositionController(double Kp, double Kd)
     lastPos = currentPos;
 }
 
+void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double Kp, double Kd)
+{
+    static bool firstTimeThrough = true;
+    static Eigen::Vector3d lastAngles;
+    static Eigen::Vector3d lastAngVel;
+    Eigen::Vector3d desAngleVel(0,0,0);
+    double alpha = 0.5;
+
+    Eigen::Vector3d jointAngles = GetJointAngles();
+    Eigen::Vector3d desJointAngles = desJointAnglesArg;
+
+    if(firstTimeThrough)
+    {
+        lastAngles = jointAngles;
+        lastAngVel << 0,0,0;
+        firstTimeThrough = false;
+    }
+
+    Eigen::Vector3d currAngVel = jointAngles-lastAngles;
+    Eigen::Vector3d filteredVel = alpha*currAngVel + (1-alpha)*lastAngVel;
+    jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
+
+    SetJointTorqueOutput(jointTorques);
+
+    qDebug() << "I am running controller";
+
+    lastAngVel = filteredVel;
+    lastAngles = jointAngles;
+}
+
 void c3DOFDevice::JointController(double Kp, double Kd)
 {
     static bool firstTimeThrough = true;
