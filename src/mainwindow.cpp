@@ -37,6 +37,7 @@ void MainWindow::Initialize()
     connect(this->ui->TwoDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->ThreeUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->ThreeDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->AllDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
@@ -750,7 +751,7 @@ void MainWindow::on_OneUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr1 = curr1 + 1*PI/180;
+    curr1 = curr1 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -760,7 +761,7 @@ void MainWindow::on_OneDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr1 = curr1 - 1*PI/180;
+    curr1 = curr1 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -770,7 +771,7 @@ void MainWindow::on_TwoUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr2 = curr2 + 1*PI/180;
+    curr2 = curr2 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -780,7 +781,7 @@ void MainWindow::on_TwoDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr2 = curr2 - 1*PI/180;
+    curr2 = curr2 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -790,7 +791,7 @@ void MainWindow::on_ThreeUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr3 = curr3 + 1*PI/180;
+    curr3 = curr3 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -800,6 +801,19 @@ void MainWindow::on_ThreeDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr3 = curr3 - 1*PI/180;
+    curr3 = curr3 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
+}
+
+void MainWindow::on_AllDown_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
+
+    curr1 = curr1 - 5*PI/180;
+    curr2 = curr2 - 5*PI/180;
+    curr3 = curr3 - 5*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+    //on_CalibratePushButton_clicked();
 }

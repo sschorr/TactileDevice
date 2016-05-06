@@ -38,7 +38,7 @@
 #define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
 
 // Define the max amperage of the motor (continuous)
-#define MAX_AMPS 0.092
+#define MAX_AMPS 0.096
 
 class cMotorController
 {

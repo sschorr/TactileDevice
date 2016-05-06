@@ -92,7 +92,7 @@ void haptics_thread::run()
             rateClock.stop();
 
             accelSignal = ReadAccel();
-            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
             case initCalibControl:

@@ -87,6 +87,7 @@ private slots:
     void on_TwoDown_clicked();
     void on_ThreeUp_clicked();
     void on_ThreeDown_clicked();
+    void on_AllDown_clicked();
 };
 
 #endif // MAINWINDOW_H

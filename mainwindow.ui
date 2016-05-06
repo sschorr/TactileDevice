@@ -1362,6 +1362,19 @@
        <string>Init Calib Joints</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="AllDown">
+      <property name="geometry">
+       <rect>
+        <x>1060</x>
+        <y>170</y>
+        <width>75</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>All -</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
