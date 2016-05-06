@@ -231,7 +231,7 @@ void haptics_thread::UpdateVRGraphics()
     }
 
 
-    // mainwindow makes the line visible after trial, this makes it opaque again and starts the next trial
+    // mainwindow makes the line visible after palpationLine trial, this makes it opaque again and starts the next trial
     if(p_CommonData->palpPostTrialClock.timeoutOccurred())
     {
         p_CommonData->palpPostTrialClock.stop();

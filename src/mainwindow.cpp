@@ -148,12 +148,12 @@ void MainWindow::UpdateGUIInfo()
     case frictionTrial:
         if(p_CommonData->pairNo == 1)
         {
-            ui->directions->setText("Press 'N' to explore object 2.");
-            ui->objectNo->setText("Object 1");
+            ui->directions->setText("Press 'Q' to toggle between surfaces \n'R' to lock in answer.");
+            ui->objectNo->setText("Current Surface: 1");
         } else if(p_CommonData->pairNo == 2)
         {
-            ui->directions->setText("Which object had higher friction? \n Press '1' or '2', then press 'L' to lockin answer.");
-            ui->objectNo->setText("Object 2");
+            ui->directions->setText("Press 'Q' to toggle between surfaces \n'R' to lock in answer.");
+            ui->objectNo->setText("Current Surface: 2");
         }
         break;
 
@@ -177,8 +177,8 @@ void MainWindow::UpdateGUIInfo()
         break;
 
     case trialBreak:
-        ui->directions->setText("Please take a break. \n Press 'N' to continue.");
-        ui->selection->setText("Selection:");
+        ui->directions->setText("Please take a break. \nPress 'N' to continue.");
+        ui->selection->setText("Stiffer Object:");
         break;
     }
 }
@@ -330,16 +330,51 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         p_CommonData->azimuth = p_CommonData->azimuth - degInc;
     }
-    if (a_event->key() == Qt::Key_Q)
+    if (a_event->key() == Qt::Key_C)
     {
         p_CommonData->camRadius = p_CommonData->camRadius - radInc;
     }
-    if (a_event->key() == Qt::Key_E)
+    if (a_event->key() == Qt::Key_V)
     {
         p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     }
     if (a_event->key() == Qt::Key_R)
     {
+        // friction experiment
+        if(p_CommonData->currentExperimentState == frictionTrial)
+        {
+            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            {
+                if(p_CommonData->currentExperimentState == frictionTrial)
+                {
+                    if(p_CommonData->subjectAnswer == 1 || p_CommonData->subjectAnswer == 2)
+                    {
+                        WriteDataToFile();
+
+                        // check if next trial is a break
+                        QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+                        if (nextTrialType == "break")
+                        {
+                            p_CommonData->currentExperimentState = trialBreak;
+                            p_CommonData->recordFlag = false;
+                            p_CommonData->debugData.clear();
+                        }
+
+                        p_CommonData->pairNo = 1;
+                        p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                        p_CommonData->subjectAnswer = 0;
+                        ui->selection->setText("Higher Friction:");
+                        double max = 0.03; double min = -0.03;
+                        double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                        p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+                        p_CommonData->trialNo = p_CommonData->trialNo + 1;
+                        p_CommonData->recordFlag = true;
+                    }
+                }
+            }
+        }
+
+
         // palpation Line experiment
         if(p_CommonData->currentExperimentState == palpationLineTrial)
         {
@@ -402,9 +437,43 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
     }
-    if (a_event->key() == Qt::Key_N)
+
+    if (a_event->key() == Qt::Key_Backspace)
     {
         if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+        {
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->pairNo = 1;
+                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                double max = 0.03; double min = -0.01;
+                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+            }
+        }
+    }
+
+    if (a_event->key() == Qt::Key_1)
+    {
+        p_CommonData->subjectAnswer = 1;
+        ui->selection->setText("Higher Friction: 1 (blue)");
+    }
+
+    if (a_event->key() == Qt::Key_2)
+    {
+        p_CommonData->subjectAnswer = 2;
+        ui->selection->setText("Higher Friction: 2 (red)");
+    }
+
+    if (a_event->key() == Qt::Key_Q)
+    {
+        if(p_CommonData->currentExperimentState == trialBreak)
+        {
+            p_CommonData->currentExperimentState = frictionTrial;
+            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+        }
+
+        else if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
         {
             if(p_CommonData->pairNo == 1)
             {
@@ -425,61 +494,10 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
     }
-    if (a_event->key() == Qt::Key_Backspace)
-    {
-        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
-        {
-            if(p_CommonData->pairNo == 2)
-            {
-                p_CommonData->pairNo = 1;
-                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                double max = 0.03; double min = -0.01;
-                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-            }
-        }
-    }
-
-    if (a_event->key() == Qt::Key_1)
-    {
-        p_CommonData->subjectAnswer = 1;
-        ui->selection->setText("Selection: 1");
-    }
-
-    if (a_event->key() == Qt::Key_2)
-    {
-        p_CommonData->subjectAnswer = 2;
-        ui->selection->setText("Selection: 2");
-    }
 
     if (a_event->key() == Qt::Key_L)
     {
-        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
-        {
-            if(p_CommonData->currentExperimentState == frictionTrial)
-            {
-                WriteDataToFile();
-            }
 
-            // check if next trial is a break
-            QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
-            if (nextTrialType == "break")
-            {
-                p_CommonData->currentExperimentState = trialBreak;
-                p_CommonData->recordFlag = false;
-                p_CommonData->debugData.clear();
-            }
-
-            p_CommonData->pairNo = 1;
-            p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-            p_CommonData->subjectAnswer = 0;
-            ui->selection->setText("Selection:");
-            double max = 0.03; double min = -0.03;
-            double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-            p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-            p_CommonData->trialNo = p_CommonData->trialNo + 1;
-            p_CommonData->recordFlag = true;
-        }
     }
 
     double angle = 10.0;
@@ -614,7 +632,7 @@ void MainWindow::on_loadProtocol_clicked()
     //Open dialog box to get protocol file and save into variable
     QString temp = QFileDialog::getOpenFileName();
     p_CommonData->frictionProtocolLocation = temp;
-    p_CommonData->frictionProtocolFile.LoadFile(temp.toStdString().c_str());
+    int error = p_CommonData->frictionProtocolFile.LoadFile(temp.toStdString().c_str());
     qDebug() << p_CommonData->frictionProtocolLocation;
 }
 
@@ -643,7 +661,11 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentEnvironmentState = experimentFriction;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
-    p_CommonData->p_expFrictionBox->m_material->setBlueAqua();   
+    p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+    double degInc = 5.0;
+    double radInc = 0.05;
+    p_CommonData->polar = p_CommonData->polar - 5*degInc;
+    p_CommonData->camRadius = p_CommonData->camRadius + radInc;
 }
 
 void MainWindow::on_startExperiment_2_clicked()

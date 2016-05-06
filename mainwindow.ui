@@ -1009,9 +1009,9 @@
      <widget class="QLabel" name="objectNo">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>570</x>
         <y>680</y>
-        <width>161</width>
+        <width>221</width>
         <height>91</height>
        </rect>
       </property>
@@ -1048,15 +1048,15 @@
      <widget class="QLabel" name="selection">
       <property name="geometry">
        <rect>
-        <x>380</x>
+        <x>320</x>
         <y>770</y>
-        <width>261</width>
+        <width>361</width>
         <height>41</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <pointsize>16</pointsize>
+        <pointsize>20</pointsize>
        </font>
       </property>
       <property name="text">
@@ -1362,6 +1362,106 @@
        <string>Init Calib Joints</string>
       </property>
      </widget>
+     <zorder>directions</zorder>
+     <zorder>DisplayWidget</zorder>
+     <zorder>lcdNumberHapticRate</zorder>
+     <zorder>VoltageLCD2</zorder>
+     <zorder>label_22</zorder>
+     <zorder>label_18</zorder>
+     <zorder>VoltageLCD1</zorder>
+     <zorder>label_17</zorder>
+     <zorder>VoltageLCD3</zorder>
+     <zorder>label_16</zorder>
+     <zorder>sliderControl</zorder>
+     <zorder>label_6</zorder>
+     <zorder>MotorAngleLCDNumber1</zorder>
+     <zorder>CartesianZLCDNumber</zorder>
+     <zorder>verticalSliderZ</zorder>
+     <zorder>label_3</zorder>
+     <zorder>CartesianXLCDNumber</zorder>
+     <zorder>JointAngleLCDNumber2</zorder>
+     <zorder>label_15</zorder>
+     <zorder>label_7</zorder>
+     <zorder>label_21</zorder>
+     <zorder>label_8</zorder>
+     <zorder>DesiredForceY</zorder>
+     <zorder>label_14</zorder>
+     <zorder>label_19</zorder>
+     <zorder>label_4</zorder>
+     <zorder>DesY</zorder>
+     <zorder>verticalSliderY</zorder>
+     <zorder>ZeroSliders</zorder>
+     <zorder>MotorAngleLCDNumber2</zorder>
+     <zorder>label</zorder>
+     <zorder>DesX</zorder>
+     <zorder>JointAngleLCDNumber3</zorder>
+     <zorder>CartesianYLCDNumber</zorder>
+     <zorder>JointAngleLCDNumber1</zorder>
+     <zorder>label_20</zorder>
+     <zorder>label_5</zorder>
+     <zorder>CalibratePushButton</zorder>
+     <zorder>verticalSliderX</zorder>
+     <zorder>label_13</zorder>
+     <zorder>label_2</zorder>
+     <zorder>DesiredForceZ</zorder>
+     <zorder>DesZ</zorder>
+     <zorder>MotorAngleLCDNumber3</zorder>
+     <zorder>label_9</zorder>
+     <zorder>DesiredForceX</zorder>
+     <zorder>label_30</zorder>
+     <zorder>VRControl</zorder>
+     <zorder>startSin</zorder>
+     <zorder>setDirectory</zorder>
+     <zorder>stopRecord</zorder>
+     <zorder>turnOff</zorder>
+     <zorder>KpSlider</zorder>
+     <zorder>KdSlider</zorder>
+     <zorder>bandwidthAmpSlider</zorder>
+     <zorder>bandwidthFreqSlider</zorder>
+     <zorder>lcdKp</zorder>
+     <zorder>lcdKd</zorder>
+     <zorder>lcdBandAmp</zorder>
+     <zorder>lcdBandFreq</zorder>
+     <zorder>KpLabel</zorder>
+     <zorder>KdLabel</zorder>
+     <zorder>BandwidthAmpLabel</zorder>
+     <zorder>BandwidthFreqLabel</zorder>
+     <zorder>palpationButton</zorder>
+     <zorder>frictionButton</zorder>
+     <zorder>humpButton</zorder>
+     <zorder>hoopHumpButton</zorder>
+     <zorder>startCircle</zorder>
+     <zorder>loadProtocol</zorder>
+     <zorder>startExperiment</zorder>
+     <zorder>trialNo</zorder>
+     <zorder>label_23</zorder>
+     <zorder>pairNo</zorder>
+     <zorder>label_24</zorder>
+     <zorder>objectNo</zorder>
+     <zorder>selection</zorder>
+     <zorder>setNeutral</zorder>
+     <zorder>setTrial</zorder>
+     <zorder>dynamicEnvironment</zorder>
+     <zorder>palpExp</zorder>
+     <zorder>loadProtocol_2</zorder>
+     <zorder>startExperiment_2</zorder>
+     <zorder>paperEnvironment</zorder>
+     <zorder>desAngle2</zorder>
+     <zorder>desAngle3</zorder>
+     <zorder>desAngle1</zorder>
+     <zorder>label_25</zorder>
+     <zorder>label_26</zorder>
+     <zorder>label_27</zorder>
+     <zorder>loadProtocol_3</zorder>
+     <zorder>startExperiment_3</zorder>
+     <zorder>pushButton</zorder>
+     <zorder>OneUp</zorder>
+     <zorder>OneDown</zorder>
+     <zorder>TwoUp</zorder>
+     <zorder>TwoDown</zorder>
+     <zorder>ThreeDown</zorder>
+     <zorder>ThreeUp</zorder>
+     <zorder>initJoints</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
