@@ -56,6 +56,9 @@ void haptics_thread::initialize()
     p_CommonData->overallClock.reset();
     p_CommonData->overallClock.start(true);
 
+    // setup the calibration clock
+    p_CommonData->calibClock.reset();
+
     currTime = 0;
     lastTime = 0;
 
@@ -97,6 +100,7 @@ void haptics_thread::run()
             {
             case initCalibControl:
                 UpdateVRGraphics();
+                SetInitJointAngles();
                 p_CommonData->wearableDelta->IndivJointController(p_CommonData->desJointInits, p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
@@ -1382,6 +1386,18 @@ void haptics_thread::rotateTissueLine(double angle)
     p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(0,0,-1,angle);
     p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(0,0,-1,angle);
+}
+
+void haptics_thread::SetInitJointAngles()
+{
+    double moveTime = 2.0;
+    if (p_CommonData->calibClock.getCurrentTimeSeconds() < moveTime)
+    {
+        double curr1 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr2 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr3 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        p_CommonData->desJointInits << curr1, curr2, curr3;
+    }
 }
 
 void haptics_thread::RenderPalpation()

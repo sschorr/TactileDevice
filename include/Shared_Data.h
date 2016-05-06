@@ -135,6 +135,9 @@ typedef struct
     //clock for showing temp transparent, then moving to next trial
     chai3d::cPrecisionClock palpPostTrialClock;
 
+    //clock for doing the startup trajectory
+    chai3d::cPrecisionClock calibClock;
+
     // determine start time for bandwidth sin
     double sinStartTime;
 

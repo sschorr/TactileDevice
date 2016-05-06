@@ -140,6 +140,15 @@ void MainWindow::UpdateGUIInfo()
 
     //qDebug() << "indicator Rot: " << p_CommonData->indicatorRot << "tissue rot: " << p_CommonData->tissueRot;
 
+    //calibrate if startup process over
+    if(p_CommonData->calibClock.timeoutOccurred())
+    {
+        p_CommonData->calibClock.stop();
+        p_CommonData->calibClock.reset();
+
+        on_CalibratePushButton_clicked();
+    }
+
     switch(p_CommonData->currentExperimentState)
     {
     case idleExperiment:
@@ -840,13 +849,17 @@ void MainWindow::on_ThreeDown_clicked()
 
 void MainWindow::on_AllDown_clicked()
 {
-    double curr1 = p_CommonData->desJointInits[0];
+    /*double curr1 = p_CommonData->desJointInits[0];
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
     curr1 = curr1 - 5*PI/180;
     curr2 = curr2 - 5*PI/180;
     curr3 = curr3 - 5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
+    p_CommonData->desJointInits << curr1, curr2, curr3;*/
+
+    p_CommonData->calibClock.reset();
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
+    p_CommonData->calibClock.start();
     //on_CalibratePushButton_clicked();
 }
