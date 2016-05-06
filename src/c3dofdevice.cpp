@@ -462,8 +462,6 @@ void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double
 
     SetJointTorqueOutput(jointTorques);
 
-    qDebug() << "I am running controller";
-
     lastAngVel = filteredVel;
     lastAngles = jointAngles;
 }
@@ -509,9 +507,9 @@ void c3DOFDevice::TurnOffControl()
     // set the zero force as the desired force
     SetDesiredForce(nullForce);
     // set output torque based on zero force
-    this->motor_1->SetOutputTorque(nullForce[0]);
-    this->motor_2->SetOutputTorque(nullForce[0]);
-    this->motor_3->SetOutputTorque(nullForce[0]);
+    this->motor_1->SetOutputTorque(-1.88);
+    this->motor_2->SetOutputTorque(1.88);
+    this->motor_3->SetOutputTorque(-1.88);
 }
 
 void c3DOFDevice::ForceController()

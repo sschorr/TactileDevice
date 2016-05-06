@@ -37,6 +37,7 @@ void MainWindow::Initialize()
     connect(this->ui->TwoDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->ThreeUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->ThreeDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->AllDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
@@ -177,7 +178,7 @@ void MainWindow::UpdateGUIInfo()
         break;
 
     case trialBreak:
-        ui->directions->setText("Please take a break. \nPress 'N' to continue.");
+        ui->directions->setText("Please take a break. \nPress 'Q' to continue.");
         ui->selection->setText("Stiffer Object:");
         break;
     }
@@ -186,6 +187,7 @@ void MainWindow::UpdateGUIInfo()
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta->ZeroEncoders();
+    p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
     onGUIchanged();
 }
 
@@ -469,8 +471,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == trialBreak)
         {
-            p_CommonData->currentExperimentState = frictionTrial;
-            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            // check if next trial is a break
+            QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+            if (nextTrialType == "end")
+            {
+                p_CommonData->currentExperimentState = end;
+                ui->directions->setText("Experiment Completed, please contact administrator");
+            }
+            else
+            {
+                p_CommonData->currentExperimentState = frictionTrial;
+                p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            }
+
         }
 
         else if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
@@ -771,7 +784,7 @@ void MainWindow::on_OneUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr1 = curr1 + 1*PI/180;
+    curr1 = curr1 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -781,7 +794,7 @@ void MainWindow::on_OneDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr1 = curr1 - 1*PI/180;
+    curr1 = curr1 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -791,7 +804,7 @@ void MainWindow::on_TwoUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr2 = curr2 + 1*PI/180;
+    curr2 = curr2 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -801,7 +814,7 @@ void MainWindow::on_TwoDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr2 = curr2 - 1*PI/180;
+    curr2 = curr2 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -811,7 +824,7 @@ void MainWindow::on_ThreeUp_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr3 = curr3 + 1*PI/180;
+    curr3 = curr3 + 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
 }
 
@@ -821,6 +834,19 @@ void MainWindow::on_ThreeDown_clicked()
     double curr2 = p_CommonData->desJointInits[1];
     double curr3 = p_CommonData->desJointInits[2];
 
-    curr3 = curr3 - 1*PI/180;
+    curr3 = curr3 - 1.5*PI/180;
     p_CommonData->desJointInits << curr1, curr2, curr3;
+}
+
+void MainWindow::on_AllDown_clicked()
+{
+    double curr1 = p_CommonData->desJointInits[0];
+    double curr2 = p_CommonData->desJointInits[1];
+    double curr3 = p_CommonData->desJointInits[2];
+
+    curr1 = curr1 - 5*PI/180;
+    curr2 = curr2 - 5*PI/180;
+    curr3 = curr3 - 5*PI/180;
+    p_CommonData->desJointInits << curr1, curr2, curr3;
+    //on_CalibratePushButton_clicked();
 }
