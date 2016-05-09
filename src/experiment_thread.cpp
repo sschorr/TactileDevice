@@ -77,7 +77,7 @@ void Experiment_Thread::run()
             break;
 
         case trialBreak:
-
+            p_CommonData->recordFlag = false;
             break;
         }
     }

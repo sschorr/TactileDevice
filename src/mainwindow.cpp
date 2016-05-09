@@ -369,17 +369,21 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                             p_CommonData->currentExperimentState = trialBreak;
                             p_CommonData->recordFlag = false;
                             p_CommonData->debugData.clear();
+                            p_CommonData->trialNo = p_CommonData->trialNo + 1;
                         }
 
-                        p_CommonData->pairNo = 1;
-                        p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                        p_CommonData->subjectAnswer = 0;
-                        ui->selection->setText("Higher Friction:");
-                        double max = 0.03; double min = -0.03;
-                        double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                        p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-                        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-                        p_CommonData->recordFlag = true;
+                        else
+                        {
+                            p_CommonData->pairNo = 1;
+                            p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                            p_CommonData->subjectAnswer = 0;
+                            ui->selection->setText("Higher Friction:");
+                            double max = 0.015; double min = -0.015;
+                            double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                            p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+                            p_CommonData->trialNo = p_CommonData->trialNo + 1;
+                            p_CommonData->recordFlag = true;
+                        }
                     }
                 }
             }
@@ -501,7 +505,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->pairNo = 2;
                 p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
-                double max = 0.03; double min = -0.01;
+                double max = 0.015; double min = -0.015;
                 double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
                 p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
             }
@@ -510,7 +514,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->pairNo = 1;
                 p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                double max = 0.03; double min = -0.01;
+                double max = 0.015; double min = -0.015;
                 double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
                 p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
             }
