@@ -188,7 +188,7 @@ void MainWindow::UpdateGUIInfo()
 
     case trialBreak:
         ui->directions->setText("Please take a break. \nPress 'Q' to continue.");
-        ui->selection->setText("Stiffer Object:");
+        ui->selection->setText("Higher Friction:");
         break;
     }
 }
@@ -354,12 +354,13 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         // friction experiment
         if(p_CommonData->currentExperimentState == frictionTrial)
         {
-            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            if(p_CommonData->subjectAnswer == 1 || p_CommonData->subjectAnswer == 2)
             {
                 if(p_CommonData->currentExperimentState == frictionTrial)
                 {
-                    if(p_CommonData->subjectAnswer == 1 || p_CommonData->subjectAnswer == 2)
+                    if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
                     {
+
                         WriteDataToFile();
 
                         // check if next trial is a break

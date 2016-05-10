@@ -940,7 +940,7 @@ void haptics_thread::RenderHoopHump()
 
 void haptics_thread::RenderExpFriction()
 {
-    cCreateBox(p_CommonData->p_expFrictionBox, .065, .13, .01);
+    cCreateBox(p_CommonData->p_expFrictionBox, .09, .13, .01);
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
     p_CommonData->p_expFrictionBox->m_material->setStiffness(200);
