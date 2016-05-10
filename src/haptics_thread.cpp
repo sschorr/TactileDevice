@@ -1393,9 +1393,9 @@ void haptics_thread::SetInitJointAngles()
     double moveTime = 2.0;
     if (p_CommonData->calibClock.getCurrentTimeSeconds() < moveTime)
     {
-        double curr1 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr2 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr3 = 45*PI/180 - 25*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr1 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr2 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
         p_CommonData->desJointInits << curr1, curr2, curr3;
     }
 }
