@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -263,6 +263,7 @@ typedef struct
     chai3d::cMultiMesh* p_hump;
     chai3d::cMultiMesh* p_hoopHump;
 
+    // flags for environment change and tissue transparency
     bool environmentChange;
     bool m_flagTissueTransparent;
 
@@ -272,6 +273,10 @@ typedef struct
 
     // init joint angles
     Eigen::Vector3d desJointInits;
+
+    // flags for only normal or only lateral control
+    bool flagLateral;
+    bool flagNormal;
 
 } shared_data;
 

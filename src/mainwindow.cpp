@@ -39,6 +39,9 @@ void MainWindow::Initialize()
     connect(this->ui->ThreeDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->AllDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
+    connect(this->ui->normalBox, SIGNAL(stateChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->lateralBox, SIGNAL(stateChanged(int)), this, SLOT(onGUIchanged()));
+
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
@@ -55,12 +58,36 @@ void MainWindow::Initialize()
 
     p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
 
+    ui->normalBox->setChecked(true);
+    ui->lateralBox->setChecked(true);
+    p_CommonData->flagNormal = true;
+    p_CommonData->flagLateral = true;
+
     GraphicsTimer.start(20);
     UpdateGUIInfo();
 }
 
 void MainWindow::onGUIchanged()
 {
+
+    if(ui->lateralBox->isChecked())
+    {
+        p_CommonData->flagLateral = true;
+    }
+    else
+    {
+        p_CommonData->flagLateral = false;
+    }
+
+    if(ui->normalBox->isChecked())
+    {
+        p_CommonData->flagNormal = true;
+    }
+    else
+    {
+        p_CommonData->flagNormal = false;
+    }
+
     if(ui->initJoints->isChecked())
     {
         p_CommonData->currentControlState = initCalibControl;
@@ -80,8 +107,6 @@ void MainWindow::onGUIchanged()
         //let haptics thread determine desired position
         p_CommonData->currentControlState = VRControlMode;
     }
-
-
 
     double KpSlider = this->ui->KpSlider->value()*20.0;
     double KdSlider = this->ui->KdSlider->value()/30.0;
@@ -868,3 +893,7 @@ void MainWindow::on_AllDown_clicked()
     p_CommonData->calibClock.start();
     //on_CalibratePushButton_clicked();
 }
+
+
+
+

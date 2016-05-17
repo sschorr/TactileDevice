@@ -472,12 +472,23 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
     chai3d::cVector3d desiredPosMovement = forceToPosMult*deviceLastComputedForce0; //this is only for lateral
 
+    // check to see if we are rendering only normal or only lateral
+    if(p_CommonData->flagNormal == false)
+    {
+        desiredPosMovement.z(0);
+    }
+
+    if(p_CommonData->flagLateral == false)
+    {
+        desiredPosMovement.x(0);
+        desiredPosMovement.y(0);
+    }
     // don't allow the tactor to move away from finger
 
     double vertPosMovement = desiredPosMovement.z();
     if(vertPosMovement > 0)
         vertPosMovement = 0;
-    /*
+    /* Old code for using a nonlinear normal force map based on data taken from fingers
     if(deviceLastComputedForce0.z() > 0)
         vertPosMovement = log(8.6736*deviceLastComputedForce0.z()+1.0); //linear fit exp data from normal displacement paper
     else
@@ -496,7 +507,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         desiredPos << neutralPos[0], neutralPos[1], neutralPos[2];
     }
 
-    // Perform position controller based on desired position
+    // Perform control based on desired position
     p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
 }
 
