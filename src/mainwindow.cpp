@@ -743,6 +743,7 @@ void MainWindow::on_startExperiment_3_clicked()
     p_CommonData->currentExperimentState = palpationLineTrial;
     p_CommonData->currentEnvironmentState = experimentPalpationLine;
     p_CommonData->currentControlState = VRControlMode;
+    ui->VRControl->setChecked(true);
 
     // check that we are not currently embedded in tissue
     if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
