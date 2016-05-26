@@ -954,7 +954,7 @@ void haptics_thread::RenderExpFriction()
     cCreateBox(p_CommonData->p_expFrictionBox, .09, .13, .01);
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
-    p_CommonData->p_expFrictionBox->m_material->setStiffness(200);
+    p_CommonData->p_expFrictionBox->m_material->setStiffness(300);
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
     world->addChild(p_CommonData->p_expFrictionBox);
