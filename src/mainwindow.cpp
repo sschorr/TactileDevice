@@ -404,7 +404,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                             p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
                             p_CommonData->subjectAnswer = 0;
                             ui->selection->setText("Higher Friction:");
-                            double max = 0.015; double min = -0.015;
+                            double max = 0.01; double min = -0.01;
                             double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
                             p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
                             p_CommonData->trialNo = p_CommonData->trialNo + 1;
@@ -487,7 +487,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->pairNo = 1;
                 p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                double max = 0.03; double min = -0.01;
+                double max = 0.01; double min = -0.01;
                 double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
                 p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
             }
@@ -496,21 +496,33 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_1)
     {
-        p_CommonData->subjectAnswer = 1;
-        ui->selection->setText("Higher Friction: 1 (blue)");
+        if(p_CommonData->currentExperimentState == frictionTrial)
+        {
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->subjectAnswer = 1;
+                ui->selection->setText("Higher Friction: 1 (blue)");
+            }
+        }
     }
 
     if (a_event->key() == Qt::Key_2)
     {
-        p_CommonData->subjectAnswer = 2;
-        ui->selection->setText("Higher Friction: 2 (red)");
+        if(p_CommonData->currentExperimentState == frictionTrial)
+        {
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->subjectAnswer = 2;
+                ui->selection->setText("Higher Friction: 2 (red)");
+            }
+        }
     }
 
     if (a_event->key() == Qt::Key_Q)
     {
         if(p_CommonData->currentExperimentState == trialBreak)
         {
-            // check if next trial is a break
+            // check if next trial is end
             QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
             if (nextTrialType == "end")
             {
@@ -520,9 +532,16 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             else
             {
                 p_CommonData->currentExperimentState = frictionTrial;
+                p_CommonData->pairNo = 1;
+                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+                p_CommonData->subjectAnswer = 0;
+                ui->selection->setText("Higher Friction:");
+                double max = 0.01; double min = -0.01;
+                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
                 p_CommonData->trialNo = p_CommonData->trialNo + 1;
+                p_CommonData->recordFlag = true;
             }
-
         }
 
         else if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
@@ -531,16 +550,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->pairNo = 2;
                 p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
-                double max = 0.015; double min = -0.015;
-                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-            }
-
-            else if(p_CommonData->pairNo == 2)
-            {
-                p_CommonData->pairNo = 1;
-                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                double max = 0.015; double min = -0.015;
+                double max = 0.01; double min = -0.01;
                 double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
                 p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
             }
