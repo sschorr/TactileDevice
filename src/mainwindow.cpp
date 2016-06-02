@@ -728,6 +728,7 @@ void MainWindow::on_startExperiment_clicked()
     double radInc = 0.05;
     p_CommonData->polar = p_CommonData->polar - 5*degInc;
     p_CommonData->camRadius = p_CommonData->camRadius + radInc;
+    p_CommonData->debugData.clear();
 }
 
 void MainWindow::on_startExperiment_2_clicked()

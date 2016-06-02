@@ -63,6 +63,7 @@ INCLUDEPATH += "./External/chai3d-3.0.0/modules/ODE/obj/Debug/Win32"
 
 # Libraries for Chai3d and Openhaptics
 LIBS += "./External/chai3d-3.0.0/lib/Debug/Win32/chai3d.lib"
+#LIBS += "./External/chai3d-3.0.0/lib/Release/Win32/chai3d.lib"
 LIBS += "./External/chai3d-3.0.0/extras/freeglut/lib/Debug/Win32/freeglut.lib"
 LIBS += "./External/chai3d-3.0.0/modules/ODE/lib/Debug/Win32/CODE.lib"
 
