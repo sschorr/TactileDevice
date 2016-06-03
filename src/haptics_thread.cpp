@@ -955,6 +955,7 @@ void haptics_thread::RenderExpFriction()
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
     p_CommonData->p_expFrictionBox->m_material->setStiffness(300);
+    p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1500);
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
     world->addChild(p_CommonData->p_expFrictionBox);
@@ -1077,14 +1078,14 @@ void haptics_thread::RenderTwoFriction()
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(300);
     p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1000);
-    p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.4);
-    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.4*0.9);
+    p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.9);
+    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.9*0.9);
 
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.4);
-    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.4*.9);
+    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(300);
+    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.9);
+    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.9*.9);
 
     world->addChild(p_CommonData->p_frictionBox1);
     world->addChild(p_CommonData->p_frictionBox2);
