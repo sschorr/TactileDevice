@@ -95,7 +95,7 @@ void haptics_thread::run()
             rateClock.stop();
 
             accelSignal = ReadAccel();
-            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
             case initCalibControl:
@@ -1078,15 +1078,15 @@ void haptics_thread::RenderTwoFriction()
     p_CommonData->p_frictionBox2->setLocalPos(0,-.05, 0);
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1500);
-    p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.9);
-    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.9*0.9);
+    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
+    p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.25);
+    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*0.9);
 
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.9);
-    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.9*.9);
+    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
+    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.4);
+    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.4*.9);
 
     world->addChild(p_CommonData->p_frictionBox1);
     world->addChild(p_CommonData->p_frictionBox2);
