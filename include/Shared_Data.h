@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626
+//#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -26,8 +26,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <Qt/qfiledialog.h>
-#include <Qt/qinputdialog.h>
+#include <qfiledialog>
+#include <qinputdialog>
 #include "CODE.h"
 
 #define STIFFNESS_BASELINE 50

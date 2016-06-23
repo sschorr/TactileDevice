@@ -354,7 +354,7 @@ void haptics_thread::UpdateVRGraphics()
     world->computeGlobalPositions(true);
 
     // update position and orientation of tool (and sphere that represents tool)
-    m_tool0->updatePose();
+    m_tool0->updateFromDevice();
 
     // get position and rotation of the magTracker
     p_CommonData->chaiMagDevice0->getPosition(position0);
@@ -378,7 +378,7 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
 
     //use this if two tools (haptic proxies) are desired
-    m_tool1->updatePose();
+    m_tool1->updateFromDevice();
     p_CommonData->chaiMagDevice1->getPosition(position1);
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
     m_curSphere1->setLocalPos(position1);
@@ -394,61 +394,7 @@ void haptics_thread::UpdateVRGraphics()
         //---------------------------------------------------
         // Implement Dynamic simulation
         //---------------------------------------------------
-        int numInteractionPoints = m_tool0->getNumInteractionPoints();
-        for (int i=0; i<numInteractionPoints; i++)
-        {
-            // get pointer to next interaction point of tool
-            chai3d::cHapticPoint* interactionPoint = m_tool0->getInteractionPoint(i);
-
-            // check primary contact point if available
-            if (interactionPoint->getNumCollisionEvents() > 0)
-            {
-                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-                // given the mesh object we may be touching, we search for its owner which
-                // could be the mesh itself or a multi-mesh object. Once the owner found, we
-                // look for the parent that will point to the ODE object itself.
-                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-                // cast to ODE object
-                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-                // if ODE object, we apply interaction forces
-                if (ODEobject != NULL)
-                {
-                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                       collisionEvent->m_globalPos);
-                }
-            }
-        }
-        numInteractionPoints = m_tool1->getNumInteractionPoints();
-        for (int i=0; i<numInteractionPoints; i++)
-        {
-            // get pointer to next interaction point of tool
-            chai3d::cHapticPoint* interactionPoint = m_tool1->getInteractionPoint(i);
-
-            // check primary contact point if available
-            if (interactionPoint->getNumCollisionEvents() > 0)
-            {
-                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(0);
-
-                // given the mesh object we may be touching, we search for its owner which
-                // could be the mesh itself or a multi-mesh object. Once the owner found, we
-                // look for the parent that will point to the ODE object itself.
-                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
-
-                // cast to ODE object
-                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
-
-                // if ODE object, we apply interaction forces
-                if (ODEobject != NULL)
-                {
-                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                       collisionEvent->m_globalPos);
-                }
-            }
-        }
-        ODEWorld->updateDynamics(timeInterval);
+        //find 3.1.1 implementation of dynamic bodies later
         lastTime = currTime;
     }
 }
@@ -456,7 +402,7 @@ void haptics_thread::UpdateVRGraphics()
 void haptics_thread::ComputeVRDesiredDevicePos()
 {
     //perform transformation to get "device forces"
-    lastComputedForce0 = m_tool0->m_lastComputedGlobalForce;
+    lastComputedForce0 = m_tool0->getDeviceGlobalForce();
     rotation0.trans();
     deviceRotation0.identity();
     deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
@@ -956,7 +902,7 @@ void haptics_thread::RenderExpFriction()
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
     p_CommonData->p_expFrictionBox->m_material->setStiffness(300);
-    p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1580);
+    //p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1580);
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
     world->addChild(p_CommonData->p_expFrictionBox);
@@ -1078,13 +1024,13 @@ void haptics_thread::RenderTwoFriction()
     p_CommonData->p_frictionBox2->setLocalPos(0,-.05, 0);
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
+    //p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
     p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.25);
     p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*0.9);
 
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
+    //p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.4);
     p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.4*.9);
 
