@@ -192,11 +192,6 @@ void haptics_thread::UpdateVRGraphics()
             RenderExpFriction();
             break;
 
-        case experimentPalpation:
-            world->clearAllChildren();
-            RenderExpPalpation();
-            break;
-
         case friction:
             world->clearAllChildren();
             RenderTwoFriction();
@@ -313,42 +308,6 @@ void haptics_thread::UpdateVRGraphics()
         double lastDispRotation = p_CommonData->indicatorRot;
         rotateTissueLineDisp(-lastDispRotation);
     }
-
-//    // mainwindow makes the lump visible after trial, this makes it opaque again and starts the next trial
-//    if(p_CommonData->palpPostTrialClock.timeoutOccurred())
-//    {
-//        p_CommonData->palpPostTrialClock.stop();
-//        p_CommonData->palpPostTrialClock.reset();
-//        // increment trial no
-//        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-//         // make tissue opaque again if done with visible training trials
-//        if (p_CommonData->trialNo > 3)
-//        {
-//            p_CommonData->p_tissueCyl->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueBox->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueLump->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueLumpCenter->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(1.0, true);
-//            p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
-//        }
-//        // move lump to a different location
-//        double tissueRad = 0.08; double lumpRad = tissueRad*0.15;
-//        double boxWidth = 2.0*tissueRad;
-//        double boxDepth = 0.1;
-//        double boxHeight = 0.05;
-//        double widthMax = boxWidth/2-lumpRad; double widthMin = -boxWidth/2+lumpRad;
-//        double depthMax = boxDepth/2-lumpRad; double depthMin = -boxDepth/2+lumpRad;
-//        double y = ((double) rand()*(widthMax-widthMin)/(double)RAND_MAX+widthMin);
-//        double x = ((double) rand()*(depthMax-depthMin)/(double)RAND_MAX+depthMin);
-//        p_CommonData->p_tissueLump->setLocalPos(x,y,-0.0000001);
-//        p_CommonData->p_tissueLumpCenter->setLocalPos(x,y,-0.00000011);
-//        p_CommonData->p_tissueLumpCenter1->setLocalPos(x,y,-0.00000012);
-//        p_CommonData->p_tissueLumpCenter2->setLocalPos(x,y,-0.00000013);
-//        p_CommonData->p_tissueLumpCenter3->setLocalPos(x,y,-0.00000014);
-//        p_CommonData->recordFlag = true;
-//        p_CommonData->currentExperimentState = palpationTrial;
-//    }
 
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
@@ -911,108 +870,6 @@ void haptics_thread::RenderExpFriction()
     world->addChild(finger);
 }
 
-void haptics_thread::RenderExpPalpation()
-{
-    // define sizes of the palpation tissue
-    double tissueRad = 0.08;
-    double lumpRad = tissueRad*0.15;
-    double lumpCenterRad = tissueRad*.15*0.9;
-    double lumpCenterRad1 = tissueRad*.15*0.8;
-    double lumpCenterRad2 = tissueRad*.15*0.7;
-    double lumpCenterRad3 = tissueRad*.15*0.6;
-
-    double boxWidth = 2.0*tissueRad;
-    double boxDepth = 0.1;
-    double boxHeight = 0.05;
-
-    double tissueNomStiffness = 200; double nomFriction = 0.5;
-
-    // create the meshes for the tissue rendering
-//    cCreateCylinder(p_CommonData->p_tissueCyl, 0.05, tissueRad);
-//    p_CommonData->p_tissueCyl->createAABBCollisionDetector(toolRadius);
-//    p_CommonData->p_tissueCyl->setLocalPos(0,0,0);
-//    p_CommonData->p_tissueCyl->m_material->setStiffness(tissueNomStiffness);
-//    p_CommonData->p_tissueCyl->m_material->setStaticFriction(nomFriction);
-//    p_CommonData->p_tissueCyl->m_material->setDynamicFriction(nomFriction*0.9);
-//    p_CommonData->p_tissueCyl->m_material->setBrownTan();
-
-    // create the main body of tissue (box rather than cylinder)
-    cCreateBox(p_CommonData->p_tissueBox, boxDepth, boxWidth, boxHeight);
-    p_CommonData->p_tissueBox->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueBox->setLocalPos(0,0,boxHeight/2);
-    p_CommonData->p_tissueBox->m_material->setStiffness(tissueNomStiffness);
-    p_CommonData->p_tissueBox->m_material->setStaticFriction(nomFriction);
-    p_CommonData->p_tissueBox->m_material->setDynamicFriction(nomFriction*0.9);
-    p_CommonData->p_tissueBox->m_material->setBrownTan();
-
-    cCreateCylinder(p_CommonData->p_tissueLump, 0.05, lumpRad);
-    p_CommonData->p_tissueLump->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLump->m_material->setStiffness(tissueNomStiffness*1.1);
-    p_CommonData->p_tissueLump->m_material->setStaticFriction(nomFriction);
-    p_CommonData->p_tissueLump->m_material->setDynamicFriction(nomFriction*0.9);
-    p_CommonData->p_tissueLump->m_material->setBrownTan();
-
-    cCreateCylinder(p_CommonData->p_tissueLumpCenter, 0.05, lumpCenterRad);
-    p_CommonData->p_tissueLumpCenter->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLumpCenter->m_material->setStiffness(tissueNomStiffness*1.2);
-    p_CommonData->p_tissueLumpCenter->m_material->setStaticFriction(0.5);
-    p_CommonData->p_tissueLumpCenter->m_material->setDynamicFriction(0.5*0.9);
-    p_CommonData->p_tissueLumpCenter->m_material->setBrownTan();
-
-    cCreateCylinder(p_CommonData->p_tissueLumpCenter1, 0.05, lumpCenterRad1);
-    p_CommonData->p_tissueLumpCenter1->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLumpCenter1->m_material->setStiffness(tissueNomStiffness*1.3);
-    p_CommonData->p_tissueLumpCenter1->m_material->setStaticFriction(0.5);
-    p_CommonData->p_tissueLumpCenter1->m_material->setDynamicFriction(0.5*0.9);
-    p_CommonData->p_tissueLumpCenter1->m_material->setBrownTan();
-
-    cCreateCylinder(p_CommonData->p_tissueLumpCenter2, 0.05, lumpCenterRad2);
-    p_CommonData->p_tissueLumpCenter2->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLumpCenter2->m_material->setStiffness(tissueNomStiffness*1.4);
-    p_CommonData->p_tissueLumpCenter2->m_material->setStaticFriction(0.5);
-    p_CommonData->p_tissueLumpCenter2->m_material->setDynamicFriction(0.5*0.9);
-    p_CommonData->p_tissueLumpCenter2->m_material->setBrownTan();
-
-    cCreateCylinder(p_CommonData->p_tissueLumpCenter3, 0.05, lumpCenterRad3);
-    p_CommonData->p_tissueLumpCenter3->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_tissueLumpCenter3->m_material->setStiffness(tissueNomStiffness*1.5);
-    p_CommonData->p_tissueLumpCenter3->m_material->setStaticFriction(0.5);
-    p_CommonData->p_tissueLumpCenter3->m_material->setDynamicFriction(0.5*0.9);
-    p_CommonData->p_tissueLumpCenter3->m_material->setBrownTan();
-
-    // put the higher stiffness "lump" in a random location (cyl)
-//    srand (time(NULL));
-//    double max = tissueRad - lumpRad; double min = 0;
-//    double angMax = 2*PI; double angMin = 0;
-//    double rad = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-//    double ang = ((double) rand()*(angMax-angMin)/(double)RAND_MAX+angMin);
-//    p_CommonData->p_tissueLump->setLocalPos(rad*cos(ang),rad*sin(ang),-0.0000001);
-//    p_CommonData->p_tissueLumpCenter->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000011);
-//    p_CommonData->p_tissueLumpCenter1->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000012);
-//    p_CommonData->p_tissueLumpCenter2->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000013);
-//    p_CommonData->p_tissueLumpCenter3->setLocalPos(rad*cos(ang),rad*sin(ang),-0.00000014);
-
-    // put the higher stiffness "lump" in a random location (box)
-    srand (time(NULL));
-    double widthMax = boxWidth/2-lumpRad; double widthMin = -boxWidth/2+lumpRad;
-    double depthMax = boxDepth/2-lumpRad; double depthMin = -boxDepth/2+lumpRad;
-    double y = ((double) rand()*(widthMax-widthMin)/(double)RAND_MAX+widthMin);
-    double x = ((double) rand()*(depthMax-depthMin)/(double)RAND_MAX+depthMin);
-    p_CommonData->p_tissueLump->setLocalPos(x,y,-0.0000001);
-    p_CommonData->p_tissueLumpCenter->setLocalPos(x,y,-0.00000011);
-    p_CommonData->p_tissueLumpCenter1->setLocalPos(x,y,-0.00000012);
-    p_CommonData->p_tissueLumpCenter2->setLocalPos(x,y,-0.00000013);
-    p_CommonData->p_tissueLumpCenter3->setLocalPos(x,y,-0.00000014);
-
-    world->addChild(p_CommonData->p_tissueBox);
-    world->addChild(p_CommonData->p_tissueLump);
-    world->addChild(p_CommonData->p_tissueLumpCenter);
-    world->addChild(p_CommonData->p_tissueLumpCenter1);
-    world->addChild(p_CommonData->p_tissueLumpCenter2);
-    world->addChild(p_CommonData->p_tissueLumpCenter3);
-    world->addChild(m_tool0);
-    world->addChild(finger);
-}
 
 void haptics_thread::RenderTwoFriction()
 {    
@@ -1111,10 +968,6 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
 
     double moveStartTime = 1;
     double tactorSpeed = 5; // [mm/s]
-
-    double smallCircTime = 2*PI*smallR/tactorSpeed;
-    double medCircTime = 2*PI*medR/tactorSpeed;
-    double largeCircTime = 2*PI*largeR/tactorSpeed;
     double circTime = 2*PI*p_CommonData->circRadius/tactorSpeed;
 
     double theta;
@@ -1140,57 +993,6 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
         Y = p_CommonData->circRadius*sin(theta);
     }
 
-    // this code puts all 3 circle radius draws together
-//    p_CommonData->recordFlag = false;
-//    // move to start small circle
-//    if (currTime < moveStartTime)
-//    {
-//        X = currTime/moveStartTime*smallR;
-//        Y = 0;
-//    }
-
-//    // perform small circle
-//    else if (currTime < (moveStartTime + smallCircTime))
-//    {
-//        p_CommonData->recordFlag = true;
-//        theta = 2*PI*(currTime - moveStartTime)/smallCircTime;
-//        X = smallR*cos(theta);
-//        Y = smallR*sin(theta);
-//    }
-
-//    // move to start med circle
-//    else if (currTime < (2*moveStartTime + smallCircTime))
-//    {
-//        p_CommonData->recordFlag = false;
-//        X = smallR + (currTime-(moveStartTime + smallCircTime))/moveStartTime*smallR;
-//        Y = 0;
-//    }
-
-//    // perform medium circle
-//    else if (currTime < (2*moveStartTime + smallCircTime + medCircTime))
-//    {
-//        p_CommonData->recordFlag = true;
-//        theta = 2*PI*(currTime - (2*moveStartTime+smallCircTime))/medCircTime;
-//        X = medR*cos(theta);
-//        Y = medR*sin(theta);
-//    }
-
-//    // move to start large circle
-//    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime))
-//    {
-//        p_CommonData->recordFlag = false;
-//        X = 2*smallR + (currTime-(2*moveStartTime + smallCircTime + medCircTime))/moveStartTime*smallR;
-//        Y = 0;
-//    }
-
-//    // perform large circle
-//    else if (currTime < (3*moveStartTime + smallCircTime + medCircTime + largeCircTime))
-//    {
-//        p_CommonData->recordFlag = true;
-//        theta = 2*PI*(currTime - (3*moveStartTime + smallCircTime + medCircTime))/largeCircTime;
-//        X = largeR*cos(theta);
-//        Y = largeR*sin(theta);
-//    }
 
     if (inputMotionAxis.x() == 1)
     {

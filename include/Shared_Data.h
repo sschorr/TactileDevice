@@ -97,7 +97,6 @@ typedef enum
     hump,
     hoopHump,
     experimentFriction,
-    experimentPalpation,
     experimentPalpationLine,
     dynamicBodies,
     paperEnvironment

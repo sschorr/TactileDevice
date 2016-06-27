@@ -31,12 +31,6 @@ void MainWindow::Initialize()
     connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthFreqSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
 
-    connect(this->ui->OneUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->OneDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->TwoUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->TwoDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->ThreeUp, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(this->ui->ThreeDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->AllDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
     connect(this->ui->normalBox, SIGNAL(stateChanged(int)), this, SLOT(onGUIchanged()));
@@ -683,12 +677,6 @@ void MainWindow::on_paperEnvironment_clicked()
     p_CommonData->currentEnvironmentState = paperEnvironment;
 }
 
-void MainWindow::on_palpExp_clicked()
-{
-    p_CommonData->environmentChange = true;
-    p_CommonData->currentEnvironmentState = experimentPalpation;
-}
-
 void MainWindow::on_loadProtocol_clicked()
 {
     //Open dialog box to get protocol file and save into variable
@@ -729,23 +717,6 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->polar = p_CommonData->polar - 5*degInc;
     p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     p_CommonData->debugData.clear();
-}
-
-void MainWindow::on_startExperiment_2_clicked()
-{
-    p_CommonData->environmentChange = true;
-    p_CommonData->currentExperimentState = palpationTrial;
-    p_CommonData->currentEnvironmentState = experimentPalpation;
-    p_CommonData->currentControlState = VRControlMode;
-    p_CommonData->recordFlag = true;
-
-    p_CommonData->p_tissueCyl->setTransparencyLevel(0.2, true);
-    p_CommonData->p_tissueBox->setTransparencyLevel(0.2, true);
-    p_CommonData->p_tissueLump->setTransparencyLevel(0.4, true);
-    p_CommonData->p_tissueLumpCenter->setTransparencyLevel(0.5, true);
-    p_CommonData->p_tissueLumpCenter1->setTransparencyLevel(0.65, true);
-    p_CommonData->p_tissueLumpCenter2->setTransparencyLevel(0.8, true);
-    p_CommonData->p_tissueLumpCenter3->setTransparencyLevel(1.0, true);
 }
 
 void MainWindow::on_startExperiment_3_clicked()
@@ -829,81 +800,11 @@ void MainWindow::rotateTissueLine(double angle)
 }
 
 
-void MainWindow::on_OneUp_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr1 = curr1 + 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
-void MainWindow::on_OneDown_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr1 = curr1 - 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
-void MainWindow::on_TwoUp_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr2 = curr2 + 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
-void MainWindow::on_TwoDown_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr2 = curr2 - 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
-void MainWindow::on_ThreeUp_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr3 = curr3 + 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
-void MainWindow::on_ThreeDown_clicked()
-{
-    double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr3 = curr3 - 1.5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;
-}
-
 void MainWindow::on_AllDown_clicked()
 {
-    /*double curr1 = p_CommonData->desJointInits[0];
-    double curr2 = p_CommonData->desJointInits[1];
-    double curr3 = p_CommonData->desJointInits[2];
-
-    curr1 = curr1 - 5*PI/180;
-    curr2 = curr2 - 5*PI/180;
-    curr3 = curr3 - 5*PI/180;
-    p_CommonData->desJointInits << curr1, curr2, curr3;*/
-
     p_CommonData->calibClock.reset();
     p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
     p_CommonData->calibClock.start();
-    //on_CalibratePushButton_clicked();
 }
 
 

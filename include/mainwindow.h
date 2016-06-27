@@ -72,21 +72,13 @@ private slots:
     void on_setNeutral_clicked();
     void on_setTrial_clicked();
     void on_dynamicEnvironment_clicked();
-    void on_palpExp_clicked();
     void on_loadProtocol_2_clicked();
-    void on_startExperiment_2_clicked();
     void on_paperEnvironment_clicked();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
     void on_startExperiment_3_clicked();
     void on_loadProtocol_3_clicked();
     void on_pushButton_clicked();
-    void on_OneUp_clicked();
-    void on_OneDown_clicked();
-    void on_TwoUp_clicked();
-    void on_TwoDown_clicked();
-    void on_ThreeUp_clicked();
-    void on_ThreeDown_clicked();
     void on_AllDown_clicked();
 };
 

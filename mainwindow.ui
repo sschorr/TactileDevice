@@ -1102,50 +1102,11 @@
        <string>Dynamic Bodies</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="palpExp">
-      <property name="geometry">
-       <rect>
-        <x>1080</x>
-        <y>670</y>
-        <width>131</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Palp Exp Environ</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="loadProtocol_2">
-      <property name="geometry">
-       <rect>
-        <x>830</x>
-        <y>670</y>
-        <width>111</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Load Palp Protocol</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="startExperiment_2">
-      <property name="geometry">
-       <rect>
-        <x>960</x>
-        <y>670</y>
-        <width>111</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Start Palp Exp</string>
-      </property>
-     </widget>
      <widget class="QPushButton" name="paperEnvironment">
       <property name="geometry">
        <rect>
         <x>1080</x>
-        <y>720</y>
+        <y>670</y>
         <width>131</width>
         <height>41</height>
        </rect>
@@ -1236,7 +1197,7 @@
       <property name="geometry">
        <rect>
         <x>830</x>
-        <y>720</y>
+        <y>670</y>
         <width>111</width>
         <height>41</height>
        </rect>
@@ -1249,7 +1210,7 @@
       <property name="geometry">
        <rect>
         <x>960</x>
-        <y>720</y>
+        <y>670</y>
         <width>111</width>
         <height>41</height>
        </rect>
@@ -1269,84 +1230,6 @@
       </property>
       <property name="text">
        <string>Set Rad</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="OneUp">
-      <property name="geometry">
-       <rect>
-        <x>890</x>
-        <y>150</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>1+</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="OneDown">
-      <property name="geometry">
-       <rect>
-        <x>890</x>
-        <y>180</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>1-</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="TwoUp">
-      <property name="geometry">
-       <rect>
-        <x>960</x>
-        <y>150</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>2+</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="TwoDown">
-      <property name="geometry">
-       <rect>
-        <x>960</x>
-        <y>180</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>2-</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="ThreeDown">
-      <property name="geometry">
-       <rect>
-        <x>1030</x>
-        <y>180</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>3-</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="ThreeUp">
-      <property name="geometry">
-       <rect>
-        <x>1030</x>
-        <y>150</y>
-        <width>21</width>
-        <height>23</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>3+</string>
       </property>
      </widget>
      <widget class="QRadioButton" name="initJoints">
@@ -1482,9 +1365,6 @@
      <zorder>setNeutral</zorder>
      <zorder>setTrial</zorder>
      <zorder>dynamicEnvironment</zorder>
-     <zorder>palpExp</zorder>
-     <zorder>loadProtocol_2</zorder>
-     <zorder>startExperiment_2</zorder>
      <zorder>paperEnvironment</zorder>
      <zorder>desAngle2</zorder>
      <zorder>desAngle3</zorder>
@@ -1495,12 +1375,6 @@
      <zorder>loadProtocol_3</zorder>
      <zorder>startExperiment_3</zorder>
      <zorder>pushButton</zorder>
-     <zorder>OneUp</zorder>
-     <zorder>OneDown</zorder>
-     <zorder>TwoUp</zorder>
-     <zorder>TwoDown</zorder>
-     <zorder>ThreeDown</zorder>
-     <zorder>ThreeUp</zorder>
      <zorder>initJoints</zorder>
      <zorder>normalBox</zorder>
      <zorder>lateralBox</zorder>
