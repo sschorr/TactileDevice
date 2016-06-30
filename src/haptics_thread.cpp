@@ -18,7 +18,7 @@ void haptics_thread::initialize()
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
-    //InitDynamicBodies();
+    InitDynamicBodies();
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
@@ -174,7 +174,9 @@ void haptics_thread::UpdateVRGraphics()
     double zPos = p_CommonData->camRadius*cos(p_CommonData->polar*PI/180.0);
     p_CommonData->cameraPos.set(xPos, yPos, zPos);
 
-    //update camera parameters
+
+    p_CommonData->lookatPos.set(-1, 0, p_CommonData->cameraPos.z());
+    // update camera parameters
     p_CommonData->p_camera->set( p_CommonData->cameraPos,
                                  p_CommonData->lookatPos,
                                  p_CommonData->upVector);
@@ -212,23 +214,129 @@ void haptics_thread::UpdateVRGraphics()
             RenderHump();
             break;
 
-        case hoopHump:
-            world->clearAllChildren();
-            RenderHoopHump();
-            break;
-
         case dynamicBodies:
             world->clearAllChildren();
             RenderDynamicBodies();
             break;
 
-        case paperEnvironment:
-            world->clearAllChildren();
-            RenderPaper();
-            break;
         }
     }
 
+    // compute global reference frames for each object
+    world->computeGlobalPositions(true);
+
+    // update position and orientation of tool 0(and sphere that represents tool)
+    m_tool0->updateFromDevice();
+    // get position and rotation of the magTracker
+    p_CommonData->chaiMagDevice0->getPosition(position0);
+    p_CommonData->chaiMagDevice0->getRotation(rotation0);
+    //set deviceRotation for recording
+    deviceRotation0 = rotation0; //the chai device already rotates the tracker return based on the finger harness
+    // set the visual representation to match
+    m_curSphere0->setLocalPos(position0);
+    m_curSphere0->setLocalRot(rotation0);
+    m_tool0->computeInteractionForces();
+
+    // update position of finger to stay on proxy point
+    // finger axis are not at fingerpad, so we want a translation along fingertip z axis
+    chai3d::cVector3d fingerOffset(0,-0.006,0);
+    fingerRotation0 = rotation0;
+    fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
+    fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
+    finger->setLocalRot(fingerRotation0);
+    finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
+
+    // update position and orientation of tool 1
+    m_tool1->updateFromDevice();
+    p_CommonData->chaiMagDevice1->getPosition(position1);
+    p_CommonData->chaiMagDevice1->getRotation(rotation1);
+    deviceRotation1 = rotation1;
+    m_curSphere1->setLocalPos(position1);
+    m_curSphere1->setLocalRot(rotation1);
+    m_tool1->computeInteractionForces();
+
+    // update position of finger to stay on proxy point
+    // finger axis are not at fingerpad, so we want a translation along fingertip z axis
+    chai3d::cVector3d thumbOffset(0,-0.01,0);
+    fingerRotation1 = rotation1;
+    fingerRotation1.rotateAboutLocalAxisDeg(0,0,1,90);
+    fingerRotation1.rotateAboutLocalAxisDeg(1,0,0,90);
+    thumb->setLocalRot(fingerRotation1);
+    thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
+
+
+
+    // perform our dynamic body updates if we are in a dynamic environment
+    if(p_CommonData->currentEnvironmentState == dynamicBodies)
+    {
+        currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+        double timeInterval = currTime - lastTime;
+        if(timeInterval > 0.01) timeInterval = 0.01;
+        //---------------------------------------------------
+        // Implement Dynamic simulation
+        //---------------------------------------------------
+        // for each interaction point of the tool we look for any contact events
+        // with the environment and apply forces accordingly
+        int numInteractionPoints = m_tool0->getNumHapticPoints();
+        for (int j=0; j<numInteractionPoints; j++)
+        {
+            // get pointer to next interaction point of tool
+            chai3d::cHapticPoint* interactionPoint = m_tool0->getHapticPoint(j);
+
+            // check all contact points
+            int numContacts = interactionPoint->getNumCollisionEvents();
+            for (int k=0; k<numContacts; k++)
+            {
+                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(k);
+
+                // given the mesh object we may be touching, we search for its owner which
+                // could be the mesh itself or a multi-mesh object. Once the owner found, we
+                // look for the parent that will point to the ODE object itself.
+                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+                // cast to ODE object
+                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+                // if ODE object, we apply interaction forces
+                if (ODEobject != NULL)
+                {
+                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+                }
+            }
+        }
+        numInteractionPoints = m_tool1->getNumHapticPoints();
+        for (int j=0; j<numInteractionPoints; j++)
+        {
+            // get pointer to next interaction point of tool
+            chai3d::cHapticPoint* interactionPoint = m_tool1->getHapticPoint(j);
+
+            // check all contact points
+            int numContacts = interactionPoint->getNumCollisionEvents();
+            for (int k=0; k<numContacts; k++)
+            {
+                chai3d::cCollisionEvent* collisionEvent = interactionPoint->getCollisionEvent(k);
+
+                // given the mesh object we may be touching, we search for its owner which
+                // could be the mesh itself or a multi-mesh object. Once the owner found, we
+                // look for the parent that will point to the ODE object itself.
+                chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
+
+                // cast to ODE object
+                cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
+
+                // if ODE object, we apply interaction forces
+                if (ODEobject != NULL)
+                {
+                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+                }
+            }
+        }
+        // update simulation
+        ODEWorld->updateDynamics(timeInterval);
+        lastTime = currTime;
+    }
 
     // mainwindow makes the line visible after palpationLine trial, this makes it opaque again and starts the next trial
     if(p_CommonData->palpPostTrialClock.timeoutOccurred())
@@ -301,60 +409,12 @@ void haptics_thread::UpdateVRGraphics()
 
         else if (type == "end")
         {
-            p_CommonData->currentExperimentState = end;
+            p_CommonData->currentExperimentState = endExperiment;
         }
 
         // rotate tissue line indicator back to 0
         double lastDispRotation = p_CommonData->indicatorRot;
         rotateTissueLineDisp(-lastDispRotation);
-    }
-
-    // compute global reference frames for each object
-    world->computeGlobalPositions(true);
-
-    // update position and orientation of tool (and sphere that represents tool)
-    m_tool0->updateFromDevice();
-
-    // get position and rotation of the magTracker
-    p_CommonData->chaiMagDevice0->getPosition(position0);
-    p_CommonData->chaiMagDevice0->getRotation(rotation0);
-
-    //set deviceRotation for recording
-    deviceRotation = rotation0; //the chai device already rotates the tracker return based on the finger harness
-
-    // set the visual representation to match
-    m_curSphere0->setLocalPos(position0);
-    m_curSphere0->setLocalRot(rotation0);
-    m_tool0->computeInteractionForces();
-
-    // update position of finger to stay on proxy point
-    // finger axis are not at fingerpad, so we want a translation along fingertip z axis
-    chai3d::cVector3d fingerOffset(0,-0.006,0);
-    fingerRotation0 = rotation0;
-    fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
-    fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
-    finger->setLocalRot(fingerRotation0);
-    finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
-
-    //use this if two tools (haptic proxies) are desired
-    m_tool1->updateFromDevice();
-    p_CommonData->chaiMagDevice1->getPosition(position1);
-    p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    m_curSphere1->setLocalPos(position1);
-    m_curSphere1->setLocalRot(rotation1);
-    m_tool1->computeInteractionForces();
-
-    // perform our dynamic body updates if we are in a dynamic environment
-    if((p_CommonData->currentEnvironmentState == dynamicBodies) | (p_CommonData->currentEnvironmentState == paperEnvironment))
-    {
-        currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
-        double timeInterval = currTime - lastTime;
-        if(timeInterval > 0.01) timeInterval = 0.01;
-        //---------------------------------------------------
-        // Implement Dynamic simulation
-        //---------------------------------------------------
-        //find 3.1.1 implementation of dynamic bodies later
-        lastTime = currTime;
     }
 }
 
@@ -453,6 +513,7 @@ void haptics_thread::InitGeneralChaiStuff()
     //--------------------------------------------------------------------------
     // Create a new world
     world = new chai3d::cWorld();
+    p_CommonData->p_world = world;
 
     // create a camera and insert it into the virtual world
     world->setBackgroundColor(0, 0, 0);
@@ -471,15 +532,20 @@ void haptics_thread::InitGeneralChaiStuff()
                                  p_CommonData->lookatPos,    // lookat position (target)
                                  p_CommonData->upVector);   // direction of the "up" vector
 
+    // set the near and far clipping planes of the camera
+    // anything in front/behind these clipping planes will not be rendered
+    p_CommonData->p_camera->setClippingPlanes(0.01, 20.0);
+
     p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 140.0;
-    p_CommonData->camRadius = 0.15;
+    p_CommonData->polar = 150.0;
+    p_CommonData->camRadius = 0.25;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
     world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
     light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
+
 }
 
 void haptics_thread::InitFingerAndTool()
@@ -528,14 +594,23 @@ void haptics_thread::InitFingerAndTool()
     world->addChild(finger); // add object to world
     finger->setShowFrame(false);
     finger->setFrameSize(0.05);
+    finger->setLocalPos(0.0, 0.0, 0.0);
+    //create the thumb
+    thumb = new chai3d::cMultiMesh();
+    world->addChild(thumb);
+    finger->setShowFrame(false);
+    finger->setFrameSize(0.05);
     finger->setLocalPos(0,0,0);
 
     // load an object file
     if(cLoadFileOBJ(finger, "./Resources/FingerModel.obj")){
         qDebug() << "finger file loaded";
     }
+    if(cLoadFileOBJ(thumb, "./Resources/FingerModelThumb.obj")){
+        qDebug() << "thumb file loaded";
+    }
 
-    // set params
+    // set params for finger
     finger->setShowEnabled(true);
     //finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
@@ -547,6 +622,19 @@ void haptics_thread::InitFingerAndTool()
     finger->m_material->m_specular.set(1.0, 1.0, 1.0);
     finger->setUseMaterial(true);
     finger->setHapticEnabled(false);
+
+    // set params for thumb
+    thumb->setShowEnabled(true);
+    //finger->computeBoundaryBox(true); //compute a boundary box
+    thumb->setUseVertexColors(true);
+    chai3d::cColorf thumbColor;
+    thumbColor.setBrownSandy();
+    thumb->setVertexColor(thumbColor);
+    thumb->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    thumb->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    thumb->m_material->m_specular.set(1.0, 1.0, 1.0);
+    thumb->setUseMaterial(true);
+    thumb->setHapticEnabled(false);
 }
 
 void haptics_thread::InitEnvironments()
@@ -604,11 +692,11 @@ void haptics_thread::InitDynamicBodies()
     //--------------------------------------------------------------------------
 
     // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(world);
+    ODEWorld = new cODEWorld(p_CommonData->p_world);
     //give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
-    ODEWorld->setAngularDamping(.2);
+    ODEWorld->setAngularDamping(.02);
     ODEWorld->setLinearDamping(.02);
 
     // Create an ODE Block
@@ -643,7 +731,7 @@ void haptics_thread::InitDynamicBodies()
     ground->setMaterial(matGround);
 
     // setup collision detector
-    ground->createAABBCollisionDetector(toolRadius);
+    //ground->createAABBCollisionDetector(toolRadius);
 }
 
 void haptics_thread::RenderDynamicBodies()
@@ -654,12 +742,14 @@ void haptics_thread::RenderDynamicBodies()
     //--------------------------------------------------------------------------
 
     // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(world);
+    ODEWorld = new cODEWorld(p_CommonData->p_world);
+    p_CommonData->p_world->addChild(ODEWorld);
+
     //give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
     ODEWorld->setAngularDamping(.02);
-    ODEWorld->setLinearDamping(.00002);
+    ODEWorld->setLinearDamping(.0002);
 
     // Create an ODE Block
     p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
@@ -683,7 +773,7 @@ void haptics_thread::RenderDynamicBodies()
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
     ground->setLocalPos(0,0,0.05);
 
-    //define some material properties
+    //define some material properties for ground
     chai3d::cMaterial matGround;
     matGround.setStiffness(300);
     matGround.setDynamicFriction(0.2);
@@ -693,18 +783,24 @@ void haptics_thread::RenderDynamicBodies()
     ground->setMaterial(matGround);
 
     // setup collision detector
-    ground->createAABBCollisionDetector(toolRadius);
+    //ground->createAABBCollisionDetector(toolRadius);
 
     double boxSize = 0.05;
     cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
-
     p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
+
+
     chai3d::cMaterial mat0;
     mat0.setBlueRoyal();
     mat0.setStiffness(300);
-    mat0.setDynamicFriction(0.6);
-    mat0.setStaticFriction(0.6);
+    mat0.setLateralStiffness(600);
+    mat0.setDynamicFriction(1.5);
+    mat0.setStaticFriction(1.5);
+    mat0.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox->setMaterial(mat0);
+    p_CommonData->p_dynamicBox->setUseMaterial(true);
+
+
 
     // add mesh to ODE object
     p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
@@ -718,92 +814,19 @@ void haptics_thread::RenderDynamicBodies()
     // set position of box
     p_CommonData->ODEBody0->setLocalPos(0,0,0);
 
-    world->addChild(ODEWorld);
-    world->addChild(ground);
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
-}
 
-void haptics_thread::RenderPaper()
-{
-    ODEWorld->deleteAllChildren();
-    //--------------------------------------------------------------------------
-    // CREATING ODE World and Objects
-    //--------------------------------------------------------------------------
-
-    // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(world);
-    //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 0));
-    // define damping properties
-    ODEWorld->setAngularDamping(.02);
-    ODEWorld->setLinearDamping(.00000002);
-
-    // Create an ODE Block
-    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
-
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();
-
-    //--------------------------------------------------------------------------
-    // CREATING ODE INVISIBLE WALLS
-    //--------------------------------------------------------------------------
-    ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
-    //create ground
-    ground = new chai3d::cMesh();
-
-    //create a plane
-    double groundSize = 5.0;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
-
-    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05);
-
-    //define some material properties
-    chai3d::cMaterial matGround;
-    matGround.setStiffness(300);
-    matGround.setDynamicFriction(1);
-    matGround.setStaticFriction(1);
-    matGround.setGrayLight();
-    matGround.m_emission.setGrayLevel(0.3);
-    ground->setMaterial(matGround);
-
-    // setup collision detector
-    ground->createAABBCollisionDetector(toolRadius);
-
-    double boxSize = 0.05;
-    cCreateBox(p_CommonData->p_dynamicBox, 2.0*boxSize, 2.0*boxSize, .005); // make mesh a box
-
-    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
-    chai3d::cMaterial mat0;
-    mat0.setBlueRoyal();
-    mat0.setStiffness(300);
-    mat0.setDynamicFriction(0.6);
-    mat0.setStaticFriction(0.6);
-    p_CommonData->p_dynamicBox->setMaterial(mat0);
-
-    // add mesh to ODE object
-    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
-
-    // create a dynamic model of the ODE object
-    p_CommonData->ODEBody0->createDynamicBox(2.0*boxSize, 2.0*boxSize, .005);
-
-    // set mass of box
-    p_CommonData->ODEBody0->setMass(0.05);
-
-    // set position of box
-    p_CommonData->ODEBody0->setLocalPos(0,0,0);
+    // setup tools for dynamic interaction
+    m_tool0->enableDynamicObjects(true);
+    m_tool1->enableDynamicObjects(true);
 
     world->addChild(ODEWorld);
     world->addChild(ground);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
-
+    world->addChild(thumb);
 }
+
 
 void haptics_thread::RenderHump()
 {
@@ -825,31 +848,6 @@ void haptics_thread::RenderHump()
     p_CommonData->p_hump->setFriction(0.5, 0.5, true);
     world->addChild(p_CommonData->p_hump);
 
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
-}
-
-void haptics_thread::RenderHoopHump()
-{
-    p_CommonData->p_hoopHump->loadFromFile("./Resources/HumpHoopImported.obj");
-
-    p_CommonData->p_hoopHump->computeBoundaryBox(true); //compute a boundary box
-
-    // compute collision detection algorithm
-    p_CommonData->p_hoopHump->createAABBCollisionDetector(toolRadius);
-
-    chai3d::cColorf hoopHumpColor;
-    hoopHumpColor.setBlueDeepSky();
-    p_CommonData->p_hoopHump->setVertexColor(hoopHumpColor);
-    p_CommonData->p_hoopHump->m_material->m_ambient.set(0.1, 0.1, 0.1);
-    p_CommonData->p_hoopHump->m_material->m_diffuse.set(0.3, 0.3, 0.3);
-    p_CommonData->p_hoopHump->m_material->m_specular.set(1.0, 1.0, 1.0);
-    p_CommonData->p_hoopHump->setUseMaterial(true);
-    p_CommonData->p_hoopHump->setStiffness(200);
-    p_CommonData->p_hoopHump->setFriction(0.5, 0.5, true);
-
-    world->addChild(p_CommonData->p_hoopHump);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);

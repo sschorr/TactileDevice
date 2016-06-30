@@ -458,14 +458,23 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     a_position.set(x, y, z);
 
     // transformation to go from mag tracker at back, to at finger tip (x red, y green, z blue)
+    chai3d::cVector3d posOffsetinB;
     if (trackerNo == 0)
     {
-        chai3d::cVector3d posOffsetinB(-.060, 0, .018);
-        chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
-        chai3d::cVector3d posOffsetinA;
-        R_BtoA.mulr(posOffsetinB, posOffsetinA);
-        a_position = a_position + posOffsetinA;
+        posOffsetinB.set(-.060, 0, .018);
     }
+
+    if (trackerNo == 1)
+    {
+        posOffsetinB.set(-.067, 0, .020);
+    }
+
+    chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
+    chai3d::cVector3d posOffsetinA;
+    R_BtoA.mulr(posOffsetinB, posOffsetinA);
+    a_position = a_position + posOffsetinA;
+
+
     // estimate linear velocity
     estimateLinearVelocity(a_position);
 

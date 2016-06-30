@@ -22,6 +22,8 @@ SOURCES += ./src/main.cpp\
            ./src/magtracker.cpp \
            ./src/experiment_thread.cpp \
            ./src/magTracker_thread.cpp \
+           ./External/chai3d-3.1.1/modules/OCULUS/src/OVRDevice.cpp \
+           ./External/chai3d-3.1.1/modules/OCULUS/src/OVRRenderContext.cpp
 
 
 HEADERS  += ./include/mainwindow.h\
@@ -78,14 +80,26 @@ INCLUDEPATH += "./External/chai3d-3.1.1/modules/ODE"
 INCLUDEPATH += "./External/chai3d-3.1.1/modules/ODE/src"
 INCLUDEPATH += "./External/chai3d-3.1.1/modules/ODE/external/ODE/include"
 INCLUDEPATH += "./External/chai3d-3.1.1/modules/ODE/obj/Debug/Win32"
+INCLUDEPATH += "./External/chai3d-3.1.1/modules/OCULUS/src/"
+INCLUDEPATH += "./External/chai3d-3.1.1/modules/OCULUS/external/SDL/include"
+INCLUDEPATH += "./External/chai3d-3.1.1/modules/OCULUS/external/oculusSDK/LibOVR/Include/"
 
-# Libraries for Chai3d and Openhaptics
+
+# Libraries for Chai3d and Oculus
 LIBS += "./External/chai3d-3.1.1/external/glfiles/lib/OPENGL32.lib"
 LIBS += "./External/chai3d-3.1.1/external/glfiles/lib/GLU32.lib"
 LIBS += "./External/chai3d-3.1.1/extras/freeglut/lib/Debug/Win32/freeglut.lib"
 LIBS += "./External/chai3d-3.1.1/lib/Debug/Win32/chai3d.lib"
 #LIBS += "./External/chai3d-3.1.1/lib/Release/Win32/chai3d.lib"
 LIBS += "./External/chai3d-3.1.1/modules/ODE/lib/Debug/Win32/chai3d-ODE.lib"
+
+LIBS += "./External/chai3d-3.1.1/modules/OCULUS/external/SDL/lib/VS2013/Win32/SDL2.lib"
+LIBS += "./External/chai3d-3.1.1/modules/OCULUS/external/SDL/lib/VS2013/Win32/SDL2main.lib"
+LIBS += "./External/chai3d-3.1.1/modules/OCULUS/external/oculusSDK/LibOVR/Lib/Windows/Win32/Debug/VS2013/LibOVR.lib"
+LIBS += "./External/chai3d-3.1.1/modules/OCULUS/external/oculusSDK/LibOVRKernel/Lib/Windows/Win32/Debug/VS2013/LibOVRKernel.lib"
+
+
+
 
 # Library for Ascension trackewr
 LIBS += "./lib/ATC3DG.lib"

@@ -7,7 +7,7 @@
 #include <windows.h>
 #include <iostream>
 #include <sstream> // Required for stringstreams
-#include <string>
+#include <string.h>
 #include <QString>
 #include <ostream>
 #include <istream>
@@ -18,6 +18,15 @@
 #include <qfiledialog.h>
 #include <qinputdialog.h>
 #include <QKeyEvent>
+#include <QThread>
+#define SDL_MAIN_HANDLED
+#include "SDL.h"
+#include "OVRRenderContext.h"
+#include "OVRDevice.h"
+
+using namespace chai3d;
+using namespace std;
+
 
 namespace Ui {
 class MainWindow;
@@ -31,7 +40,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    // functions
     void Initialize();
+    void processEvents();
+
+    // vars
     shared_data* p_CommonData;
     Eigen::Vector3d localMotorAngles;
     Eigen::Vector3d localJointAngles;
@@ -42,6 +55,18 @@ public:
     Eigen::Vector3d localDesiredPos;
     Eigen::Vector3d localDesiredJointAngle;
 
+    // Oculus Rift
+    // display context
+    chai3d::cOVRRenderContext renderContext;
+    // oculus device
+    chai3d::cOVRDevice oculusVR;
+
+    //------------------------------------------------------------------------------
+    // DECLARED MACROS
+    //------------------------------------------------------------------------------
+
+    // convert to resource path
+    #define RESOURCE_PATH(p)    (char*)((resourceRoot+string(p)).c_str())
 
 
 private:
@@ -72,7 +97,6 @@ private slots:
     void on_setNeutral_clicked();
     void on_setTrial_clicked();
     void on_dynamicEnvironment_clicked();
-    void on_loadProtocol_2_clicked();
     void on_paperEnvironment_clicked();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);

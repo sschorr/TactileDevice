@@ -17,11 +17,53 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
+    //--------------------------------------------------------------------------
+    // SETUP DISPLAY CONTEXT
+    //--------------------------------------------------------------------------
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
+    {
+        cout << "failed initialization" << endl;
+        QThread::msleep(1000);
+        //return 1;
+    }
+
+    if (!oculusVR.initVR())
+    {
+        cout << "failed to initialize Oculus" << endl;
+        QThread::msleep(1000);
+        SDL_Quit();
+        //return 1;
+    }
+
+    ovrSizei hmdResolution = oculusVR.getResolution();
+    ovrSizei windowSize = { hmdResolution.w / 2, hmdResolution.h / 2 };
+
+    renderContext.init("CHAI3D", 100, 100, windowSize.w, windowSize.h);
+    SDL_ShowCursor(SDL_DISABLE);
+
+    if (glewInit() != GLEW_OK)
+    {
+        oculusVR.destroyVR();
+        renderContext.destroy();
+        SDL_Quit();
+        //return 1;
+    }
+
+    if (!oculusVR.initVRBuffers(windowSize.w, windowSize.h))
+    {
+        oculusVR.destroyVR();
+        renderContext.destroy();
+        SDL_Quit();
+        //return 1;
+    }
+
+
     // Set our current state
     p_CommonData->currentControlState = idleControl;
 
     // Initialize shared memory for OpenGL widget
-    ui->DisplayWidget->p_CommonData = p_CommonData;    
+    //ui->DisplayWidget->p_CommonData = p_CommonData;
 
     connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
@@ -57,7 +99,7 @@ void MainWindow::Initialize()
     p_CommonData->flagNormal = true;
     p_CommonData->flagLateral = true;
 
-    GraphicsTimer.start(20);
+    GraphicsTimer.start(10);
     UpdateGUIInfo();
 }
 
@@ -120,6 +162,48 @@ void MainWindow::onGUIchanged()
 
 void MainWindow::UpdateGUIInfo()
 {
+    //    chai3d::cShapeSphere *sphere = new chai3d::cShapeSphere(1);
+    //    p_CommonData->p_world->addChild(sphere);
+    //    sphere->setLocalPos(0, 0, 0.0);
+
+    // Handle Oculus events
+    // handle key presses
+    processEvents();
+
+    // start rendering
+    oculusVR.onRenderStart();
+
+    // render frame for each eye
+    for (int eyeIndex = 0; eyeIndex < ovrEye_Count; eyeIndex++)
+    {
+        // retrieve projection and modelview matrix from oculus
+        cTransform projectionMatrix, modelViewMatrix;
+        oculusVR.onEyeRender(eyeIndex, projectionMatrix, modelViewMatrix);
+
+        p_CommonData->p_camera->m_useCustomProjectionMatrix = true;
+        p_CommonData->p_camera->m_projectionMatrix = projectionMatrix;
+
+        p_CommonData->p_camera->m_useCustomModelViewMatrix = true;
+        p_CommonData->p_camera->m_modelViewMatrix = modelViewMatrix;
+
+//        p_CommonData->cameraPos.set(0.6, 0.3, 0);
+//        p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
+//        p_CommonData->upVector.set(0.0, 0.0, 1.0);
+//        p_CommonData->p_camera->set(p_CommonData->cameraPos,p_CommonData->lookatPos,p_CommonData->upVector);
+
+        // render world
+        ovrSizei size = oculusVR.getEyeTextureSize(eyeIndex);
+        p_CommonData->p_camera->renderView(size.w, size.h, 0, C_STEREO_LEFT_EYE, false);
+
+        // finalize rendering
+        oculusVR.onEyeRenderFinish(eyeIndex);
+    }
+
+    // update frames
+    oculusVR.submitFrame();
+    oculusVR.blitMirror();
+    SDL_GL_SwapWindow(renderContext.window);
+
     localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
     localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
     localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
@@ -197,7 +281,7 @@ void MainWindow::UpdateGUIInfo()
         ui->directions->setText("Press 'Z' or 'X' to rotate answer.  Press 'R' to lock in choice");
         break;
 
-    case end:
+    case endExperiment:
         ui->directions->setText("Experiment over, please contact administrator");
         break;
 
@@ -520,7 +604,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
             if (nextTrialType == "end")
             {
-                p_CommonData->currentExperimentState = end;
+                p_CommonData->currentExperimentState = endExperiment;
                 ui->directions->setText("Experiment Completed, please contact administrator");
             }
             else
@@ -686,15 +770,6 @@ void MainWindow::on_loadProtocol_clicked()
     qDebug() << p_CommonData->frictionProtocolLocation;
 }
 
-void MainWindow::on_loadProtocol_2_clicked()
-{
-    //Open dialog box to get protocol file and save into variable
-    QString temp = QFileDialog::getOpenFileName();
-    p_CommonData->palpationProtocolLocation = temp;
-    p_CommonData->palpationProtocolFile.LoadFile(temp.toStdString().c_str());
-    qDebug() << p_CommonData->palpationProtocolLocation;
-}
-
 void MainWindow::on_loadProtocol_3_clicked()
 {
     //Open dialog box to get protocol file and save into variable
@@ -805,6 +880,41 @@ void MainWindow::on_AllDown_clicked()
     p_CommonData->calibClock.reset();
     p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
     p_CommonData->calibClock.start();
+}
+
+void MainWindow::processEvents()
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type)
+        {
+        case SDL_KEYDOWN:
+            // esc
+            if (event.key.keysym.sym == SDLK_q || event.key.keysym.sym == SDLK_ESCAPE)
+            {
+                close();
+                break;
+            }
+
+            // spacebar
+            if (event.key.keysym.sym == SDLK_SPACE)
+            {
+                oculusVR.recenterPose();
+                break;
+            }
+
+            break;
+
+        case SDL_QUIT:
+            close();
+            break;
+
+        default:
+            break;
+        }
+    }
 }
 
 

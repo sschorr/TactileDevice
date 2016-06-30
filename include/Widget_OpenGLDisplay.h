@@ -1,9 +1,13 @@
 #ifndef WIDGET_OPENGLDISPLAY_H
 #define WIDGET_OPENGLDISPLAY_H
 
+#include <QThread>
+#include <time.h>
 #include <chai3d.h>
 #include <QGLWidget>
 #include "Shared_Data.h"
+
+
 
 class Widget_OpenGLDisplay : public QGLWidget
 {
@@ -15,6 +19,7 @@ public:
     shared_data *p_CommonData;
 
 protected:
+//    void processEvents();
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);

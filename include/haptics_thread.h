@@ -23,6 +23,7 @@
 #include "windows.h"
 #include <time.h>
 
+
 #define RANGE_10V 0x00 // Range code for ADC ±10V range.
 #define RANGE_5V 0x10 // Range code for ADC ±5V range.
 #define EOPL 0x80 // ADC end-of-poll-list marker.
@@ -56,12 +57,10 @@ public:
     void RenderPalpation();
     void RenderTwoFriction();
     void RenderHump();
-    void RenderHoopHump();
     void RenderExpFriction();
     void WriteDataToFile();
     void InitDynamicBodies();
     void RenderDynamicBodies();
-    void RenderPaper();
     void SetInitJointAngles();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
@@ -91,6 +90,7 @@ public:
     chai3d::cMesh* meshBox;
     chai3d::cMesh* ground;
     chai3d::cMultiMesh* finger;
+    chai3d::cMultiMesh* thumb;
     chai3d::cEffectSurface* newEffect;
     cODEGenericBody* ODEGPlane0;
 

@@ -25,14 +25,14 @@ void Widget_OpenGLDisplay::paintGL()
 {
     if(p_CommonData)
     {
-        // render world
-        p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
+        //render world
+        //p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
     }
 }
 
 void Widget_OpenGLDisplay::resizeGL(int width, int height)
 {
-    // update the size of the viewport
+    //update the size of the viewport
     m_displayWidth = width;
     m_displayHeight = height;
 

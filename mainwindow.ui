@@ -30,16 +30,6 @@
      <attribute name="title">
       <string>Tab 1</string>
      </attribute>
-     <widget class="Widget_OpenGLDisplay" name="DisplayWidget" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>811</width>
-        <height>671</height>
-       </rect>
-      </property>
-     </widget>
      <widget class="QLCDNumber" name="lcdNumberHapticRate">
       <property name="geometry">
        <rect>
@@ -1286,7 +1276,6 @@
      </widget>
      <zorder>AllDown</zorder>
      <zorder>directions</zorder>
-     <zorder>DisplayWidget</zorder>
      <zorder>lcdNumberHapticRate</zorder>
      <zorder>VoltageLCD2</zorder>
      <zorder>label_22</zorder>
@@ -1407,14 +1396,6 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>Widget_OpenGLDisplay</class>
-   <extends>QWidget</extends>
-   <header>Widget_OpenGLDisplay.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -5,7 +5,7 @@
 
 // defines indicating what physical hardware is present
 //#define SENSORAY626
-//#define MAGTRACKER
+#define MAGTRACKER
 
 #include <qDebug>
 #include <QVector>
@@ -75,7 +75,7 @@ typedef enum
     palpationLineWritingToFile,
     palpationLineBreak,
     trialBreak,
-    end
+    endExperiment
 } experiment_states;
 
 typedef enum
@@ -110,6 +110,7 @@ typedef struct
 
     // camera vars
     chai3d::cCamera* p_camera;
+    chai3d::cWorld * p_world;
     chai3d::cVector3d cameraPos;
     chai3d::cVector3d lookatPos;
     chai3d::cVector3d upVector;

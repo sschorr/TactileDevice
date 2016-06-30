@@ -5,10 +5,6 @@
 #include "experiment_thread.h"
 #include "magTracker_thread.h"
 
-
-// This code runs the pololu motor driven device stably
-
-
 // Variable Declarations ============================================
 shared_data shared; //create the shared_data structure for sharing
 
@@ -21,9 +17,11 @@ haptics_thread hapticsThread;
 Experiment_Thread experimentThread;
 magTracker_thread magTrackerThread;
 
+
 // MAIN FUNCTION ====================================================
 int main(int argc, char *argv[])
 {
+
     QApplication a(argc, argv);
     MainWindow window;
 
@@ -47,12 +45,12 @@ int main(int argc, char *argv[])
 
     // Initialize and set the window thread data pointer to the shared data
     window.p_CommonData = &shared;
+    window.show();
     window.Initialize();
 
     hapticsThread.start();
     experimentThread.start();
     magTrackerThread.start();
-    window.show();
 
     return a.exec();
 }
