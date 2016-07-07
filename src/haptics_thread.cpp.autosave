@@ -423,10 +423,10 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     //perform transformation to get "device forces"
     lastComputedForce0 = m_tool0->getDeviceGlobalForce();
 
-    // rotation of delta mechanism in world frame (originally from mag tracker, but already transformed to tip orientation)
+    // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small angle to  to tip orientation)
     rotation0.trans();
 
-    // create new rotation around z for matching device frames
+    // create new device rotation (relative to altered tracker - this flips the  around z for matching device frames
     deviceRotation0.identity();
     deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
     deviceRotation0.trans();    
