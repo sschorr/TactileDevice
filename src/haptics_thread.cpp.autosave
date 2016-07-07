@@ -456,12 +456,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     {
         desiredPosMovement.x(0);
         desiredPosMovement.y(0);
-    }
+    }    
+    
     // don't allow the tactor to move away from finger
-
     double vertPosMovement = desiredPosMovement.z();
     if(vertPosMovement > 0)
         vertPosMovement = 0;
+    
     /* Old code for using a nonlinear normal force map based on data taken from fingers
     if(deviceLastComputedForce0.z() > 0)
         vertPosMovement = log(8.6736*deviceLastComputedForce0.z()+1.0); //linear fit exp data from normal displacement paper

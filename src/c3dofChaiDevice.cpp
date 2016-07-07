@@ -534,6 +534,11 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     {
         frame.rotateAboutLocalAxisDeg(0,1,0,9);
     }
+    if (trackerNo == 1)
+    {
+        frame.rotateAboutLocalAxisDeg(0,1,0,9);
+    }
+
 
     // store new rotation matrix
     a_rotation = frame;

@@ -78,8 +78,6 @@ Eigen::Vector3d c3DOFDevice::GetJointAngles()
 
         jointAngles[i] = theta;
 
-        /*if (i == 2)
-            qDebug() << "CalcJointAngle" << theta*180/PI;*/
     }
 
     return jointAngles;
