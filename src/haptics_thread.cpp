@@ -423,10 +423,10 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     //perform transformation to get "device forces"
     lastComputedForce0 = m_tool0->getDeviceGlobalForce();
 
-    // rotation of delta mechanism in world frame (originally from mag tracker, but already transformed to tip orientation)
+    // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
 
-    // create new rotation around z for matching device frames
+    // create new device rotation (this essentially just flips the tail in/out of mag tracker
     deviceRotation0.identity();
     deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
     deviceRotation0.trans();    
@@ -456,12 +456,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     {
         desiredPosMovement.x(0);
         desiredPosMovement.y(0);
-    }
-    // don't allow the tactor to move away from finger
+    }    
 
+    // don't allow the tactor to move away from finger
     double vertPosMovement = desiredPosMovement.z();
     if(vertPosMovement > 0)
         vertPosMovement = 0;
+
     /* Old code for using a nonlinear normal force map based on data taken from fingers
     if(deviceLastComputedForce0.z() > 0)
         vertPosMovement = log(8.6736*deviceLastComputedForce0.z()+1.0); //linear fit exp data from normal displacement paper
