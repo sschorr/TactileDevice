@@ -17,36 +17,26 @@
 
 #define PI 3.14159265
 
-// Physical parameters of build [mm] =======================================
-// radius of motor pulley
-#define MOTRAD 1.5 // [mm]
-// horizontal offset of motorshaft from base joint
-#define HORIZOFFSET 6.25 // [mm]
-// vertical offset of motorshaft from base joint
-#define VERTOFFSET -9.5 // [mm]
-// distance from base joint to tether attachment point
-#define ATTACHL 7.5 // [mm]
-// Base joint angles during calibration procedure
-#define CALIBANGLE 0.785398 //45 [deg] to rad
-// length upper arm
-#define L_UA 9 // [mm]
-// length lower arm
-#define L_LA 9 // [mm]
-// length of base (center to joint)
-#define L_BASE 15 // [mm]
-// length of end effector (center to joint)
-#define L_EE 15 // [mm]
-// Spring torque of spring at parallel
-#define SPRING_TORQUE 0.05 //is the old spring (will use .1 for new motors) [in-.lbs/180 deg]
-
-
+// Physical parameters of build agnostic [mm] =======================================
+#define SPRING_TORQUE 0.1           // 0.1 for stiff, .05 for weak [in-.lbs/180 deg], measured at parallel
+#define MOTRAD 1.5                  // radius of motor pulley [mm]
+#define HORIZOFFSET 6.25            // horizontal offset of motorshaft from base joint [mm]
+#define VERTOFFSET -9.5             // vertical offset of motorshaft from base joint [mm]
+// Physical parameters of build index [mm] =======================================
+#define ATTACHL 7.5                 // distance from base joint to tether attachment point [mm]
+#define CALIBANGLE 0.785398         // Base joint angles during calibration procedure (45 [deg] to rad)
+#define L_UA 9                      // length upper arm [mm]
+#define L_LA 9                      // length lower arm [mm]
+#define L_BASE 15                   //length of base (center to joint)[mm]
+#define L_EE 15                     // length of end effector (center to joint)[mm]
+// Physical parameters of build thumb [mm] =======================================
 
 class c3DOFDevice
 {
 
 public:
     // Constructor of c3DOFDevice
-    c3DOFDevice();
+    c3DOFDevice(int num);
     ~c3DOFDevice();
 
     // Instantiates all the motor controllers
@@ -129,7 +119,7 @@ private:
     cMotorController* motor_2;
     cMotorController* motor_3;
 
-
+    int finger;
 };
 
 #endif // C3DOFDEVICE_H

@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     shared.chaiMagDevice1 = chai3d::cGenericHapticDevicePtr((chai3d::cGenericHapticDevice *)(new chai3d::c3dofChaiDevice(1)));
 
     // Create a haptic device
-    shared.wearableDelta = new c3DOFDevice();
-    shared.wearableDelta->Init3DOFDeviceEnc();
+    shared.wearableDelta0 = new c3DOFDevice(0);
+    shared.wearableDelta0->Init3DOFDeviceEnc();
 
     // Initialize and set the haptics thread data pointer to the shared data
     hapticsThread.p_CommonData = &shared;

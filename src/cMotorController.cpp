@@ -5,8 +5,7 @@
 */
 //===========================================================================
 #include "shared_data.h"
-#include "cMotorController.h"
-#include "windows.h"
+
 
 // Constructor of motor controller =========================================
 cMotorController::cMotorController(int inputMotorID)
@@ -15,11 +14,75 @@ cMotorController::cMotorController(int inputMotorID)
     channelNum = MotorNumToChannelNum(motorNum);
 }
 
+// Init 626 encoder tracking and reading ============================
+void cMotorController::InitEncoder()
+{
+#ifdef SENSORAY826
+    int fail = S826_CounterModeWrite(PCI_BOARD, channelNum, MODE_ENC);
+    if (fail == 0)
+       qDebug() << "encoder" << channelNum << "init'ed";
+    S826_CounterStateWrite(PCI_BOARD, channelNum, 1); //sets the counter to start keeping track
+#endif
+
+    // Set initial condition of offset angle until funciton is called
+    offsetAngle = 0;
+}
+
+void cMotorController::SetOffsetAngle()
+{
+#ifdef SENSORAY826
+    uint EncoderRaw;
+    S826_CounterSnapshot(PCI_BOARD, channelNum);
+    S826_CounterSnapshotRead(PCI_BOARD, channelNum, &EncoderRaw, nullptr, nullptr, T_WAIT);
+
+    int EncoderPos = 0;
+    if (EncoderRaw <= (MAXCOUNT/2))
+        EncoderPos = EncoderRaw;
+    else if (EncoderRaw >= (MAXCOUNT/2))
+        EncoderPos = -(MAXCOUNT)+ EncoderRaw;
+
+    offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
+
+#endif
+
+#ifdef SENSORAY626
+    //Lock before we access Sensorarray stuff
+    m_mutex.lock();
+    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
+    m_mutex.unlock();
+    // Change the raw encoder count into a double centered around 0
+    double EncoderPos = 0;
+    if (EncoderRaw < ((MAX_COUNT+1)/2))
+        EncoderPos = EncoderRaw;
+    else if (EncoderRaw >= ((MAX_COUNT+1)/2))
+        EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
+
+     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
+#endif
+}
+
 
 // Get angle of motor ======================================================
 double cMotorController::GetMotorAngle()
 {
     double motorAngle = 0;
+
+#ifdef SENSORAY826
+    uint EncoderRaw;
+    S826_CounterSnapshot(PCI_BOARD, channelNum);
+    S826_CounterSnapshotRead(PCI_BOARD, channelNum, &EncoderRaw, nullptr, nullptr, T_WAIT);
+
+    int EncoderPos = 0;
+    if (EncoderRaw <= (MAXCOUNT/2))
+        EncoderPos = EncoderRaw;
+    else if (EncoderRaw > (MAXCOUNT/2))
+        EncoderPos = -(MAXCOUNT)+ EncoderRaw;
+
+    double rawMotorAngle = ENCCOUNT_TO_RAD*EncoderPos;
+    motorAngle = -(rawMotorAngle - offsetAngle);
+
+#endif
+
 #ifdef SENSORAY626
     //Lock before we access Sensorarray stuff
     //m_mutex.lock();
@@ -44,26 +107,13 @@ cMotorController::~cMotorController()
     close();
 }
 
-
-// Open connection to 626 Board
-int cMotorController::open()
-{
-#ifdef SENSORAY626
-    // load the .dll
-    S626_DLLOpen();
-
-    // open the 626 card
-    S626_OpenBoard(0,0,0,0);
-
-    if (S626_GetErrors(0) != 0)
-        return S626_GetErrors(0);
-#endif
-    return 0;
-}
-
 // Write all outputs to 0 and then close 626 board =========================
 int cMotorController::close()
 {
+#ifdef SENSORAY826
+    S826_SystemClose();
+#endif
+
 #ifdef SENSORAY626
     ////////////////////////////////////////////////////////////////////////////
     // Unregister board number 0 after programming analog and digital outputs
@@ -99,63 +149,6 @@ int cMotorController::MotorNumToChannelNum(int motorNumArg)
     return counterNumRet;
 }
 
-// Init 626 encoder tracking and reading ============================
-void cMotorController::InitEncoder()
-{
-#ifdef SENSORAY626
-    open();
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Configure board 0, counter counterNum as a quadrature counter. An active Index will reset
-    // the counter core to zero and generate an interrupt request.
-    ///////////////////////////////////////////////////////////////////////////////////////////
-
-    // Set counter operating mode.
-    S626_CounterModeSet( 0, channelNum,
-    //( LOADSRC_INDX << BF_LOADSRC ) | // Index causes preload.
-    ( INDXSRC_SOFT << BF_INDXSRC ) | // Hardware index is disabled
-    ( INDXPOL_POS << BF_INDXPOL ) | // Active high index.
-    ( CLKSRC_COUNTER << BF_CLKSRC ) | // Operating mode is Counter.
-    ( CLKPOL_POS << BF_CLKPOL ) | // Active high clock.
-    ( CLKMULT_4X << BF_CLKMULT ) | // Clock multiplier is 4x.
-    ( CLKENAB_ALWAYS << BF_CLKENAB ) ); // Counting is always enabled.
-
-    // Initialize preload value to zero so that the counter core will be set
-    // to zero upon the occurance of an Index.
-    S626_CounterPreload( 0, channelNum, 0 );
-
-    // Enable latching of accumulated counts on demand. This assumes that
-    // there is no conflict with the latch source used by paired counter 2B.
-    S626_CounterLatchSourceSet( 0, channelNum, LATCHSRC_AB_READ );
-
-    // Enable the counter to generate interrupt requests upon index.
-    S626_CounterIntSourceSet( 0, channelNum, INTSRC_INDX );
-
-    // Simulate Index Pulse to reset count at 0 on startup
-    S626_CounterSoftIndex(0, channelNum);
-#endif
-
-    // Set initial condition of offset angle until funciton is called
-    offsetAngle = 0;
-}
-
-void cMotorController::SetOffsetAngle()
-{
-#ifdef SENSORAY626
-    //Lock before we access Sensorarray stuff
-    m_mutex.lock();
-    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
-    m_mutex.unlock();
-    // Change the raw encoder count into a double centered around 0
-    double EncoderPos = 0;
-    if (EncoderRaw < ((MAX_COUNT+1)/2))
-        EncoderPos = EncoderRaw;
-    else if (EncoderRaw >= ((MAX_COUNT+1)/2))
-        EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
-
-     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
-#endif
-}
 
 
 void cMotorController::SetOutputTorque(double desiredTorque)
@@ -178,7 +171,6 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     }
 
     long writeData = (long)(VoltOut*DAC_VSCALAR);
-
 
 #ifdef SENSORAY626
     S626_WriteDAC(0,channelNum,writeData);

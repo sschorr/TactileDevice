@@ -1,23 +1,34 @@
 #include "c3DOFdevice.h"
+#include "Shared_Data.h"
 
 
-c3DOFDevice::c3DOFDevice()
+c3DOFDevice::c3DOFDevice(int num)
 {
     this->desiredForce << 0,0,0;
     this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
     this->motorTorques << 0,0,0;
     this->jointTorques << 0,0,0;
+    this->finger = num;
 }
 
 c3DOFDevice::~c3DOFDevice()
-{
+{   
     delete this->motor_1;
     delete this->motor_2;
     delete this->motor_3;
+#ifdef SENSORAY826
+    if(S826_SystemClose())
+        qDebug() << "Sensoray closed";
+#endif
 }
 
 int c3DOFDevice::Init3DOFDeviceEnc()
 {
+#ifdef SENSORAY826
+    int fail = S826_SystemOpen();  //open connection to the sensoray
+        qDebug() << fail;
+#endif
+
     motor_1 = new cMotorController(1);
     motor_1->InitEncoder();
     motor_2 = new cMotorController(2);
@@ -25,6 +36,9 @@ int c3DOFDevice::Init3DOFDeviceEnc()
     motor_3 = new cMotorController(3);
     motor_3->InitEncoder();
 
+    motor_1->SetOffsetAngle();
+    motor_2->SetOffsetAngle();
+    motor_3->SetOffsetAngle();
     return 0;
 }
 
@@ -381,6 +395,7 @@ Eigen::Vector3d c3DOFDevice::ReadDesiredPos()
     return this->desiredPos;
 }
 
+// set desired motor torques based on desired cartesian force
 void c3DOFDevice::SetCartesianTorqueOutput(Eigen::Vector3d desiredForceOutput)
 {
     Eigen::Vector3d desiredMotorTorques = CalcDesiredMotorTorques(desiredForceOutput);
@@ -390,6 +405,7 @@ void c3DOFDevice::SetCartesianTorqueOutput(Eigen::Vector3d desiredForceOutput)
     this->motor_3->SetOutputTorque(desiredMotorTorques[2]);
 }
 
+// set motor torques based on desired joint torques
 void c3DOFDevice::SetJointTorqueOutput(Eigen::Vector3d desJointTorqueOutput)
 {
     motorTorques = CalcDesiredMotorTorquesJointControl(desJointTorqueOutput);
@@ -405,6 +421,7 @@ Eigen::Vector3d c3DOFDevice::ReadVoltageOutput()
     return returnVoltage;
 }
 
+// cartesian based position controller
 void c3DOFDevice::PositionController(double Kp, double Kd)
 {    
     double K_p = Kp;
@@ -436,6 +453,7 @@ void c3DOFDevice::PositionController(double Kp, double Kd)
     lastPos = currentPos;
 }
 
+// joint controller for startup calibration (can be called with an externally set desired angle, otherwise, same as "JointController")
 void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double Kp, double Kd)
 {
     static bool firstTimeThrough = true;
@@ -464,6 +482,7 @@ void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double
     lastAngles = jointAngles;
 }
 
+// joint controller that reads device desired joint angles
 void c3DOFDevice::JointController(double Kp, double Kd)
 {
     static bool firstTimeThrough = true;
@@ -504,7 +523,7 @@ void c3DOFDevice::TurnOffControl()
     Eigen::Vector3d nullForce(0,0,0);
     // set the zero force as the desired force
     SetDesiredForce(nullForce);
-    // set output torque based on zero force
+    // set output torque based on zero force (These are set to avoid the motor backdriving while idle)
     this->motor_1->SetOutputTorque(-1.88);
     this->motor_2->SetOutputTorque(1.88);
     this->motor_3->SetOutputTorque(-1.88);

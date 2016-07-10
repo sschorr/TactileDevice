@@ -22,9 +22,9 @@ void haptics_thread::initialize()
 
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
-    p_CommonData->wearableDelta->TurnOffControl();
+    p_CommonData->wearableDelta0->TurnOffControl();
     p_CommonData->neutralPos << 0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180);
-    p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos); // kinematic neutral position
+    p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos); // kinematic neutral position
 
     p_CommonData->Kp = 0; //these are set by the window sliders
     p_CommonData->Kd = 0; //these are set by the window sliders
@@ -101,35 +101,35 @@ void haptics_thread::run()
             case initCalibControl:
                 UpdateVRGraphics();
                 SetInitJointAngles();
-                p_CommonData->wearableDelta->IndivJointController(p_CommonData->desJointInits, p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->IndivJointController(p_CommonData->desJointInits, p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case idleControl:
                 UpdateVRGraphics();
-                p_CommonData->wearableDelta->TurnOffControl();
+                p_CommonData->wearableDelta0->TurnOffControl();
                 break;
 
             case VRControlMode:
                 UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
-                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case sliderControlMode:
                 UpdateVRGraphics();
-                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case sinControlMode:
                 UpdateVRGraphics();                
                 CommandSinPos(inputAxis);
-                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case circControlMode:
                 UpdateVRGraphics();
                 CommandCircPos(inputAxis);
-                p_CommonData->wearableDelta->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
             }
 
@@ -163,7 +163,7 @@ void haptics_thread::run()
     }
 
     // If we are terminating, delete the haptic device to set outputs to 0
-    delete p_CommonData->wearableDelta;
+    delete p_CommonData->wearableDelta0;
 }
 
 void haptics_thread::UpdateVRGraphics()
@@ -483,21 +483,21 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     }
 
     // Perform control based on desired position
-    p_CommonData->wearableDelta->SetDesiredPos(desiredPos);
+    p_CommonData->wearableDelta0->SetDesiredPos(desiredPos);
 }
 
 void haptics_thread::RecordData()
 {
     recordDataCounter = 0;
     dataRecorder.time = p_CommonData->overallClock.getCurrentTimeSeconds();
-    dataRecorder.jointAngles = p_CommonData->wearableDelta->GetJointAngles();
-    dataRecorder.motorAngles = p_CommonData->wearableDelta->GetMotorAngles();
-    dataRecorder.pos = p_CommonData->wearableDelta->GetCartesianPos();
-    dataRecorder.desiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-    dataRecorder.voltageOut = p_CommonData->wearableDelta->ReadVoltageOutput();
+    dataRecorder.jointAngles = p_CommonData->wearableDelta0->GetJointAngles();
+    dataRecorder.motorAngles = p_CommonData->wearableDelta0->GetMotorAngles();
+    dataRecorder.pos = p_CommonData->wearableDelta0->GetCartesianPos();
+    dataRecorder.desiredPos = p_CommonData->wearableDelta0->ReadDesiredPos();
+    dataRecorder.voltageOut = p_CommonData->wearableDelta0->ReadVoltageOutput();
     dataRecorder.VRInteractionForce = deviceLastForceRecord; // last force on tool0
     dataRecorder.VRInteractionForceGlobal = globalLastForceRecord; // last force on tool0 in global coords
-    dataRecorder.motorTorque = p_CommonData->wearableDelta->motorTorques;
+    dataRecorder.motorTorque = p_CommonData->wearableDelta0->motorTorques;
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;
     dataRecorder.accelSignal = accelSignal;
@@ -923,7 +923,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     // case that we want to stay still at beginning
     if (currTime < stillTime)
     {
-        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);        
+        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos);
     }    
 
     // case that we want to be ramping and then oscillating
@@ -937,20 +937,20 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
         }
 
         Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->neutralPos;
-        p_CommonData->wearableDelta->SetDesiredPos(sinPos);
+        p_CommonData->wearableDelta0->SetDesiredPos(sinPos);
     }
 
     // If time is greater than 20 periods + stillTime reset to neutral pos
     else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
     {
-        p_CommonData->wearableDelta->SetDesiredPos(p_CommonData->neutralPos);
+        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos);
         p_CommonData->recordFlag = false;
     }
 
     // If time is greater than 20 periods + 2*stillTime, pause and write to file
     if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + 2*stillTime))
     {
-        p_CommonData->wearableDelta->TurnOffControl();
+        p_CommonData->wearableDelta0->TurnOffControl();
         WriteDataToFile();
 
         p_CommonData->bandSinFreq = p_CommonData->bandSinFreq + 0.2;
@@ -1020,12 +1020,12 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
         desPos[2] = p_CommonData->neutralPos.z();
     }
 
-    p_CommonData->wearableDelta->SetDesiredPos(desPos);
+    p_CommonData->wearableDelta0->SetDesiredPos(desPos);
 
 
     if (currTime > (moveStartTime + 2*circTime))
     {
-        p_CommonData->wearableDelta->TurnOffControl();
+        p_CommonData->wearableDelta0->TurnOffControl();
         WriteDataToFile();
         p_CommonData->currentControlState = idleControl;
 

@@ -92,7 +92,7 @@ void MainWindow::Initialize()
     p_CommonData->indicatorRot = 0;
     p_CommonData->tissueRot = 0;
 
-    p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
+    p_CommonData->desJointInits = p_CommonData->wearableDelta0->GetJointAngles();
 
     ui->normalBox->setChecked(true);
     ui->lateralBox->setChecked(true);
@@ -135,7 +135,7 @@ void MainWindow::onGUIchanged()
         double ySlider = this->ui->verticalSliderY->value()/22.2;
         double zSlider = this->ui->verticalSliderZ->value()/22.2+p_CommonData->neutralPos[2];
         Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta->SetDesiredPos(tempDesiredPos);
+        p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos);
     }
 
     else if(ui->VRControl->isChecked())
@@ -204,13 +204,13 @@ void MainWindow::UpdateGUIInfo()
     oculusVR.blitMirror();
     SDL_GL_SwapWindow(renderContext.window);
 
-    localMotorAngles = p_CommonData->wearableDelta->GetMotorAngles();
-    localJointAngles = p_CommonData->wearableDelta->GetJointAngles();
-    localCartesianPos = p_CommonData->wearableDelta->GetCartesianPos();
-    localDesiredForce = p_CommonData->wearableDelta->ReadDesiredForce();
-    localOutputVoltages = p_CommonData->wearableDelta->ReadVoltageOutput();
-    localDesiredPos = p_CommonData->wearableDelta->ReadDesiredPos();
-    localDesiredJointAngle = p_CommonData->desJointInits;//p_CommonData->wearableDelta->CalcInverseKinJoint();
+    localMotorAngles = p_CommonData->wearableDelta0->GetMotorAngles();
+    localJointAngles = p_CommonData->wearableDelta0->GetJointAngles();
+    localCartesianPos = p_CommonData->wearableDelta0->GetCartesianPos();
+    localDesiredForce = p_CommonData->wearableDelta0->ReadDesiredForce();
+    localOutputVoltages = p_CommonData->wearableDelta0->ReadVoltageOutput();
+    localDesiredPos = p_CommonData->wearableDelta0->ReadDesiredPos();
+    localDesiredJointAngle = p_CommonData->desJointInits;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
 
     ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
     ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
@@ -298,8 +298,8 @@ void MainWindow::UpdateGUIInfo()
 
 void MainWindow::on_CalibratePushButton_clicked()
 {
-    p_CommonData->wearableDelta->ZeroEncoders();
-    p_CommonData->desJointInits = p_CommonData->wearableDelta->GetJointAngles();
+    p_CommonData->wearableDelta0->ZeroEncoders();
+    p_CommonData->desJointInits = p_CommonData->wearableDelta0->GetJointAngles();
     onGUIchanged();
 }
 

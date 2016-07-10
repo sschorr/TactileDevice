@@ -4,8 +4,10 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define SENSORAY626
-#define MAGTRACKER
+//#define SENSORAY626 (both index and thumb)
+//#define MAGTRACKER
+#define SENSORAY826
+#define OCULUS
 
 #include <qDebug>
 #include <QVector>
@@ -123,7 +125,8 @@ typedef struct
     QMutex sharedMutex;
 
     // the delta mechanism class
-    c3DOFDevice* wearableDelta;
+    c3DOFDevice* wearableDelta0;
+    c3DOFDevice* wearableDelta1;
 
     // the delta mechanism chai class
     chai3d::cGenericHapticDevicePtr chaiMagDevice0; // a pointer to the current haptic device
