@@ -4,8 +4,7 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define SENSORAY626 (both index and thumb)
-//#define MAGTRACKER
+#define MAGTRACKER
 #define SENSORAY826
 #define OCULUS
 

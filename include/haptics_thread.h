@@ -102,14 +102,23 @@ public:
     chai3d::cVector3d lastComputedForce0;
     chai3d::cVector3d magTrackerLastComputedForce0;
     chai3d::cVector3d deviceLastComputedForce0;
-    Eigen::Vector3d deviceLastForceRecord;
-    Eigen::Vector3d globalLastForceRecord;
+    Eigen::Vector3d deviceLastForceRecord0;
+    Eigen::Vector3d globalLastForceRecord0;
     chai3d::cVector3d deviceLastLastComputedForce0;
     chai3d::cVector3d estimatedVel0;
+
+    chai3d::cVector3d lastComputedForce1;
+    chai3d::cVector3d magTrackerLastComputedForce1;
+    chai3d::cVector3d deviceLastComputedForce1;
+    Eigen::Vector3d deviceLastForceRecord1;
+    Eigen::Vector3d globalLastForceRecord1;
+    chai3d::cVector3d deviceLastLastComputedForce1;
+    chai3d::cVector3d estimatedVel1;
 
     // tracker rotation variables
     chai3d::cVector3d position0; chai3d::cMatrix3d rotation0;
     chai3d::cMatrix3d fingerRotation0; chai3d::cMatrix3d deviceRotation0;
+
     chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
     chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
 
