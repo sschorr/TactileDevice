@@ -10,8 +10,7 @@
 // Constructor of motor controller =========================================
 cMotorController::cMotorController(int inputMotorID)
 {
-    motorNum = inputMotorID;
-    channelNum = MotorNumToChannelNum(motorNum);
+    channelNum = inputMotorID; //now just indexing motors directly
 }
 
 // Init 626 encoder tracking and reading ============================
@@ -26,6 +25,16 @@ void cMotorController::InitEncoder()
 
     // Set initial condition of offset angle until funciton is called
     offsetAngle = 0;
+}
+
+void cMotorController::InitDACOut()
+{
+#ifdef SENSORAY826
+    int fail = S826_DacRangeWrite(PCI_BOARD, channelNum, VOLTRANGE, 0);
+    if (fail == 0)
+       qDebug() << "DAC" << channelNum << "init'ed";
+#endif
+
 }
 
 void cMotorController::SetOffsetAngle()
@@ -43,21 +52,6 @@ void cMotorController::SetOffsetAngle()
 
     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
 
-#endif
-
-#ifdef SENSORAY626
-    //Lock before we access Sensorarray stuff
-    m_mutex.lock();
-    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
-    m_mutex.unlock();
-    // Change the raw encoder count into a double centered around 0
-    double EncoderPos = 0;
-    if (EncoderRaw < ((MAX_COUNT+1)/2))
-        EncoderPos = EncoderRaw;
-    else if (EncoderRaw >= ((MAX_COUNT+1)/2))
-        EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
-
-     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
 #endif
 }
 
@@ -82,22 +76,6 @@ double cMotorController::GetMotorAngle()
     motorAngle = -(rawMotorAngle - offsetAngle);
 
 #endif
-
-#ifdef SENSORAY626
-    //Lock before we access Sensorarray stuff
-    //m_mutex.lock();
-    unsigned long EncoderRaw = S626_CounterReadLatch(0, channelNum);
-    //m_mutex.unlock();
-    // Change the raw encoder count into a double centered around 0
-    double EncoderPos = 0;
-    if (EncoderRaw < ((MAX_COUNT+1)/2))
-        EncoderPos = EncoderRaw;
-    else if (EncoderRaw >= ((MAX_COUNT+1)/2))
-        EncoderPos = -MAX_COUNT+1+(double)EncoderRaw;
-
-    double rawMotorAngle = ENCCOUNT_TO_RAD*EncoderPos;
-    motorAngle = -(rawMotorAngle - offsetAngle);
-#endif
     return motorAngle;
 }
 
@@ -111,56 +89,34 @@ cMotorController::~cMotorController()
 int cMotorController::close()
 {
 #ifdef SENSORAY826
-    S826_SystemClose();
-#endif
-
-#ifdef SENSORAY626
-    ////////////////////////////////////////////////////////////////////////////
-    // Unregister board number 0 after programming analog and digital outputs
-    // to their application-defined "shutdown" states.
-    ////////////////////////////////////////////////////////////////////////////
-    // Program all analog outputs to zero volts.
-    for ( WORD DacChan = 0; DacChan < 4; S626_WriteDAC( 0, DacChan++, 0 ));
-    // Program all digital outputs to the inactive state.
-    for ( WORD Group = 0; Group < 3; S626_DIOWriteBankSet( 0, Group++, 0 ));
-    // Unregister the board and release its handle.
-    S626_CloseBoard( 0 );
-
-    // close the DLL
-    S626_DLLClose();
+    double Vmax; double Vmin;
+    // determine range of DAC
+    if (VOLTRANGE == 2)
+    {
+        Vmax = 5;
+        Vmin = -5;
+    } else {
+        Vmax = 10;
+        Vmin = -10;
+    }
+    uint setPoint = (0.0-Vmin)/(Vmax-Vmin) * MAXSETPNT;
+    S826_DacDataWrite(PCI_BOARD, channelNum, setPoint, 0);
 #endif
     return 0;
 }
 
-
-
-// Convert the motor number to the encoder number that corresponds======================
-int cMotorController::MotorNumToChannelNum(int motorNumArg)
-{
-    int counterNumRet;
-    switch(motorNumArg){
-    case 1: counterNumRet = 0;
-        break;
-    case 2: counterNumRet = 1;
-        break;
-    case 3: counterNumRet = 2;
-        break;
-    }
-    return counterNumRet;
-}
-
-
-
 void cMotorController::SetOutputTorque(double desiredTorque)
 {
+    double Vmax; //range of DAC
+    double Vmin; //range of DAC
+
     double VoltOut = 0;
-    // we need to limit the max voltage output to a corresponding max amperage;
-    double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS; //0.92
+    double MaxVolt = MAX_AMPS*AMPS_TO_VOLTS; //0.96 //we need to limit the max voltage output to a corresponding max amperage;
 
     double desiredAmps = desiredTorque/KT;
     VoltOut = desiredAmps*AMPS_TO_VOLTS;
 
-    // Write Voltage out to DAC with software limits checked
+    // Check to make sure we're not assigning more than we want
     if (VoltOut > MaxVolt)
     {
         VoltOut = MaxVolt;
@@ -169,15 +125,22 @@ void cMotorController::SetOutputTorque(double desiredTorque)
     {
         VoltOut = -MaxVolt;
     }
+    // determine range of DAC
+    if (VOLTRANGE == 2)
+    {
+        Vmax = 5;
+        Vmin = -5;
+    } else {
+        Vmax = 10;
+        Vmin = -10;
+    }
+    uint setPoint = (VoltOut-Vmin)/(Vmax-Vmin) * MAXSETPNT;
 
-    long writeData = (long)(VoltOut*DAC_VSCALAR);
-
-#ifdef SENSORAY626
-    S626_WriteDAC(0,channelNum,writeData);
+#ifdef SENSORAY826
+    S826_DacDataWrite(PCI_BOARD, channelNum, setPoint, 0);
 #endif
 
-    //Setting for GUI
-    this->voltageOutput = VoltOut;
+    this->voltageOutput = VoltOut; //Store for GUI
 }
 
 

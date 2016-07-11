@@ -21,8 +21,8 @@
 #define MODE_ENC  0x00000070    // for quadrature-encoded device using x4 clock multiplier
 #define MAXCOUNT  0xFFFFFFFF    // maximum number of counts for 32-bit counter channel
 #define T_WAIT    0             // maximum time to wait for data [usec]
-
-
+#define MAXSETPNT 0xFFFF        // maximum analog output level (0x0000 to 0xFFFF covers output voltage range)
+#define VOLTRANGE 2             // mode that assigns +-5V range
 
 // OLD DEFINES FROM 626
 // Define used for max Sensoray Encoder Count
@@ -36,7 +36,6 @@
 //#define ENCODER_CPR 12800 // for micromo 50*256:1
 #define ENCODER_CPR 12800 // for micromo 50*4*64:1
 
-
 // Define used for Encoder count to angle in radian
 #define ENCCOUNT_TO_RAD 2*3.1415926535897932384/(ENCODER_CPR)
 
@@ -45,8 +44,7 @@
 //#define KT 501.76 //mNm/A for micromo 256:1
 #define KT 125.44 //mNm/A for micromo 64:1
 
-
-// Define the amplifier output to voltage input ratio I = I_RATIO*V
+// Define the amplifier output to voltage input ratio I = I_RATIO*V (defined by current amplifier)
 #define AMPS_TO_VOLTS 10 //Amps*10 = # Volts, Amps = Volts/10
 
 // Define the max amperage of the motor (continuous)
@@ -61,8 +59,8 @@ public:
     // Open and Access Sensoray 626, configure for encoder
     int open();
     int close();
-    int MotorNumToChannelNum(int);
     void InitEncoder();
+    void InitDACOut();
     void SetOffsetAngle();
     double GetMotorAngle();
     void SetOutputTorque(double);
@@ -77,7 +75,6 @@ public:
 
 private:
     QMutex m_mutex;
-    int motorNum;
     int channelNum;
     double offsetAngle;
 

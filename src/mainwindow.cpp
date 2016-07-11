@@ -65,15 +65,19 @@ void MainWindow::Initialize()
     // Initialize shared memory for OpenGL widget
     //ui->DisplayWidget->p_CommonData = p_CommonData;
 
-    connect(this->ui->verticalSliderX, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
-    connect(this->ui->verticalSliderY, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
-    connect(this->ui->verticalSliderZ, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderX0, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderY0, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderZ0, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderX1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderY1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->verticalSliderZ1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KdSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthFreqSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
 
-    connect(this->ui->AllDown, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->AllDown0, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
+    connect(this->ui->AllDown1, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
     connect(this->ui->normalBox, SIGNAL(stateChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->lateralBox, SIGNAL(stateChanged(int)), this, SLOT(onGUIchanged()));
@@ -92,7 +96,9 @@ void MainWindow::Initialize()
     p_CommonData->indicatorRot = 0;
     p_CommonData->tissueRot = 0;
 
-    p_CommonData->desJointInits = p_CommonData->wearableDelta0->GetJointAngles();
+    p_CommonData->desJointInits0 = p_CommonData->wearableDelta0->GetJointAngles();
+    p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
+
 
     ui->normalBox->setChecked(true);
     ui->lateralBox->setChecked(true);
@@ -131,11 +137,18 @@ void MainWindow::onGUIchanged()
     if(ui->sliderControl->isChecked())
     {
         p_CommonData->currentControlState = sliderControlMode;
-        double xSlider = this->ui->verticalSliderX->value()/22.2;
-        double ySlider = this->ui->verticalSliderY->value()/22.2;
-        double zSlider = this->ui->verticalSliderZ->value()/22.2+p_CommonData->neutralPos[2];
-        Eigen::Vector3d tempDesiredPos(xSlider, ySlider, zSlider);
-        p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos);
+
+        double xSlider0 = this->ui->verticalSliderX0->value()/22.2;
+        double ySlider0 = this->ui->verticalSliderY0->value()/22.2;
+        double zSlider0 = this->ui->verticalSliderZ0->value()/22.2+p_CommonData->wearableDelta0->neutralPos[2];
+        Eigen::Vector3d tempDesiredPos0(xSlider0, ySlider0, zSlider0);
+        p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos0);
+
+        double xSlider1 = this->ui->verticalSliderX1->value()/22.2;
+        double ySlider1 = this->ui->verticalSliderY1->value()/22.2;
+        double zSlider1 = this->ui->verticalSliderZ1->value()/22.2+p_CommonData->wearableDelta1->neutralPos[2];
+        Eigen::Vector3d tempDesiredPos1(xSlider1, ySlider1, zSlider1);
+        p_CommonData->wearableDelta1->SetDesiredPos(tempDesiredPos1);
     }
 
     else if(ui->VRControl->isChecked())
@@ -204,35 +217,68 @@ void MainWindow::UpdateGUIInfo()
     oculusVR.blitMirror();
     SDL_GL_SwapWindow(renderContext.window);
 
-    localMotorAngles = p_CommonData->wearableDelta0->GetMotorAngles();
-    localJointAngles = p_CommonData->wearableDelta0->GetJointAngles();
-    localCartesianPos = p_CommonData->wearableDelta0->GetCartesianPos();
-    localDesiredForce = p_CommonData->wearableDelta0->ReadDesiredForce();
-    localOutputVoltages = p_CommonData->wearableDelta0->ReadVoltageOutput();
-    localDesiredPos = p_CommonData->wearableDelta0->ReadDesiredPos();
-    localDesiredJointAngle = p_CommonData->desJointInits;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
+    localMotorAngles0 = p_CommonData->wearableDelta0->GetMotorAngles();
+    localJointAngles0 = p_CommonData->wearableDelta0->GetJointAngles();
+    localCartesianPos0 = p_CommonData->wearableDelta0->GetCartesianPos();
+    localDesiredForce0 = p_CommonData->wearableDelta0->ReadDesiredForce();
+    localOutputVoltages0 = p_CommonData->wearableDelta0->ReadVoltageOutput();
+    localDesiredPos0 = p_CommonData->wearableDelta0->ReadDesiredPos();
+    localDesiredJointAngle0 = p_CommonData->desJointInits0;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
 
-    ui->MotorAngleLCDNumber1->display(localMotorAngles[0]*180/PI);
-    ui->MotorAngleLCDNumber2->display(localMotorAngles[1]*180/PI);
-    ui->MotorAngleLCDNumber3->display(localMotorAngles[2]*180/PI);
-    ui->JointAngleLCDNumber1->display(localJointAngles[0]*180/PI);
-    ui->JointAngleLCDNumber2->display(localJointAngles[1]*180/PI);
-    ui->JointAngleLCDNumber3->display(localJointAngles[2]*180/PI);
-    ui->CartesianXLCDNumber->display(localCartesianPos[0]);
-    ui->CartesianYLCDNumber->display(localCartesianPos[1]);
-    ui->CartesianZLCDNumber->display(localCartesianPos[2]);
-    ui->desAngle1->display(localDesiredJointAngle[0]*180/PI);
-    ui->desAngle2->display(localDesiredJointAngle[1]*180/PI);
-    ui->desAngle3->display(localDesiredJointAngle[2]*180/PI);
-    ui->DesiredForceX->display(localDesiredForce[0]);
-    ui->DesiredForceY->display(localDesiredForce[1]);
-    ui->DesiredForceZ->display(localDesiredForce[2]);
-    ui->VoltageLCD1->display((double)(localOutputVoltages[0]));
-    ui->VoltageLCD2->display((double)(localOutputVoltages[1]));
-    ui->VoltageLCD3->display((double)(localOutputVoltages[2]));
-    ui->DesX->display(localDesiredPos[0]);
-    ui->DesY->display(localDesiredPos[1]);
-    ui->DesZ->display(localDesiredPos[2]);
+    localMotorAngles1 = p_CommonData->wearableDelta0->GetMotorAngles();
+    localJointAngles1 = p_CommonData->wearableDelta0->GetJointAngles();
+    localCartesianPos1 = p_CommonData->wearableDelta0->GetCartesianPos();
+    localDesiredForce1 = p_CommonData->wearableDelta0->ReadDesiredForce();
+    localOutputVoltages1 = p_CommonData->wearableDelta0->ReadVoltageOutput();
+    localDesiredPos1 = p_CommonData->wearableDelta0->ReadDesiredPos();
+    localDesiredJointAngle1 = p_CommonData->desJointInits1;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
+
+    // index device
+    ui->MotorAngleLCDNumber1_0->display(localMotorAngles0[0]*180/PI);
+    ui->MotorAngleLCDNumber2_0->display(localMotorAngles0[1]*180/PI);
+    ui->MotorAngleLCDNumber3_0->display(localMotorAngles0[2]*180/PI);
+    ui->JointAngleLCDNumber1_0->display(localJointAngles0[0]*180/PI);
+    ui->JointAngleLCDNumber2_0->display(localJointAngles0[1]*180/PI);
+    ui->JointAngleLCDNumber3_0->display(localJointAngles0[2]*180/PI);
+    ui->CartesianXLCDNumber0->display(localCartesianPos0[0]);
+    ui->CartesianYLCDNumber0->display(localCartesianPos0[1]);
+    ui->CartesianZLCDNumber0->display(localCartesianPos0[2]);
+    ui->desAngle1_0->display(localDesiredJointAngle0[0]*180/PI);
+    ui->desAngle2_0->display(localDesiredJointAngle0[1]*180/PI);
+    ui->desAngle3_0->display(localDesiredJointAngle0[2]*180/PI);
+    ui->DesiredForceX0->display(localDesiredForce0[0]);
+    ui->DesiredForceY0->display(localDesiredForce0[1]);
+    ui->DesiredForceZ0->display(localDesiredForce0[2]);
+    ui->VoltageLCD1_0->display((double)(localOutputVoltages0[0]));
+    ui->VoltageLCD2_0->display((double)(localOutputVoltages0[1]));
+    ui->VoltageLCD3_0->display((double)(localOutputVoltages0[2]));
+    ui->DesX0->display(localDesiredPos0[0]);
+    ui->DesY0->display(localDesiredPos0[1]);
+    ui->DesZ0->display(localDesiredPos0[2]);
+
+    // thumb device
+    ui->MotorAngleLCDNumber1_1->display(localMotorAngles1[0]*180/PI);
+    ui->MotorAngleLCDNumber2_1->display(localMotorAngles1[1]*180/PI);
+    ui->MotorAngleLCDNumber3_1->display(localMotorAngles1[2]*180/PI);
+    ui->JointAngleLCDNumber1_1->display(localJointAngles1[0]*180/PI);
+    ui->JointAngleLCDNumber2_1->display(localJointAngles1[1]*180/PI);
+    ui->JointAngleLCDNumber3_1->display(localJointAngles1[2]*180/PI);
+    ui->CartesianXLCDNumber1->display(localCartesianPos1[0]);
+    ui->CartesianYLCDNumber1->display(localCartesianPos1[1]);
+    ui->CartesianZLCDNumber1->display(localCartesianPos1[2]);
+    ui->desAngle1_1->display(localDesiredJointAngle1[0]*180/PI);
+    ui->desAngle2_1->display(localDesiredJointAngle1[1]*180/PI);
+    ui->desAngle3_1->display(localDesiredJointAngle1[2]*180/PI);
+    ui->DesiredForceX1->display(localDesiredForce1[0]);
+    ui->DesiredForceY1->display(localDesiredForce1[1]);
+    ui->DesiredForceZ1->display(localDesiredForce1[2]);
+    ui->VoltageLCD1_1->display((double)(localOutputVoltages1[0]));
+    ui->VoltageLCD2_1->display((double)(localOutputVoltages1[1]));
+    ui->VoltageLCD3_1->display((double)(localOutputVoltages1[2]));
+    ui->DesX1->display(localDesiredPos1[0]);
+    ui->DesY1->display(localDesiredPos1[1]);
+    ui->DesZ1->display(localDesiredPos1[2]);
+
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
     ui->lcdBandAmp->display(p_CommonData->bandSinAmpDisp);
     ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
@@ -299,21 +345,33 @@ void MainWindow::UpdateGUIInfo()
 void MainWindow::on_CalibratePushButton_clicked()
 {
     p_CommonData->wearableDelta0->ZeroEncoders();
-    p_CommonData->desJointInits = p_CommonData->wearableDelta0->GetJointAngles();
+    p_CommonData->desJointInits0 = p_CommonData->wearableDelta0->GetJointAngles();
+
+    p_CommonData->wearableDelta1->ZeroEncoders();
+    p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
     onGUIchanged();
 }
 
 void MainWindow::on_ZeroSliders_clicked()
 {
-    ui->verticalSliderX->blockSignals(true);
-    ui->verticalSliderY->blockSignals(true);
-    ui->verticalSliderZ->blockSignals(true);
-    ui->verticalSliderX->setValue(0);
-    ui->verticalSliderY->setValue(0);
-    ui->verticalSliderZ->setValue(0);
-    ui->verticalSliderX->blockSignals(false);
-    ui->verticalSliderY->blockSignals(false);
-    ui->verticalSliderZ->blockSignals(false);
+    ui->verticalSliderX0->blockSignals(true);
+    ui->verticalSliderY0->blockSignals(true);
+    ui->verticalSliderZ0->blockSignals(true);
+    ui->verticalSliderX1->blockSignals(true);
+    ui->verticalSliderY1->blockSignals(true);
+    ui->verticalSliderZ1->blockSignals(true);
+    ui->verticalSliderX0->setValue(0);
+    ui->verticalSliderY0->setValue(0);
+    ui->verticalSliderZ0->setValue(0);
+    ui->verticalSliderX1->setValue(0);
+    ui->verticalSliderY1->setValue(0);
+    ui->verticalSliderZ1->setValue(0);
+    ui->verticalSliderX0->blockSignals(false);
+    ui->verticalSliderY0->blockSignals(false);
+    ui->verticalSliderZ0->blockSignals(false);
+    ui->verticalSliderX1->blockSignals(false);
+    ui->verticalSliderY1->blockSignals(false);
+    ui->verticalSliderZ1->blockSignals(false);
     onGUIchanged();
 }
 
@@ -461,7 +519,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 if(p_CommonData->currentExperimentState == frictionTrial)
                 {
-                    if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+                    if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
                     {
 
                         WriteDataToFile();
@@ -498,7 +556,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         if(p_CommonData->currentExperimentState == palpationLineTrial)
         {
             // check that we are not currently embedded in tissue
-            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
             {
                 p_CommonData->currentExperimentState = palpationLineWritingToFile;
                 p_CommonData->recordFlag = false;
@@ -524,7 +582,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
         else if(p_CommonData->currentExperimentState == palpationLineBreak)
         {
-            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
             {
                 p_CommonData->currentExperimentState = palpationLineWritingToFile;
                 p_CommonData->recordFlag = false;
@@ -537,7 +595,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         // standard palpation experiment
         if(p_CommonData->currentExperimentState == palpationTrial)
         {
-            if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+            if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
             {
                 p_CommonData->currentExperimentState = idleExperiment;
                 WriteDataToFile();
@@ -559,7 +617,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_Backspace)
     {
-        if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+        if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
             if(p_CommonData->pairNo == 2)
             {
@@ -622,7 +680,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
 
-        else if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
             if(p_CommonData->pairNo == 1)
             {
@@ -803,7 +861,7 @@ void MainWindow::on_startExperiment_3_clicked()
     ui->VRControl->setChecked(true);
 
     // check that we are not currently embedded in tissue
-    if(!(localDesiredPos[2] < p_CommonData->neutralPos[2]))
+    if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
     {
         p_CommonData->p_tissueOne->setTransparencyLevel(0.25, true);
         p_CommonData->p_tissueTwo->setTransparencyLevel(0.3, true);
@@ -825,11 +883,9 @@ void MainWindow::on_startExperiment_3_clicked()
     }
 }
 
-
-
 void MainWindow::on_setNeutral_clicked()
 {
-    p_CommonData->neutralPos[2] = localCartesianPos[2];
+    p_CommonData->wearableDelta0->neutralPos[2] = localCartesianPos0[2];
     on_ZeroSliders_clicked();
 }
 
@@ -874,14 +930,6 @@ void MainWindow::rotateTissueLine(double angle)
     p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(0,0,-1,angle);
 }
 
-
-void MainWindow::on_AllDown_clicked()
-{
-    p_CommonData->calibClock.reset();
-    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
-    p_CommonData->calibClock.start();
-}
-
 void MainWindow::processEvents()
 {
     SDL_Event event;
@@ -920,3 +968,10 @@ void MainWindow::processEvents()
 
 
 
+
+void MainWindow::on_AllDown0_clicked()
+{
+    p_CommonData->calibClock.reset();
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
+    p_CommonData->calibClock.start();
+}

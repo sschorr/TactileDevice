@@ -200,9 +200,6 @@ typedef struct
     // answer to which was stiffer
     int subjectAnswer;
 
-    // updatable neutral position
-    Eigen::Vector3d neutralPos;
-
     // protocol loading
     QString frictionProtocolLocation;
     QString palpationProtocolLocation;
@@ -275,7 +272,8 @@ typedef struct
     QString fileName;
 
     // init joint angles
-    Eigen::Vector3d desJointInits;
+    Eigen::Vector3d desJointInits0;
+    Eigen::Vector3d desJointInits1;
 
     // flags for only normal or only lateral control
     bool flagLateral;

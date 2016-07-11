@@ -46,14 +46,24 @@ public:
 
     // vars
     shared_data* p_CommonData;
-    Eigen::Vector3d localMotorAngles;
-    Eigen::Vector3d localJointAngles;
-    Eigen::Vector3d localCartesianPos;
-    Eigen::Vector3d localDesiredForce;
-    Eigen::Vector3d localDesiredMotorTorques;
-    Eigen::Vector3d localOutputVoltages;
-    Eigen::Vector3d localDesiredPos;
-    Eigen::Vector3d localDesiredJointAngle;
+
+    Eigen::Vector3d localMotorAngles0;
+    Eigen::Vector3d localJointAngles0;
+    Eigen::Vector3d localCartesianPos0;
+    Eigen::Vector3d localDesiredForce0;
+    Eigen::Vector3d localDesiredMotorTorques0;
+    Eigen::Vector3d localOutputVoltages0;
+    Eigen::Vector3d localDesiredPos0;
+    Eigen::Vector3d localDesiredJointAngle0;
+
+    Eigen::Vector3d localMotorAngles1;
+    Eigen::Vector3d localJointAngles1;
+    Eigen::Vector3d localCartesianPos1;
+    Eigen::Vector3d localDesiredForce1;
+    Eigen::Vector3d localDesiredMotorTorques1;
+    Eigen::Vector3d localOutputVoltages1;
+    Eigen::Vector3d localDesiredPos1;
+    Eigen::Vector3d localDesiredJointAngle1;
 
     // Oculus Rift
     // display context
@@ -103,7 +113,7 @@ private slots:
     void on_startExperiment_3_clicked();
     void on_loadProtocol_3_clicked();
     void on_pushButton_clicked();
-    void on_AllDown_clicked();
+    void on_AllDown0_clicked();
 };
 
 #endif // MAINWINDOW_H

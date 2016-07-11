@@ -43,11 +43,11 @@
        <number>7</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="VoltageLCD2">
+     <widget class="QLCDNumber" name="VoltageLCD2_0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>480</y>
+        <x>480</x>
+        <y>470</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -72,8 +72,8 @@
      <widget class="QLabel" name="label_18">
       <property name="geometry">
        <rect>
-        <x>850</x>
-        <y>460</y>
+        <x>420</x>
+        <y>450</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -82,11 +82,11 @@
        <string>Voltage 1</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="VoltageLCD1">
+     <widget class="QLCDNumber" name="VoltageLCD1_0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>480</y>
+        <x>410</x>
+        <y>470</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -98,8 +98,8 @@
      <widget class="QLabel" name="label_17">
       <property name="geometry">
        <rect>
-        <x>990</x>
-        <y>460</y>
+        <x>560</x>
+        <y>450</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -108,11 +108,11 @@
        <string>Voltage 3</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="VoltageLCD3">
+     <widget class="QLCDNumber" name="VoltageLCD3_0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>480</y>
+        <x>550</x>
+        <y>470</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -124,8 +124,8 @@
      <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
-        <x>920</x>
-        <y>460</y>
+        <x>490</x>
+        <y>450</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -150,8 +150,8 @@
      <widget class="QLabel" name="label_6">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>310</y>
+        <x>550</x>
+        <y>300</y>
         <width>61</width>
         <height>16</height>
        </rect>
@@ -160,11 +160,11 @@
        <string>Joint Angle 3</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="MotorAngleLCDNumber1">
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber1_0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>280</y>
+        <x>410</x>
+        <y>270</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -173,11 +173,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="CartesianZLCDNumber">
+     <widget class="QLCDNumber" name="CartesianZLCDNumber0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>90</y>
+        <x>550</x>
+        <y>80</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -186,11 +186,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QSlider" name="verticalSliderZ">
+     <widget class="QSlider" name="verticalSliderZ0">
       <property name="geometry">
        <rect>
-        <x>1000</x>
-        <y>130</y>
+        <x>570</x>
+        <y>120</y>
         <width>22</width>
         <height>81</height>
        </rect>
@@ -214,8 +214,8 @@
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>260</y>
+        <x>550</x>
+        <y>250</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -224,11 +224,11 @@
        <string>Motor Angle 3</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="CartesianXLCDNumber">
+     <widget class="QLCDNumber" name="CartesianXLCDNumber0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>90</y>
+        <x>410</x>
+        <y>80</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -237,11 +237,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="JointAngleLCDNumber2">
+     <widget class="QLCDNumber" name="JointAngleLCDNumber2_0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>330</y>
+        <x>480</x>
+        <y>320</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -253,8 +253,8 @@
      <widget class="QLabel" name="label_15">
       <property name="geometry">
        <rect>
-        <x>850</x>
-        <y>410</y>
+        <x>420</x>
+        <y>400</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -266,8 +266,8 @@
      <widget class="QLabel" name="label_7">
       <property name="geometry">
        <rect>
-        <x>870</x>
-        <y>70</y>
+        <x>440</x>
+        <y>60</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -279,8 +279,8 @@
      <widget class="QLabel" name="label_21">
       <property name="geometry">
        <rect>
-        <x>1000</x>
-        <y>210</y>
+        <x>570</x>
+        <y>200</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -292,8 +292,8 @@
      <widget class="QLabel" name="label_8">
       <property name="geometry">
        <rect>
-        <x>940</x>
-        <y>70</y>
+        <x>510</x>
+        <y>60</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -302,11 +302,11 @@
        <string>Y</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesiredForceY">
+     <widget class="QLCDNumber" name="DesiredForceY0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>430</y>
+        <x>480</x>
+        <y>420</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -318,8 +318,8 @@
      <widget class="QLabel" name="label_14">
       <property name="geometry">
        <rect>
-        <x>990</x>
-        <y>410</y>
+        <x>560</x>
+        <y>400</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -331,8 +331,8 @@
      <widget class="QLabel" name="label_19">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>210</y>
+        <x>430</x>
+        <y>200</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -344,8 +344,8 @@
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>310</y>
+        <x>410</x>
+        <y>300</y>
         <width>61</width>
         <height>16</height>
        </rect>
@@ -354,11 +354,11 @@
        <string>Joint Angle 1</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesY">
+     <widget class="QLCDNumber" name="DesY0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>230</y>
+        <x>480</x>
+        <y>220</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -367,11 +367,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QSlider" name="verticalSliderY">
+     <widget class="QSlider" name="verticalSliderY0">
       <property name="geometry">
        <rect>
-        <x>930</x>
-        <y>130</y>
+        <x>500</x>
+        <y>120</y>
         <width>22</width>
         <height>81</height>
        </rect>
@@ -402,11 +402,11 @@
        <string>Zero Sliders</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="MotorAngleLCDNumber2">
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber2_0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>280</y>
+        <x>480</x>
+        <y>270</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -418,8 +418,8 @@
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>260</y>
+        <x>410</x>
+        <y>250</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -428,11 +428,11 @@
        <string>Motor Angle 1</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesX">
+     <widget class="QLCDNumber" name="DesX0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>230</y>
+        <x>410</x>
+        <y>220</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -441,11 +441,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="JointAngleLCDNumber3">
+     <widget class="QLCDNumber" name="JointAngleLCDNumber3_0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>330</y>
+        <x>550</x>
+        <y>320</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -454,11 +454,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="CartesianYLCDNumber">
+     <widget class="QLCDNumber" name="CartesianYLCDNumber0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>90</y>
+        <x>480</x>
+        <y>80</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -467,11 +467,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="JointAngleLCDNumber1">
+     <widget class="QLCDNumber" name="JointAngleLCDNumber1_0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>330</y>
+        <x>410</x>
+        <y>320</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -483,8 +483,8 @@
      <widget class="QLabel" name="label_20">
       <property name="geometry">
        <rect>
-        <x>930</x>
-        <y>210</y>
+        <x>500</x>
+        <y>200</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -496,8 +496,8 @@
      <widget class="QLabel" name="label_5">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>310</y>
+        <x>480</x>
+        <y>300</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -519,11 +519,11 @@
        <string>Calibrate</string>
       </property>
      </widget>
-     <widget class="QSlider" name="verticalSliderX">
+     <widget class="QSlider" name="verticalSliderX0">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>130</y>
+        <x>430</x>
+        <y>120</y>
         <width>22</width>
         <height>81</height>
        </rect>
@@ -544,8 +544,8 @@
      <widget class="QLabel" name="label_13">
       <property name="geometry">
        <rect>
-        <x>920</x>
-        <y>410</y>
+        <x>490</x>
+        <y>400</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -557,8 +557,8 @@
      <widget class="QLabel" name="label_2">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>260</y>
+        <x>480</x>
+        <y>250</y>
         <width>71</width>
         <height>16</height>
        </rect>
@@ -567,11 +567,11 @@
        <string>Motor Angle 2</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesiredForceZ">
+     <widget class="QLCDNumber" name="DesiredForceZ0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>430</y>
+        <x>550</x>
+        <y>420</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -580,11 +580,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesZ">
+     <widget class="QLCDNumber" name="DesZ0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>230</y>
+        <x>550</x>
+        <y>220</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -593,11 +593,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="MotorAngleLCDNumber3">
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber3_0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>280</y>
+        <x>550</x>
+        <y>270</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -609,8 +609,8 @@
      <widget class="QLabel" name="label_9">
       <property name="geometry">
        <rect>
-        <x>1010</x>
-        <y>70</y>
+        <x>580</x>
+        <y>60</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -619,11 +619,11 @@
        <string>Z</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="DesiredForceX">
+     <widget class="QLCDNumber" name="DesiredForceX0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>430</y>
+        <x>410</x>
+        <y>420</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -635,8 +635,8 @@
      <widget class="QLabel" name="label_30">
       <property name="geometry">
        <rect>
-        <x>930</x>
-        <y>50</y>
+        <x>650</x>
+        <y>40</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -1105,11 +1105,11 @@
        <string>Paper Environment</string>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="desAngle2">
+     <widget class="QLCDNumber" name="desAngle2_0">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>380</y>
+        <x>480</x>
+        <y>370</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -1118,11 +1118,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="desAngle3">
+     <widget class="QLCDNumber" name="desAngle3_0">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>380</y>
+        <x>550</x>
+        <y>370</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -1131,11 +1131,11 @@
        <number>6</number>
       </property>
      </widget>
-     <widget class="QLCDNumber" name="desAngle1">
+     <widget class="QLCDNumber" name="desAngle1_0">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>380</y>
+        <x>410</x>
+        <y>370</y>
         <width>64</width>
         <height>23</height>
        </rect>
@@ -1147,8 +1147,8 @@
      <widget class="QLabel" name="label_25">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>360</y>
+        <x>410</x>
+        <y>350</y>
         <width>61</width>
         <height>20</height>
        </rect>
@@ -1160,8 +1160,8 @@
      <widget class="QLabel" name="label_26">
       <property name="geometry">
        <rect>
-        <x>910</x>
-        <y>360</y>
+        <x>480</x>
+        <y>350</y>
         <width>61</width>
         <height>20</height>
        </rect>
@@ -1173,8 +1173,8 @@
      <widget class="QLabel" name="label_27">
       <property name="geometry">
        <rect>
-        <x>980</x>
-        <y>360</y>
+        <x>550</x>
+        <y>350</y>
         <width>61</width>
         <height>20</height>
        </rect>
@@ -1235,12 +1235,12 @@
        <string>Init Calib Joints</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="AllDown">
+     <widget class="QPushButton" name="AllDown0">
       <property name="geometry">
        <rect>
-        <x>1060</x>
-        <y>170</y>
-        <width>75</width>
+        <x>610</x>
+        <y>150</y>
+        <width>31</width>
         <height>23</height>
        </rect>
       </property>
@@ -1274,52 +1274,680 @@
        <string>Lateral</string>
       </property>
      </widget>
-     <zorder>AllDown</zorder>
+     <widget class="QLCDNumber" name="JointAngleLCDNumber3_1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>320</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber1_1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>270</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesiredForceZ1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>420</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QSlider" name="verticalSliderX1">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>120</y>
+        <width>22</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-99</number>
+      </property>
+      <property name="maximum">
+       <number>99</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_51">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>450</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Voltage 1</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_52">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>300</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Joint Angle 1</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="VoltageLCD2_1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>470</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber3_1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>270</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_53">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>60</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_54">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>400</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Force Z</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_55">
+      <property name="geometry">
+       <rect>
+        <x>910</x>
+        <y>60</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_56">
+      <property name="geometry">
+       <rect>
+        <x>750</x>
+        <y>400</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Force X</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="desAngle3_1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>370</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_57">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>250</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Motor Angle 2</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_58">
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>450</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Voltage 2</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="desAngle1_1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>370</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_59">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>250</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Motor Angle 1</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="CartesianZLCDNumber1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>80</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_60">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>300</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Joint Angle 2</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesiredForceY1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>420</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_61">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>350</y>
+        <width>61</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des Angle 3</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="VoltageLCD1_1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>470</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_62">
+      <property name="geometry">
+       <rect>
+        <x>770</x>
+        <y>60</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>X</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="JointAngleLCDNumber2_1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>320</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_63">
+      <property name="geometry">
+       <rect>
+        <x>820</x>
+        <y>400</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Force Y</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="VoltageLCD3_1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>470</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesiredForceX1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>420</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesX1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>220</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_64">
+      <property name="geometry">
+       <rect>
+        <x>760</x>
+        <y>200</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des X</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_65">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>300</y>
+        <width>61</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Joint Angle 3</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="JointAngleLCDNumber1_1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>320</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="CartesianYLCDNumber1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>80</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_66">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>350</y>
+        <width>61</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des Angle 2</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="desAngle2_1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>370</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesY1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>220</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_67">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>200</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des Y</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="verticalSliderZ1">
+      <property name="geometry">
+       <rect>
+        <x>900</x>
+        <y>120</y>
+        <width>22</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-99</number>
+      </property>
+      <property name="maximum">
+       <number>99</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="invertedAppearance">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_68">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>250</y>
+        <width>71</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Motor Angle 3</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="DesZ1">
+      <property name="geometry">
+       <rect>
+        <x>880</x>
+        <y>220</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="CartesianXLCDNumber1">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>80</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="AllDown1">
+      <property name="geometry">
+       <rect>
+        <x>930</x>
+        <y>150</y>
+        <width>31</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>All -</string>
+      </property>
+     </widget>
+     <widget class="QLCDNumber" name="MotorAngleLCDNumber2_1">
+      <property name="geometry">
+       <rect>
+        <x>810</x>
+        <y>270</y>
+        <width>64</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="digitCount">
+       <number>6</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_69">
+      <property name="geometry">
+       <rect>
+        <x>900</x>
+        <y>200</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des Z</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_70">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>350</y>
+        <width>61</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Des Angle 1</string>
+      </property>
+     </widget>
+     <widget class="QSlider" name="verticalSliderY1">
+      <property name="geometry">
+       <rect>
+        <x>830</x>
+        <y>120</y>
+        <width>22</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="minimum">
+       <number>-99</number>
+      </property>
+      <property name="maximum">
+       <number>99</number>
+      </property>
+      <property name="singleStep">
+       <number>5</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_71">
+      <property name="geometry">
+       <rect>
+        <x>890</x>
+        <y>450</y>
+        <width>47</width>
+        <height>13</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Voltage 3</string>
+      </property>
+     </widget>
+     <zorder>AllDown0</zorder>
      <zorder>directions</zorder>
      <zorder>lcdNumberHapticRate</zorder>
-     <zorder>VoltageLCD2</zorder>
+     <zorder>VoltageLCD2_0</zorder>
      <zorder>label_22</zorder>
      <zorder>label_18</zorder>
-     <zorder>VoltageLCD1</zorder>
+     <zorder>VoltageLCD1_0</zorder>
      <zorder>label_17</zorder>
-     <zorder>VoltageLCD3</zorder>
+     <zorder>VoltageLCD3_0</zorder>
      <zorder>label_16</zorder>
      <zorder>sliderControl</zorder>
      <zorder>label_6</zorder>
-     <zorder>MotorAngleLCDNumber1</zorder>
-     <zorder>CartesianZLCDNumber</zorder>
-     <zorder>verticalSliderZ</zorder>
+     <zorder>MotorAngleLCDNumber1_0</zorder>
+     <zorder>CartesianZLCDNumber0</zorder>
+     <zorder>verticalSliderZ0</zorder>
      <zorder>label_3</zorder>
-     <zorder>CartesianXLCDNumber</zorder>
-     <zorder>JointAngleLCDNumber2</zorder>
+     <zorder>CartesianXLCDNumber0</zorder>
+     <zorder>JointAngleLCDNumber2_0</zorder>
      <zorder>label_15</zorder>
      <zorder>label_7</zorder>
      <zorder>label_21</zorder>
      <zorder>label_8</zorder>
-     <zorder>DesiredForceY</zorder>
+     <zorder>DesiredForceY0</zorder>
      <zorder>label_14</zorder>
      <zorder>label_19</zorder>
      <zorder>label_4</zorder>
-     <zorder>DesY</zorder>
-     <zorder>verticalSliderY</zorder>
+     <zorder>DesY0</zorder>
+     <zorder>verticalSliderY0</zorder>
      <zorder>ZeroSliders</zorder>
-     <zorder>MotorAngleLCDNumber2</zorder>
+     <zorder>MotorAngleLCDNumber2_0</zorder>
      <zorder>label</zorder>
-     <zorder>DesX</zorder>
-     <zorder>JointAngleLCDNumber3</zorder>
-     <zorder>CartesianYLCDNumber</zorder>
-     <zorder>JointAngleLCDNumber1</zorder>
+     <zorder>DesX0</zorder>
+     <zorder>JointAngleLCDNumber3_0</zorder>
+     <zorder>CartesianYLCDNumber0</zorder>
+     <zorder>JointAngleLCDNumber1_0</zorder>
      <zorder>label_20</zorder>
      <zorder>label_5</zorder>
      <zorder>CalibratePushButton</zorder>
-     <zorder>verticalSliderX</zorder>
+     <zorder>verticalSliderX0</zorder>
      <zorder>label_13</zorder>
      <zorder>label_2</zorder>
-     <zorder>DesiredForceZ</zorder>
-     <zorder>DesZ</zorder>
-     <zorder>MotorAngleLCDNumber3</zorder>
+     <zorder>DesiredForceZ0</zorder>
+     <zorder>DesZ0</zorder>
+     <zorder>MotorAngleLCDNumber3_0</zorder>
      <zorder>label_9</zorder>
-     <zorder>DesiredForceX</zorder>
+     <zorder>DesiredForceX0</zorder>
      <zorder>label_30</zorder>
      <zorder>VRControl</zorder>
      <zorder>startSin</zorder>
@@ -1355,9 +1983,9 @@
      <zorder>setTrial</zorder>
      <zorder>dynamicEnvironment</zorder>
      <zorder>paperEnvironment</zorder>
-     <zorder>desAngle2</zorder>
-     <zorder>desAngle3</zorder>
-     <zorder>desAngle1</zorder>
+     <zorder>desAngle2_0</zorder>
+     <zorder>desAngle3_0</zorder>
+     <zorder>desAngle1_0</zorder>
      <zorder>label_25</zorder>
      <zorder>label_26</zorder>
      <zorder>label_27</zorder>
@@ -1367,6 +1995,52 @@
      <zorder>initJoints</zorder>
      <zorder>normalBox</zorder>
      <zorder>lateralBox</zorder>
+     <zorder>JointAngleLCDNumber3_1</zorder>
+     <zorder>MotorAngleLCDNumber1_1</zorder>
+     <zorder>DesiredForceZ1</zorder>
+     <zorder>verticalSliderX1</zorder>
+     <zorder>label_51</zorder>
+     <zorder>label_52</zorder>
+     <zorder>VoltageLCD2_1</zorder>
+     <zorder>MotorAngleLCDNumber3_1</zorder>
+     <zorder>label_53</zorder>
+     <zorder>label_54</zorder>
+     <zorder>label_55</zorder>
+     <zorder>label_56</zorder>
+     <zorder>desAngle3_1</zorder>
+     <zorder>label_57</zorder>
+     <zorder>label_58</zorder>
+     <zorder>desAngle1_1</zorder>
+     <zorder>label_59</zorder>
+     <zorder>CartesianZLCDNumber1</zorder>
+     <zorder>label_60</zorder>
+     <zorder>DesiredForceY1</zorder>
+     <zorder>label_61</zorder>
+     <zorder>VoltageLCD1_1</zorder>
+     <zorder>label_62</zorder>
+     <zorder>JointAngleLCDNumber2_1</zorder>
+     <zorder>label_63</zorder>
+     <zorder>VoltageLCD3_1</zorder>
+     <zorder>DesiredForceX1</zorder>
+     <zorder>DesX1</zorder>
+     <zorder>label_64</zorder>
+     <zorder>label_65</zorder>
+     <zorder>JointAngleLCDNumber1_1</zorder>
+     <zorder>CartesianYLCDNumber1</zorder>
+     <zorder>label_66</zorder>
+     <zorder>desAngle2_1</zorder>
+     <zorder>DesY1</zorder>
+     <zorder>label_67</zorder>
+     <zorder>verticalSliderZ1</zorder>
+     <zorder>label_68</zorder>
+     <zorder>DesZ1</zorder>
+     <zorder>CartesianXLCDNumber1</zorder>
+     <zorder>AllDown1</zorder>
+     <zorder>MotorAngleLCDNumber2_1</zorder>
+     <zorder>label_69</zorder>
+     <zorder>label_70</zorder>
+     <zorder>verticalSliderY1</zorder>
+     <zorder>label_71</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -1381,7 +2055,7 @@
      <x>0</x>
      <y>0</y>
      <width>1360</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
   </widget>

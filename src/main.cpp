@@ -21,7 +21,6 @@ magTracker_thread magTrackerThread;
 // MAIN FUNCTION ====================================================
 int main(int argc, char *argv[])
 {
-
     QApplication a(argc, argv);
     MainWindow window;
 
@@ -30,8 +29,12 @@ int main(int argc, char *argv[])
     shared.chaiMagDevice1 = chai3d::cGenericHapticDevicePtr((chai3d::cGenericHapticDevice *)(new chai3d::c3dofChaiDevice(1)));
 
     // Create a haptic device
-    shared.wearableDelta0 = new c3DOFDevice(0);
-    shared.wearableDelta0->Init3DOFDeviceEnc();
+    shared.wearableDelta0 = new c3DOFDevice(0);     // create index
+    shared.wearableDelta0->Init3DOFDeviceEnc();     // init index
+
+    shared.wearableDelta1 = new c3DOFDevice(1);     // create thumb
+    shared.wearableDelta1->Init3DOFDeviceEnc();     // init thumb
+
 
     // Initialize and set the haptics thread data pointer to the shared data
     hapticsThread.p_CommonData = &shared;

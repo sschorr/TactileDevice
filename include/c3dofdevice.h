@@ -18,18 +18,24 @@
 #define PI 3.14159265
 
 // Physical parameters of build agnostic [mm] =======================================
-#define SPRING_TORQUE 0.1           // 0.1 for stiff, .05 for weak [in-.lbs/180 deg], measured at parallel
-#define MOTRAD 1.5                  // radius of motor pulley [mm]
-#define HORIZOFFSET 6.25            // horizontal offset of motorshaft from base joint [mm]
-#define VERTOFFSET -9.5             // vertical offset of motorshaft from base joint [mm]
+#define SPRING_TORQUE 0.1               // 0.1 for stiff, .05 for weak [in-.lbs/180 deg], measured at parallel
+#define MOTRAD 1.5                      // radius of motor pulley [mm]
+#define HORIZOFFSET 6.25                // horizontal offset of motorshaft from base joint [mm]
+#define VERTOFFSET -9.5                 // vertical offset of motorshaft from base joint [mm]
+#define CALIBANGLE 0.785398             // Base joint angles during calibration procedure (45 [deg] to rad)
 // Physical parameters of build index [mm] =======================================
-#define ATTACHL 7.5                 // distance from base joint to tether attachment point [mm]
-#define CALIBANGLE 0.785398         // Base joint angles during calibration procedure (45 [deg] to rad)
-#define L_UA 9                      // length upper arm [mm]
-#define L_LA 9                      // length lower arm [mm]
-#define L_BASE 15                   //length of base (center to joint)[mm]
-#define L_EE 15                     // length of end effector (center to joint)[mm]
+#define ATTACHL_0 7.5                   // distance from base joint to tether attachment point [mm]
+#define L_UA_0 9                        // length upper arm [mm]
+#define L_LA_0 9                        // length lower arm [mm]
+#define L_BASE_0 15                     //length of base (center to joint)[mm]
+#define L_EE_0 15                       // length of end effector (center to joint)[mm]
 // Physical parameters of build thumb [mm] =======================================
+#define ATTACHL_1 10.5                  // distance from base joint to tether attachment point [mm]
+#define L_UA_1 9                        // length upper arm [mm]
+#define L_LA_1 12                       // length lower arm [mm]
+#define L_BASE_1 15                     //length of base (center to joint)[mm]
+#define L_EE_1 18                       // length of end effector (center to joint)[mm]
+
 
 class c3DOFDevice
 {
@@ -113,6 +119,12 @@ public:
     Eigen::Vector3d jointTorques;
     Eigen::Vector3d motorTorques;
 
+    // Physical parameters of build thumb assigned based on whether index or thumb in init
+    double ATTACHL;                  // distance from base joint to tether attachment point [mm]
+    double L_UA;                        // length upper arm [mm]
+    double L_LA ;                       // length lower arm [mm]
+    double L_BASE;                     //length of base (center to joint)[mm]
+    double L_EE;                       // length of end effector (center to joint)[mm]
 
 private:
     cMotorController* motor_1;

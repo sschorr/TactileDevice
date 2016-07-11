@@ -4,11 +4,27 @@
 
 c3DOFDevice::c3DOFDevice(int num)
 {
+    this->finger = num; // is this 0 (index) or 1 (thumb)
+    if(this->finger == 0)
+    {
+        ATTACHL = ATTACHL_0;                 // distance from base joint to tether attachment point [mm]
+        L_UA = L_UA_0;                       // length upper arm [mm]
+        L_LA = L_LA_0;                       // length lower arm [mm]
+        L_BASE = L_BASE_0;                   //length of base (center to joint)[mm]
+        L_EE = L_EE_0;                       // length of end effector (center to joint)[mm]
+    }
+    if(this->finger == 1)
+    {
+        ATTACHL = ATTACHL_1;                 // distance from base joint to tether attachment point [mm]
+        L_UA = L_UA_1;                       // length upper arm [mm]
+        L_LA = L_LA_1;                       // length lower arm [mm]
+        L_BASE = L_BASE_1;                   //length of base (center to joint)[mm]
+        L_EE = L_EE_1;                       // length of end effector (center to joint)[mm]
+    }
     this->desiredForce << 0,0,0;
     this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
     this->motorTorques << 0,0,0;
     this->jointTorques << 0,0,0;
-    this->finger = num;
 }
 
 c3DOFDevice::~c3DOFDevice()
@@ -17,24 +33,39 @@ c3DOFDevice::~c3DOFDevice()
     delete this->motor_2;
     delete this->motor_3;
 #ifdef SENSORAY826
-    if(S826_SystemClose())
-        qDebug() << "Sensoray closed";
+    S826_SystemClose();
 #endif
 }
 
 int c3DOFDevice::Init3DOFDeviceEnc()
 {
 #ifdef SENSORAY826
-    int fail = S826_SystemOpen();  //open connection to the sensoray
-        qDebug() << fail;
+    S826_SystemOpen();  //open connection to the sensoray
 #endif
 
-    motor_1 = new cMotorController(1);
-    motor_1->InitEncoder();
-    motor_2 = new cMotorController(2);
-    motor_2->InitEncoder();
-    motor_3 = new cMotorController(3);
-    motor_3->InitEncoder();
+    if(this->finger == 0)
+    {
+        motor_1 = new cMotorController(0);
+        motor_2 = new cMotorController(1);
+        motor_3 = new cMotorController(2);
+        motor_1->InitEncoder();
+        motor_1->InitDACOut();
+        motor_2->InitEncoder();
+        motor_2->InitDACOut();
+        motor_3->InitEncoder();
+        motor_3->InitDACOut();
+    }else if(this->finger == 1)
+    {
+        motor_1 = new cMotorController(3);
+        motor_2 = new cMotorController(4);
+        motor_3 = new cMotorController(5);
+        motor_1->InitEncoder();
+        motor_1->InitDACOut();
+        motor_2->InitEncoder();
+        motor_2->InitDACOut();
+        motor_3->InitEncoder();
+        motor_3->InitDACOut();
+    }
 
     motor_1->SetOffsetAngle();
     motor_2->SetOffsetAngle();

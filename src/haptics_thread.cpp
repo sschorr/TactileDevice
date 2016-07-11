@@ -23,8 +23,7 @@ void haptics_thread::initialize()
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
     p_CommonData->wearableDelta0->TurnOffControl();
-    p_CommonData->neutralPos << 0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180);
-    p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos); // kinematic neutral position
+    p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos); // kinematic neutral position
 
     p_CommonData->Kp = 0; //these are set by the window sliders
     p_CommonData->Kd = 0; //these are set by the window sliders
@@ -101,23 +100,27 @@ void haptics_thread::run()
             case initCalibControl:
                 UpdateVRGraphics();
                 SetInitJointAngles();
-                p_CommonData->wearableDelta0->IndivJointController(p_CommonData->desJointInits, p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta0->IndivJointController(p_CommonData->desJointInits0, p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta1->IndivJointController(p_CommonData->desJointInits1, p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case idleControl:
                 UpdateVRGraphics();
                 p_CommonData->wearableDelta0->TurnOffControl();
+                p_CommonData->wearableDelta1->TurnOffControl();
                 break;
 
             case VRControlMode:
                 UpdateVRGraphics();
                 ComputeVRDesiredDevicePos();
                 p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta1->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case sliderControlMode:
                 UpdateVRGraphics();
                 p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
+                p_CommonData->wearableDelta1->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
 
             case sinControlMode:
@@ -472,7 +475,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     /*double vertForceToPosMult = 1.0/0.8676; // based on vertical stiffness of finger (3.47N/mm from WHC paper)
     double vertPosMovement = vertForceToPosMult*deviceLastComputedForce0.z();*/ //was still too aggresive with vertical
 
-    Eigen::Vector3d neutralPos = p_CommonData->neutralPos;
+    Eigen::Vector3d neutralPos = p_CommonData->wearableDelta0->neutralPos;
     Eigen::Vector3d desiredPos(3);
     desiredPos << desiredPosMovement.x()+neutralPos[0], desiredPosMovement.y()+neutralPos[1], vertPosMovement+neutralPos[2];
 
@@ -923,7 +926,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     // case that we want to stay still at beginning
     if (currTime < stillTime)
     {
-        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos);
+        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos);
     }    
 
     // case that we want to be ramping and then oscillating
@@ -936,14 +939,14 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
             scaledBandSinAmp = p_CommonData->bandSinAmp;
         }
 
-        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->neutralPos;
+        Eigen::Vector3d sinPos = (scaledBandSinAmp*sin(2*PI*p_CommonData->bandSinFreq*(currTime-stillTime)))*inputMotionAxis + p_CommonData->wearableDelta0->neutralPos;
         p_CommonData->wearableDelta0->SetDesiredPos(sinPos);
     }
 
     // If time is greater than 20 periods + stillTime reset to neutral pos
     else if (currTime > ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
     {
-        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->neutralPos);
+        p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos);
         p_CommonData->recordFlag = false;
     }
 
@@ -1005,19 +1008,19 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     {
         desPos[0] = 0;
         desPos[1] = X;
-        desPos[2] = p_CommonData->neutralPos.z()+Y;
+        desPos[2] = p_CommonData->wearableDelta0->neutralPos.z()+Y;
     }
     else if (inputMotionAxis.y() == 1)
     {
         desPos[0] = Y;
         desPos[1] = 0;
-        desPos[2] = p_CommonData->neutralPos.z()+X;
+        desPos[2] = p_CommonData->wearableDelta0->neutralPos.z()+X;
     }
     else if (inputMotionAxis.z() == 1)
     {
         desPos[0] = X;
         desPos[1] = Y;
-        desPos[2] = p_CommonData->neutralPos.z();
+        desPos[2] = p_CommonData->wearableDelta0->neutralPos.z();
     }
 
     p_CommonData->wearableDelta0->SetDesiredPos(desPos);
@@ -1166,8 +1169,13 @@ void haptics_thread::SetInitJointAngles()
     {
         double curr1 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
         double curr2 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        p_CommonData->desJointInits << curr1, curr2, curr3;
+        double curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;        
+        p_CommonData->desJointInits0 << curr1, curr2, curr3;
+
+        double curr4 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr5 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        double curr6 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        p_CommonData->desJointInits1 << curr4, curr5, curr6;
     }
 }
 
