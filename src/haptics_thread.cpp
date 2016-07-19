@@ -824,9 +824,9 @@ void haptics_thread::RenderDynamicBodies()
     chai3d::cMaterial mat0;
     mat0.setBlueRoyal();
     mat0.setStiffness(300);
-    mat0.setLateralStiffness(600);
-    mat0.setDynamicFriction(1.5);
-    mat0.setStaticFriction(1.5);
+    mat0.setLateralStiffness(300);
+    mat0.setDynamicFriction(100);
+    mat0.setStaticFriction(100);
     mat0.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox->setMaterial(mat0);
     p_CommonData->p_dynamicBox->setUseMaterial(true);

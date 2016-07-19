@@ -225,12 +225,12 @@ void MainWindow::UpdateGUIInfo()
     localDesiredPos0 = p_CommonData->wearableDelta0->ReadDesiredPos();
     localDesiredJointAngle0 = p_CommonData->desJointInits0;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
 
-    localMotorAngles1 = p_CommonData->wearableDelta0->GetMotorAngles();
-    localJointAngles1 = p_CommonData->wearableDelta0->GetJointAngles();
-    localCartesianPos1 = p_CommonData->wearableDelta0->GetCartesianPos();
-    localDesiredForce1 = p_CommonData->wearableDelta0->ReadDesiredForce();
-    localOutputVoltages1 = p_CommonData->wearableDelta0->ReadVoltageOutput();
-    localDesiredPos1 = p_CommonData->wearableDelta0->ReadDesiredPos();
+    localMotorAngles1 = p_CommonData->wearableDelta1->GetMotorAngles();
+    localJointAngles1 = p_CommonData->wearableDelta1->GetJointAngles();
+    localCartesianPos1 = p_CommonData->wearableDelta1->GetCartesianPos();
+    localDesiredForce1 = p_CommonData->wearableDelta1->ReadDesiredForce();
+    localOutputVoltages1 = p_CommonData->wearableDelta1->ReadVoltageOutput();
+    localDesiredPos1 = p_CommonData->wearableDelta1->ReadDesiredPos();
     localDesiredJointAngle1 = p_CommonData->desJointInits1;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
 
     // index device
