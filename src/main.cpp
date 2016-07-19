@@ -35,7 +35,6 @@ int main(int argc, char *argv[])
     shared.wearableDelta1 = new c3DOFDevice(1);     // create thumb
     shared.wearableDelta1->Init3DOFDeviceEnc();     // init thumb
 
-
     // Initialize and set the haptics thread data pointer to the shared data
     hapticsThread.p_CommonData = &shared;
     experimentThread.p_CommonData = &shared;

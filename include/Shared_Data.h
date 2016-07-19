@@ -8,6 +8,8 @@
 //#define SENSORAY826
 #define OCULUS
 
+
+
 #include <qDebug>
 #include <QVector>
 #include <math.h>

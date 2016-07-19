@@ -21,7 +21,6 @@ void magTracker_thread::run()
             runTimer.start();
         }
     }
-
 }
 
 void magTracker_thread::initialize()
