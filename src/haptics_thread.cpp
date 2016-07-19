@@ -1,7 +1,5 @@
 #include "haptics_thread.h"
 
-#define DAC_VSCALAR 819.1
-
 haptics_thread::haptics_thread(QObject *parent) : QThread(parent)
 {
 
@@ -221,28 +219,22 @@ void haptics_thread::UpdateVRGraphics()
             world->clearAllChildren();
             RenderDynamicBodies();
             break;
-
         }
     }
 
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
 
-    // update position and orientation of tool 0(and sphere that represents tool)
-    m_tool0->updateFromDevice();
-    // get position and rotation of the delta mechanism (already transformed from magTracker)
-    p_CommonData->chaiMagDevice0->getPosition(position0);
+    m_tool0->updateFromDevice();  // update position and orientation of tool 0(and sphere that represents tool)
+    p_CommonData->chaiMagDevice0->getPosition(position0); // get position and rotation of the delta mechanism (already transformed from magTracker)
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
-    //set deviceRotation for recording
     deviceRotation0 = rotation0; //the chai device already rotates the tracker return based on the finger harness
-    // set the visual representation to match
-    m_curSphere0->setLocalPos(position0);
+    m_curSphere0->setLocalPos(position0); // set the visual representation to match
     m_curSphere0->setLocalRot(rotation0);
     m_tool0->computeInteractionForces();
 
-    // update position of finger to stay on proxy point
-    // finger axis are not at fingerpad, so we want a translation outward on fingertip
-    chai3d::cVector3d fingerOffset(0,-0.006,0);
+    // update position of finger to stay on proxy point    
+    chai3d::cVector3d fingerOffset(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     fingerRotation0 = rotation0;
     fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
@@ -258,16 +250,13 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
-    // update position of finger to stay on proxy point
-    // finger axis are not at fingerpad, so we want a translation outward on fingertip
-    chai3d::cVector3d thumbOffset(0,-0.01,0);
+    // update position of finger to stay on proxy point    
+    chai3d::cVector3d thumbOffset(0,-0.01,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     fingerRotation1 = rotation1;
     fingerRotation1.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation1.rotateAboutLocalAxisDeg(1,0,0,90);
     thumb->setLocalRot(fingerRotation1);
     thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
-
-
 
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
@@ -341,6 +330,8 @@ void haptics_thread::UpdateVRGraphics()
         lastTime = currTime;
     }
 
+    /*
+    // THIS SLOPPY STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
     // mainwindow makes the line visible after palpationLine trial, this makes it opaque again and starts the next trial
     if(p_CommonData->palpPostTrialClock.timeoutOccurred())
     {
@@ -350,7 +341,7 @@ void haptics_thread::UpdateVRGraphics()
         // increment trial no
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
 
-        QString type = (p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/));
+        QString type = (p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL ));
 
         qDebug() << type;
 
@@ -359,7 +350,7 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->currentExperimentState = palpationLineTrial;
             // rotate line to new location
             double lastRotation = p_CommonData->tissueRot;
-            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
+            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL ));
 
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
@@ -390,7 +381,7 @@ void haptics_thread::UpdateVRGraphics()
             p_CommonData->currentExperimentState = palpationLineTrial;
             // rotate line to new location
             double lastRotation = p_CommonData->tissueRot;
-            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL /*default*/));
+            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL ));
 
             rotateTissueLine(-lastRotation);
             rotateTissueLine(p_CommonData->tissueRot);
@@ -418,7 +409,7 @@ void haptics_thread::UpdateVRGraphics()
         // rotate tissue line indicator back to 0
         double lastDispRotation = p_CommonData->indicatorRot;
         rotateTissueLineDisp(-lastDispRotation);
-    }
+    }*/
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -590,7 +581,7 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    //m_tool0->enableDynamicObjects(true);
+    m_tool0->enableDynamicObjects(true);
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
@@ -598,8 +589,8 @@ void haptics_thread::InitFingerAndTool()
     world->addChild(m_tool1); //insert the tool into the world
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
-    //m_tool1->setShowContactPoints(true, true, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
-    //m_tool1->enableDynamicObjects(true);
+    m_tool1->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool1->enableDynamicObjects(true);
     m_tool1->start();
 
     // Can use this to show frames on tool if so desired
@@ -626,8 +617,8 @@ void haptics_thread::InitFingerAndTool()
     finger->setShowFrame(false);
     finger->setFrameSize(0.05);
     finger->setLocalPos(0.0, 0.0, 0.0);
-    //create the thumb
-    thumb = new chai3d::cMultiMesh();
+
+    thumb = new chai3d::cMultiMesh(); //create the thumb
     world->addChild(thumb);
     finger->setShowFrame(false);
     finger->setFrameSize(0.05);
@@ -643,7 +634,6 @@ void haptics_thread::InitFingerAndTool()
 
     // set params for finger
     finger->setShowEnabled(true);
-    //finger->computeBoundaryBox(true); //compute a boundary box
     finger->setUseVertexColors(true);
     chai3d::cColorf fingerColor;
     fingerColor.setBrownSandy();
@@ -656,7 +646,6 @@ void haptics_thread::InitFingerAndTool()
 
     // set params for thumb
     thumb->setShowEnabled(true);
-    //finger->computeBoundaryBox(true); //compute a boundary box
     thumb->setUseVertexColors(true);
     chai3d::cColorf thumbColor;
     thumbColor.setBrownSandy();
@@ -776,7 +765,7 @@ void haptics_thread::RenderDynamicBodies()
     ODEWorld = new cODEWorld(p_CommonData->p_world);
     p_CommonData->p_world->addChild(ODEWorld);
 
-    //give world gravity
+    // give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
     ODEWorld->setAngularDamping(.1);
@@ -890,7 +879,7 @@ void haptics_thread::RenderExpFriction()
     p_CommonData->p_expFrictionBox->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_expFrictionBox->setLocalPos(0,0,0);
     p_CommonData->p_expFrictionBox->m_material->setStiffness(300);
-    //p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1580);
+    p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1580);
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
     world->addChild(p_CommonData->p_expFrictionBox);
@@ -910,13 +899,13 @@ void haptics_thread::RenderTwoFriction()
     p_CommonData->p_frictionBox2->setLocalPos(0,-.05, 0);
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(300);
-    //p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
+    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
     p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.25);
     p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*0.9);
 
 
     p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    //p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
+    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.4);
     p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.4*.9);
 

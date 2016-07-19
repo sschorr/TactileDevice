@@ -17,15 +17,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
+#ifdef OCULUS
     //--------------------------------------------------------------------------
-    // SETUP DISPLAY CONTEXT
+    // SETUP OCULUS DISPLAY CONTEXT
     //--------------------------------------------------------------------------
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0)
     {
         cout << "failed initialization" << endl;
         QThread::msleep(1000);
-        //return 1;
     }
 
     if (!oculusVR.initVR())
@@ -33,7 +33,6 @@ void MainWindow::Initialize()
         cout << "failed to initialize Oculus" << endl;
         QThread::msleep(1000);
         SDL_Quit();
-        //return 1;
     }
 
     ovrSizei hmdResolution = oculusVR.getResolution();
@@ -47,7 +46,6 @@ void MainWindow::Initialize()
         oculusVR.destroyVR();
         renderContext.destroy();
         SDL_Quit();
-        //return 1;
     }
 
     if (!oculusVR.initVRBuffers(windowSize.w, windowSize.h))
@@ -55,8 +53,8 @@ void MainWindow::Initialize()
         oculusVR.destroyVR();
         renderContext.destroy();
         SDL_Quit();
-        //return 1;
     }
+#endif
 
 
     // Set our current state
@@ -175,10 +173,7 @@ void MainWindow::onGUIchanged()
 
 void MainWindow::UpdateGUIInfo()
 {
-    //    chai3d::cShapeSphere *sphere = new chai3d::cShapeSphere(1);
-    //    p_CommonData->p_world->addChild(sphere);
-    //    sphere->setLocalPos(0, 0, 0.0);
-
+#ifdef OCULUS
     // Handle Oculus events
     // handle key presses
     processEvents();
@@ -199,11 +194,6 @@ void MainWindow::UpdateGUIInfo()
         p_CommonData->p_camera->m_useCustomModelViewMatrix = true;
         p_CommonData->p_camera->m_modelViewMatrix = modelViewMatrix;
 
-//        p_CommonData->cameraPos.set(0.6, 0.3, 0);
-//        p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
-//        p_CommonData->upVector.set(0.0, 0.0, 1.0);
-//        p_CommonData->p_camera->set(p_CommonData->cameraPos,p_CommonData->lookatPos,p_CommonData->upVector);
-
         // render world
         ovrSizei size = oculusVR.getEyeTextureSize(eyeIndex);
         p_CommonData->p_camera->renderView(size.w, size.h, 0, C_STEREO_LEFT_EYE, false);
@@ -216,6 +206,7 @@ void MainWindow::UpdateGUIInfo()
     oculusVR.submitFrame();
     oculusVR.blitMirror();
     SDL_GL_SwapWindow(renderContext.window);
+#endif
 
     localMotorAngles0 = p_CommonData->wearableDelta0->GetMotorAngles();
     localJointAngles0 = p_CommonData->wearableDelta0->GetJointAngles();
@@ -286,8 +277,6 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdKd->display(p_CommonData->jointKd);
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
-
-    //qDebug() << "indicator Rot: " << p_CommonData->indicatorRot << "tissue rot: " << p_CommonData->tissueRot;
 
     //calibrate if startup process over
     if(p_CommonData->calibClock.timeoutOccurred())
@@ -932,6 +921,7 @@ void MainWindow::rotateTissueLine(double angle)
 
 void MainWindow::processEvents()
 {
+#ifdef OCULUS
     SDL_Event event;
 
     while (SDL_PollEvent(&event))
@@ -963,10 +953,8 @@ void MainWindow::processEvents()
             break;
         }
     }
+#endif
 }
-
-
-
 
 
 void MainWindow::on_AllDown0_clicked()
