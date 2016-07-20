@@ -10,6 +10,7 @@ Widget_OpenGLDisplay::Widget_OpenGLDisplay(QWidget *parent) :
 //===========================================================================
 void Widget_OpenGLDisplay::initializeGL()
 {
+#ifndef OCULUS
     //initialization of OpenGL
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_LIGHTING);
@@ -19,19 +20,23 @@ void Widget_OpenGLDisplay::initializeGL()
     //glEnable(GLUT_RGB);
 
     startTimer(20);
+#endif
 }
 
 void Widget_OpenGLDisplay::paintGL()
 {
+#ifndef OCULUS
     if(p_CommonData)
     {
         //render world
-        //p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
+        p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
     }
+#endif
 }
 
 void Widget_OpenGLDisplay::resizeGL(int width, int height)
 {
+#ifndef OCULUS
     //update the size of the viewport
     m_displayWidth = width;
     m_displayHeight = height;
@@ -44,10 +49,13 @@ void Widget_OpenGLDisplay::resizeGL(int width, int height)
     glLoadIdentity();
     gluPerspective(45.0, (GLfloat)width/(GLfloat)height, 0.01f, 1000.0f);
     glMatrixMode(GL_MODELVIEW);
+#endif
 }
 
 //===========================================================================
 void Widget_OpenGLDisplay::timerEvent(QTimerEvent *event)
 {
+#ifndef OCULUS
     updateGL();
+#endif
 }

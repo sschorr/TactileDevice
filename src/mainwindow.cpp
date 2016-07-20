@@ -1,12 +1,18 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <string.h>
+#include "Widget_OpenGLDisplay.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+#ifndef OCULUS
+    windowGLDisplay = new Widget_OpenGLDisplay(this->centralWidget());
+    windowGLDisplay->setObjectName(QStringLiteral("windowGLDisplay"));
+    windowGLDisplay->setGeometry(QRect(10, 20, 671, 751));
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -61,7 +67,12 @@ void MainWindow::Initialize()
     p_CommonData->currentControlState = idleControl;
 
     // Initialize shared memory for OpenGL widget
-    //ui->DisplayWidget->p_CommonData = p_CommonData;
+    //ui->displayWidget->p_CommonData = p_CommonData;
+
+#ifndef OCULUS
+    windowGLDisplay->p_CommonData = p_CommonData;
+#endif
+
 
     connect(this->ui->verticalSliderX0, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderY0, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
@@ -96,7 +107,6 @@ void MainWindow::Initialize()
 
     p_CommonData->desJointInits0 = p_CommonData->wearableDelta0->GetJointAngles();
     p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
-
 
     ui->normalBox->setChecked(true);
     ui->lateralBox->setChecked(true);

@@ -46,6 +46,7 @@ public:
     void processEvents();
 
     // vars
+    Widget_OpenGLDisplay* windowGLDisplay;
     shared_data* p_CommonData;
 
     Eigen::Vector3d localMotorAngles0;

@@ -175,8 +175,13 @@ void haptics_thread::UpdateVRGraphics()
     double zPos = p_CommonData->camRadius*cos(p_CommonData->polar*PI/180.0);
     p_CommonData->cameraPos.set(xPos, yPos, zPos);
 
-
+#ifdef OCULUS
     p_CommonData->lookatPos.set(-1, 0, p_CommonData->cameraPos.z());
+#endif
+
+#ifndef OCULUS
+    p_CommonData->lookatPos.set(0, 0, 0);
+#endif
     // update camera parameters
     p_CommonData->p_camera->set( p_CommonData->cameraPos,
                                  p_CommonData->lookatPos,
