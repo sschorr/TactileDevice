@@ -1902,6 +1902,22 @@
        <string>Voltage 3</string>
       </property>
      </widget>
+     <widget class="Widget_OpenGLDisplay" name="frame">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>230</y>
+        <width>281</width>
+        <height>241</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
      <zorder>AllDown0</zorder>
      <zorder>directions</zorder>
      <zorder>lcdNumberHapticRate</zorder>
@@ -2041,6 +2057,7 @@
      <zorder>label_70</zorder>
      <zorder>verticalSliderY1</zorder>
      <zorder>label_71</zorder>
+     <zorder>frame</zorder>
     </widget>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
@@ -2070,6 +2087,14 @@
   <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Widget_OpenGLDisplay</class>
+   <extends>QFrame</extends>
+   <header>widget_opengldisplay.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

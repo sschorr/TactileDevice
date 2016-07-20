@@ -23,6 +23,7 @@
 #include "SDL.h"
 #include "OVRRenderContext.h"
 #include "OVRDevice.h"
+#include "Widget_OpenGLDisplay.h"
 
 using namespace chai3d;
 using namespace std;
