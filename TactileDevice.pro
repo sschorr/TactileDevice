@@ -9,6 +9,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = TactileDevice
 TEMPLATE = app
+CONFIG += qwt
 
 SOURCES += ./src/main.cpp\
            ./src/mainwindow.cpp\
@@ -97,3 +98,5 @@ LIBS += "oleaut32.lib"
 LIBS += "uuid.lib"
 LIBS += "comdlg32.lib"
 LIBS += "advapi32.lib"
+LIBS += "./External/Qwt-6.1.3/lib/qwtd.lib"
+
