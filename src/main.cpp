@@ -47,8 +47,9 @@ int main(int argc, char *argv[])
 
     // Initialize and set the window thread data pointer to the shared data
     window.p_CommonData = &shared;
-    window.show();
     window.Initialize();
+    window.show();
+
 
     hapticsThread.start();
     experimentThread.start();

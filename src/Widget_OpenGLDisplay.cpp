@@ -19,7 +19,7 @@ void Widget_OpenGLDisplay::initializeGL()
     glEnable(GL_COLOR_MATERIAL);
     //glEnable(GLUT_RGB);
 
-    startTimer(20);
+    startTimer(10);
 #endif
 }
 

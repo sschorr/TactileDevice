@@ -24,6 +24,11 @@
 #include "OVRRenderContext.h"
 #include "OVRDevice.h"
 #include "Widget_OpenGLDisplay.h"
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_grid.h>
+
+
 
 using namespace chai3d;
 using namespace std;
@@ -44,10 +49,18 @@ public:
     // functions
     void Initialize();
     void processEvents();
+    void updateQwtPlot();
 
     // vars
     Widget_OpenGLDisplay* windowGLDisplay;
     shared_data* p_CommonData;
+
+    // qwtVars
+    QwtPlotCurve *curve;
+    QwtPlotGrid *grid;
+    QPolygonF points;
+    QPointF point;
+    double i;
 
     Eigen::Vector3d localMotorAngles0;
     Eigen::Vector3d localJointAngles0;

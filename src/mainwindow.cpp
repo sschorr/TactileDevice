@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef OCULUS
     windowGLDisplay = new Widget_OpenGLDisplay(this->centralWidget());
     windowGLDisplay->setObjectName(QStringLiteral("windowGLDisplay"));
-    windowGLDisplay->setGeometry(QRect(10, 20, 671, 751));
+    windowGLDisplay->setGeometry(QRect(10, 20, 881, 561));
 #endif
 }
 
@@ -93,7 +93,6 @@ void MainWindow::Initialize()
 
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
-    connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
 
     // init slider values
     this->ui->KpSlider->setValue(60);
@@ -113,76 +112,49 @@ void MainWindow::Initialize()
     p_CommonData->flagNormal = true;
     p_CommonData->flagLateral = true;
 
-    GraphicsTimer.start(10);
+    ///////////////
+    // QWT INITS //
+    ///////////////
+    i = 0;
+
+    ui->qwtPlot->setTitle("Test Plot");
+    ui->qwtPlot->setCanvasBackground(Qt::white);
+//    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
+//    ui->qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
+    ui->qwtPlot->setAxisScale(QwtPlot::xBottom, 0.0, 10);
+    ui->qwtPlot->setAxisScale(QwtPlot::yLeft, 0.0, 10.0);
+    ui->qwtPlot->updateAxes();
+
+//    curve = new QwtPlotCurve("Points");
+//    points << QPointF( 0.0, 4.4 ) << QPointF( 1.0, 3.0 )
+//           << QPointF( 2.0, 4.5 ) << QPointF( 3.0, 6.8 )
+//           << QPointF( 4.0, 7.9 ) << QPointF( 5.0, 7.1 );
+//    curve->setSamples( points );
+//    curve->attach(ui->qwtPlot);
+
+    ui->qwtPlot->show();
+    ui->qwtPlot->setAutoReplot(true);
+
+    GraphicsTimer.setInterval(10);
+    GraphicsTimer.start();
+    connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
     UpdateGUIInfo();
 }
 
-void MainWindow::onGUIchanged()
-{
-
-    if(ui->lateralBox->isChecked())
-    {
-        p_CommonData->flagLateral = true;
-    }
-    else
-    {
-        p_CommonData->flagLateral = false;
-    }
-
-    if(ui->normalBox->isChecked())
-    {
-        p_CommonData->flagNormal = true;
-    }
-    else
-    {
-        p_CommonData->flagNormal = false;
-    }
-
-    if(ui->initJoints->isChecked())
-    {
-        p_CommonData->currentControlState = initCalibControl;
-    }
-    if(ui->sliderControl->isChecked())
-    {
-        p_CommonData->currentControlState = sliderControlMode;
-
-        double xSlider0 = this->ui->verticalSliderX0->value()/22.2;
-        double ySlider0 = this->ui->verticalSliderY0->value()/22.2;
-        double zSlider0 = this->ui->verticalSliderZ0->value()/22.2+p_CommonData->wearableDelta0->neutralPos[2];
-        Eigen::Vector3d tempDesiredPos0(xSlider0, ySlider0, zSlider0);
-        p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos0);
-
-        double xSlider1 = this->ui->verticalSliderX1->value()/22.2;
-        double ySlider1 = this->ui->verticalSliderY1->value()/22.2;
-        double zSlider1 = this->ui->verticalSliderZ1->value()/22.2+p_CommonData->wearableDelta1->neutralPos[2];
-        Eigen::Vector3d tempDesiredPos1(xSlider1, ySlider1, zSlider1);
-        p_CommonData->wearableDelta1->SetDesiredPos(tempDesiredPos1);
-    }
-
-    else if(ui->VRControl->isChecked())
-    {
-        //let haptics thread determine desired position
-        p_CommonData->currentControlState = VRControlMode;
-    }
-
-    double KpSlider = this->ui->KpSlider->value()*20.0;
-    double KdSlider = this->ui->KdSlider->value()/30.0;
-
-    double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
-    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
-
-    p_CommonData->jointKp = KpSlider;
-    p_CommonData->jointKd = KdSlider;
-    p_CommonData->bandSinAmpDisp = bandwidthAmp;
-    p_CommonData->bandSinFreqDisp = bandwidthFreq;
-
-    ui->directions->setText("No experiment currently running");
-
-    UpdateGUIInfo();
-}
 
 void MainWindow::UpdateGUIInfo()
 {
+    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
+    ui->qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
+
+    i += 0.1;
+    points << QPointF( i , 7.1 +sin(i) );
+    ui->qwtPlot->detachItems(QwtPlotItem::Rtti_PlotItem, true);
+    curve = new QwtPlotCurve("Points");
+    curve->setSamples( points );
+    curve->attach(ui->qwtPlot);
+
+
 #ifdef OCULUS
     // Handle Oculus events
     // handle key presses
@@ -340,6 +312,70 @@ void MainWindow::UpdateGUIInfo()
         break;
     }
 }
+void MainWindow::onGUIchanged()
+{
+
+    if(ui->lateralBox->isChecked())
+    {
+        p_CommonData->flagLateral = true;
+    }
+    else
+    {
+        p_CommonData->flagLateral = false;
+    }
+
+    if(ui->normalBox->isChecked())
+    {
+        p_CommonData->flagNormal = true;
+    }
+    else
+    {
+        p_CommonData->flagNormal = false;
+    }
+
+    if(ui->initJoints->isChecked())
+    {
+        p_CommonData->currentControlState = initCalibControl;
+    }
+    if(ui->sliderControl->isChecked())
+    {
+        p_CommonData->currentControlState = sliderControlMode;
+
+        double xSlider0 = this->ui->verticalSliderX0->value()/22.2;
+        double ySlider0 = this->ui->verticalSliderY0->value()/22.2;
+        double zSlider0 = this->ui->verticalSliderZ0->value()/22.2+p_CommonData->wearableDelta0->neutralPos[2];
+        Eigen::Vector3d tempDesiredPos0(xSlider0, ySlider0, zSlider0);
+        p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos0);
+
+        double xSlider1 = this->ui->verticalSliderX1->value()/22.2;
+        double ySlider1 = this->ui->verticalSliderY1->value()/22.2;
+        double zSlider1 = this->ui->verticalSliderZ1->value()/22.2+p_CommonData->wearableDelta1->neutralPos[2];
+        Eigen::Vector3d tempDesiredPos1(xSlider1, ySlider1, zSlider1);
+        p_CommonData->wearableDelta1->SetDesiredPos(tempDesiredPos1);
+    }
+
+    else if(ui->VRControl->isChecked())
+    {
+        //let haptics thread determine desired position
+        p_CommonData->currentControlState = VRControlMode;
+    }
+
+    double KpSlider = this->ui->KpSlider->value()*20.0;
+    double KdSlider = this->ui->KdSlider->value()/30.0;
+
+    double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
+    double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
+
+    p_CommonData->jointKp = KpSlider;
+    p_CommonData->jointKd = KdSlider;
+    p_CommonData->bandSinAmpDisp = bandwidthAmp;
+    p_CommonData->bandSinFreqDisp = bandwidthFreq;
+
+    ui->directions->setText("No experiment currently running");
+
+    UpdateGUIInfo();
+}
+
 
 void MainWindow::on_CalibratePushButton_clicked()
 {
@@ -973,3 +1009,12 @@ void MainWindow::on_AllDown0_clicked()
     p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
     p_CommonData->calibClock.start();
 }
+
+void MainWindow::updateQwtPlot()
+{
+    i += 0.1;
+    points << QPointF( 5.0 + i, 7.1 );
+    curve->setSamples( points );
+    ui->qwtPlot->replot();
+}
+

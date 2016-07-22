@@ -47,7 +47,7 @@ INCLUDEPATH += "./External"
 
 # Include path for qwt
 INCLUDEPATH += "./include"
-INCLUDEPATH += "./External/qwt-6.0.1/src"
+INCLUDEPATH += "./External/Qwt-6.1.3/include"
 
 # Include path for Sensoray
 INCLUDEPATH += "./External/s826_3.3.9/api/"
