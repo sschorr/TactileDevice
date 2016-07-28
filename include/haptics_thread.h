@@ -93,6 +93,7 @@ public:
     cODEGenericBody* ODEGPlane0;
 
     double boxSize;
+    double groundSize;
 
     // ODE Module variables
     cODEWorld* ODEWorld;

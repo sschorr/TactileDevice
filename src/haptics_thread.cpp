@@ -688,15 +688,16 @@ void haptics_thread::InitDynamicBodies()
     //--------------------------------------------------------------------------
     // CREATING ODE World and Objects
     //--------------------------------------------------------------------------
-
     // create an ODE world to simulate dynamic bodies
     ODEWorld = new cODEWorld(p_CommonData->p_world);
 
     // Create an ODE Block
-    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();
+    p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
+    p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
@@ -705,17 +706,19 @@ void haptics_thread::InitDynamicBodies()
 
     //create ground
     ground = new chai3d::cMesh();
-
-    double boxSize = 0.05;
-    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
-
-    //create a plane
-    double groundSize = 5.0;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
 }
 
 void haptics_thread::RenderDynamicBodies()
 {
+    delete ODEWorld;
+    delete p_CommonData->ODEBody1;
+    delete p_CommonData->ODEBody2;
+    delete p_CommonData->p_dynamicBox1;
+    delete p_CommonData->p_dynamicBox2;
+    delete ODEGPlane0;
+    delete ground;
+
+    InitDynamicBodies();
     ODEWorld->deleteAllChildren();
     //--------------------------------------------------------------------------
     // CREATING ODE World and Objects
@@ -727,7 +730,7 @@ void haptics_thread::RenderDynamicBodies()
     // give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
-    ODEWorld->setAngularDamping(.01);
+    ODEWorld->setAngularDamping(.005);
     ODEWorld->setLinearDamping(.002);
 
     //--------------------------------------------------------------------------
@@ -735,10 +738,20 @@ void haptics_thread::RenderDynamicBodies()
     //--------------------------------------------------------------------------
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
+    boxSize = 0.05;
+    cCreateBox(p_CommonData->p_dynamicBox1, boxSize, boxSize, boxSize); // make mesh a box
+    cCreateBox(p_CommonData->p_dynamicBox2, boxSize, boxSize, boxSize); // make mesh a box
+    p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
+
+    //create a plane
+    groundSize = 5.0;
+    chai3d::cCreatePlane(ground, groundSize, groundSize);
+
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
     ground->setLocalPos(0,0,0.05);
 
-    //define some material properties for ground
+    // define some material properties for ground
     chai3d::cMaterial matGround;
     matGround.setStiffness(300);
     matGround.setDynamicFriction(0.2);
@@ -747,32 +760,46 @@ void haptics_thread::RenderDynamicBodies()
     matGround.m_emission.setGrayLevel(0.3);
     ground->setMaterial(matGround);
 
-    double boxSize = 0.05;
-    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
-    p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
+    double staticFriction = 2.0;
+    double dynamicFriction = staticFriction*0.9;
 
-    chai3d::cMaterial mat0;
-    mat0.setBlueRoyal();
-    mat0.setStiffness(300);
-    mat0.setLateralStiffness(300);
-    mat0.setDynamicFriction(100);
-    mat0.setStaticFriction(100);
-    mat0.setUseHapticFriction(true);
-    p_CommonData->p_dynamicBox->setMaterial(mat0);
-    p_CommonData->p_dynamicBox->setUseMaterial(true);
+    // define material properties for object 1
+    chai3d::cMaterial mat1;
+    mat1.setBlueRoyal();
+    mat1.setStiffness(600);
+    mat1.setLateralStiffness(1000);
+    mat1.setDynamicFriction(dynamicFriction);
+    mat1.setStaticFriction(staticFriction);
+    mat1.setUseHapticFriction(true);
+    p_CommonData->p_dynamicBox1->setMaterial(mat1);
+    p_CommonData->p_dynamicBox1->setUseMaterial(true);
+
+    // define material properties for object 2
+    chai3d::cMaterial mat2;
+    mat2.setRedCrimson();
+    mat2.setStiffness(600);
+    mat2.setLateralStiffness(1000);
+    mat2.setDynamicFriction(dynamicFriction);
+    mat2.setStaticFriction(staticFriction);
+    mat2.setUseHapticFriction(true);
+    p_CommonData->p_dynamicBox2->setMaterial(mat2);
+    p_CommonData->p_dynamicBox2->setUseMaterial(true);
 
     // add mesh to ODE object
-    p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
+    p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
+    p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
 
     // create a dynamic model of the ODE object
-    p_CommonData->ODEBody0->createDynamicBox(boxSize, boxSize, boxSize);
+    p_CommonData->ODEBody1->createDynamicBox(boxSize, boxSize, boxSize);
+    p_CommonData->ODEBody2->createDynamicBox(boxSize, boxSize, boxSize);
 
     // set mass of box
-    p_CommonData->ODEBody0->setMass(0.2);
+    p_CommonData->ODEBody1->setMass(0.2);
+    p_CommonData->ODEBody2->setMass(0.4);
 
     // set position of box
-    p_CommonData->ODEBody0->setLocalPos(0,0,0);
-
+    p_CommonData->ODEBody1->setLocalPos(0,.1,0);
+    p_CommonData->ODEBody2->setLocalPos(0,-.1,0);
 
     // setup tools for dynamic interaction
     m_tool0->enableDynamicObjects(true);
@@ -786,31 +813,6 @@ void haptics_thread::RenderDynamicBodies()
     world->addChild(thumb);
 }
 
-
-void haptics_thread::RenderHump()
-{
-    p_CommonData->p_hump->loadFromFile("./Resources/Hump.obj");
-
-    p_CommonData->p_hump->computeBoundaryBox(true); //compute a boundary box
-
-    // compute collision detection algorithm
-    p_CommonData->p_hump->createAABBCollisionDetector(toolRadius);
-
-    chai3d::cColorf humpColor;
-    humpColor.setBlueDeepSky();
-    p_CommonData->p_hump->setVertexColor(humpColor);
-    p_CommonData->p_hump->m_material->m_ambient.set(0.1, 0.1, 0.1);
-    p_CommonData->p_hump->m_material->m_diffuse.set(0.3, 0.3, 0.3);
-    p_CommonData->p_hump->m_material->m_specular.set(1.0, 1.0, 1.0);
-    p_CommonData->p_hump->setUseMaterial(true);
-    p_CommonData->p_hump->setStiffness(200);
-    p_CommonData->p_hump->setFriction(0.5, 0.5, true);
-    world->addChild(p_CommonData->p_hump);
-
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
-}
 
 void haptics_thread::RenderExpFriction()
 {

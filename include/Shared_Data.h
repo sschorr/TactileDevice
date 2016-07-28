@@ -254,14 +254,16 @@ typedef struct
     double indicatorRot;
 
     // haptics thread objects for Dynamic (ODE) environments
-    cODEGenericBody* ODEBody0;
     cODEGenericBody* ODEBody1;
+    cODEGenericBody* ODEBody2;
+
     // haptics thread objects for visual representation of dynamic objects
-    chai3d::cMesh* p_dynamicBox;
+    chai3d::cMesh* p_dynamicBox1;
+    chai3d::cMesh* p_dynamicBox2;
 
     // planes confining objects
-    cODEGenericBody* ODEGPlane0;
-    cODEGenericBody* ODEGPlane1;
+//    cODEGenericBody* ODEGPlane0;
+//    cODEGenericBody* ODEGPlane1;
 
     // haptics thread objects for hump environment
     chai3d::cMultiMesh* p_hump;
