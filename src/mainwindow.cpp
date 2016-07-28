@@ -62,7 +62,6 @@ void MainWindow::Initialize()
     }
 #endif
 
-
     // Set our current state
     p_CommonData->currentControlState = idleControl;
 
@@ -94,9 +93,11 @@ void MainWindow::Initialize()
     connect(this->ui->sliderControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
     connect(this->ui->VRControl, SIGNAL(clicked()), this, SLOT(onGUIchanged()));
 
-    // init slider values
-    this->ui->KpSlider->setValue(60);
-    this->ui->KdSlider->setValue(30);
+    // init slider stuff
+    this->KpScale = 40.0; this->KpInit = 50.0;
+    this->KdScale = 0.24; this->KdInit = 50.0;
+    this->ui->KpSlider->setValue(KpInit);
+    this->ui->KdSlider->setValue(KdInit);
 
     this->ui->bandwidthAmpSlider->setValue(70);
     this->ui->bandwidthFreqSlider->setValue(10);
@@ -111,7 +112,10 @@ void MainWindow::Initialize()
     ui->lateralBox->setChecked(true);
     p_CommonData->flagNormal = true;
     p_CommonData->flagLateral = true;
+    p_CommonData->device0Initing = false;
+    p_CommonData->device1Initing = false;
 
+#ifdef QWT
     ///////////////
     // QWT INITS //
     ///////////////
@@ -119,41 +123,25 @@ void MainWindow::Initialize()
 
     ui->qwtPlot->setTitle("Test Plot");
     ui->qwtPlot->setCanvasBackground(Qt::white);
-//    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
-//    ui->qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
-    ui->qwtPlot->setAxisScale(QwtPlot::xBottom, 0.0, 10);
-    ui->qwtPlot->setAxisScale(QwtPlot::yLeft, 0.0, 10.0);
+    ui->qwtPlot->setAxisScale(QwtPlot::xBottom, 0, 10.0);
+    ui->qwtPlot->setAxisScale(QwtPlot::yLeft, 8.0, 18.0);
     ui->qwtPlot->updateAxes();
-
-//    curve = new QwtPlotCurve("Points");
-//    points << QPointF( 0.0, 4.4 ) << QPointF( 1.0, 3.0 )
-//           << QPointF( 2.0, 4.5 ) << QPointF( 3.0, 6.8 )
-//           << QPointF( 4.0, 7.9 ) << QPointF( 5.0, 7.1 );
-//    curve->setSamples( points );
-//    curve->attach(ui->qwtPlot);
 
     ui->qwtPlot->show();
     ui->qwtPlot->setAutoReplot(true);
 
-    GraphicsTimer.setInterval(10);
+#endif
+
+    GraphicsTimer.setInterval(1/updateHz*1000);
     GraphicsTimer.start();
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
     UpdateGUIInfo();
+
 }
 
 
 void MainWindow::UpdateGUIInfo()
 {
-    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
-    ui->qwtPlot->setAxisAutoScale(QwtPlot::xBottom);
-
-    i += 0.1;
-    points << QPointF( i , 7.1 +sin(i) );
-    ui->qwtPlot->detachItems(QwtPlotItem::Rtti_PlotItem, true);
-    curve = new QwtPlotCurve("Points");
-    curve->setSamples( points );
-    curve->attach(ui->qwtPlot);
-
 
 #ifdef OCULUS
     // Handle Oculus events
@@ -205,6 +193,48 @@ void MainWindow::UpdateGUIInfo()
     localOutputVoltages1 = p_CommonData->wearableDelta1->ReadVoltageOutput();
     localDesiredPos1 = p_CommonData->wearableDelta1->ReadDesiredPos();
     localDesiredJointAngle1 = p_CommonData->desJointInits1;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
+
+#ifdef QWT
+    ////////////////////////////////////////////////////
+    // update real time plotting
+    ////////////////////////////////////////////////////
+    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft);
+    i += 1/updateHz;
+
+    // assign values to first curve
+    points1 << QPointF( i , p_CommonData->wearableDelta0->KdEffort );
+    if (points1.length() > 5*updateHz)
+        points1.removeFirst();
+
+    // assign values to second curve
+    points2 << QPointF( i , p_CommonData->wearableDelta0->KpEffort );
+    if (points2.length() > 5*updateHz)
+        points2.removeFirst();
+
+    // assign values to third curve
+    points3 << QPointF( i , localCartesianPos0[2] );
+    if (points3.length() > 5*updateHz)
+        points3.removeFirst();
+
+    QRectF rect = points1.boundingRect();
+    ui->qwtPlot->setAxisScale(QwtPlot::xBottom, rect.left(), rect.right());
+
+    ui->qwtPlot->detachItems(QwtPlotItem::Rtti_PlotItem, true);
+//    curve1 = new QwtPlotCurve("Points1");
+//    curve1->setSamples( points1 );
+//    curve1->setPen(* new QPen(Qt::blue));
+//    curve1->attach(ui->qwtPlot);
+
+//    curve2 = new QwtPlotCurve("Points2");
+//    curve2->setSamples( points2 );
+//    curve2->setPen(* new QPen(Qt::red));
+//    curve2->attach(ui->qwtPlot);
+
+    curve3 = new QwtPlotCurve("Points3");
+    curve3->setSamples( points3 );
+    curve3->setPen(* new QPen(Qt::black));
+    curve3->attach(ui->qwtPlot);
+#endif
 
     // index device
     ui->MotorAngleLCDNumber1_0->display(localMotorAngles0[0]*180/PI);
@@ -360,8 +390,8 @@ void MainWindow::onGUIchanged()
         p_CommonData->currentControlState = VRControlMode;
     }
 
-    double KpSlider = this->ui->KpSlider->value()*20.0;
-    double KdSlider = this->ui->KdSlider->value()/30.0;
+    double KpSlider = this->ui->KpSlider->value()*KpScale;
+    double KdSlider = this->ui->KdSlider->value()*KdScale;
 
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
@@ -384,6 +414,7 @@ void MainWindow::on_CalibratePushButton_clicked()
 
     p_CommonData->wearableDelta1->ZeroEncoders();
     p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
+
     onGUIchanged();
 }
 
@@ -921,6 +952,7 @@ void MainWindow::on_startExperiment_3_clicked()
 void MainWindow::on_setNeutral_clicked()
 {
     p_CommonData->wearableDelta0->neutralPos[2] = localCartesianPos0[2];
+    p_CommonData->wearableDelta1->neutralPos[2] = localCartesianPos1[2];
     on_ZeroSliders_clicked();
 }
 
@@ -1008,13 +1040,13 @@ void MainWindow::on_AllDown0_clicked()
     p_CommonData->calibClock.reset();
     p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
     p_CommonData->calibClock.start();
+    p_CommonData->device0Initing = true;
 }
 
-void MainWindow::updateQwtPlot()
+void MainWindow::on_AllDown1_clicked()
 {
-    i += 0.1;
-    points << QPointF( 5.0 + i, 7.1 );
-    curve->setSamples( points );
-    ui->qwtPlot->replot();
+    p_CommonData->calibClock.reset();
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
+    p_CommonData->calibClock.start();
+    p_CommonData->device1Initing = true;
 }
-

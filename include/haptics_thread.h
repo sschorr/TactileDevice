@@ -86,13 +86,13 @@ public:
     chai3d::cToolCursor* m_tool1;
     chai3d::cShapeSphere* m_curSphere0;  // sphere to hover over tool and enable frames
     chai3d::cShapeSphere* m_curSphere1;
-    chai3d::cShapeBox* m_box;    
-    chai3d::cMesh* meshBox;
     chai3d::cMesh* ground;
     chai3d::cMultiMesh* finger;
     chai3d::cMultiMesh* thumb;
     chai3d::cEffectSurface* newEffect;
     cODEGenericBody* ODEGPlane0;
+
+    double boxSize;
 
     // ODE Module variables
     cODEWorld* ODEWorld;
@@ -123,16 +123,6 @@ public:
     chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
 
     chai3d::cMatrix3d deviceRotation;
-
-    //vars for contact vibration
-    bool firstTouch;
-    double decaySinTime;
-    double decaySinExp;
-    double decaySinAmp;
-    double decaySinScale;
-    double decaySinAmpMax;
-    double decaySinFreq;
-    double computedPosAdd;
 
     // ints for display counters
     int rateDisplayCounter;

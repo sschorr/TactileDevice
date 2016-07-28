@@ -4,9 +4,10 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define MAGTRACKER
+#define MAGTRACKER
 #define SENSORAY826
 //#define OCULUS
+//#define QWT
 
 #include <qDebug>
 #include <QVector>
@@ -183,6 +184,10 @@ typedef struct
     // joint controller variables
     double jointKp;
     double jointKd;
+
+    // device initing flags
+    bool device0Initing;
+    bool device1Initing;
 
     // the trial number of the experiment
     int trialNo;

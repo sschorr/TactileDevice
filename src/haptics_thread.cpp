@@ -21,12 +21,10 @@ void haptics_thread::initialize()
     // GENERAL HAPTICS INITS=================================
     // Ensure the device is not controlling to start
     p_CommonData->wearableDelta0->TurnOffControl();
-    p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos); // kinematic neutral position
+    p_CommonData->wearableDelta1->TurnOffControl();
 
-    p_CommonData->Kp = 0; //these are set by the window sliders
-    p_CommonData->Kd = 0; //these are set by the window sliders
-    p_CommonData->jointKp = 1700.0;
-    p_CommonData->jointKd = 10;
+    p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos); // kinematic neutral position
+    p_CommonData->wearableDelta1->SetDesiredPos(p_CommonData->wearableDelta1->neutralPos); // kinematic neutral position
 
     // set flag that says haptics thread is running
     p_CommonData->hapticsThreadActive = true;
@@ -41,7 +39,7 @@ void haptics_thread::initialize()
 
     // Set the clock that controls haptic rate
     rateClock.reset();
-    rateClock.setTimeoutPeriodSeconds(0.00000000013);
+    rateClock.setTimeoutPeriodSeconds(0.000001);
     rateClock.start(true);
 
     // setup the clock that will enable display of the haptic rate
@@ -62,14 +60,6 @@ void haptics_thread::initialize()
     //init counters to 0
     rateDisplayCounter = 0;
     recordDataCounter = 0;
-
-    // init first contact variables
-    decaySinAmpMax = 2;
-    decaySinFreq = 150;
-    decaySinExp = -20;
-    decaySinScale = 2;
-    firstTouch = true;
-    decaySinAmp = 0;
 
     //init bandwidth variables
     p_CommonData->bandSinAmp = 0;
@@ -165,6 +155,7 @@ void haptics_thread::run()
 
     // If we are terminating, delete the haptic device to set outputs to 0
     delete p_CommonData->wearableDelta0;
+    delete p_CommonData->wearableDelta1;
 }
 
 void haptics_thread::UpdateVRGraphics()
@@ -213,11 +204,6 @@ void haptics_thread::UpdateVRGraphics()
         case experimentPalpationLine:
             world->clearAllChildren();
             RenderPalpation();
-            break;
-
-        case hump:
-            world->clearAllChildren();
-            RenderHump();
             break;
 
         case dynamicBodies:
@@ -694,20 +680,7 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
 
-    p_CommonData->p_hump = new chai3d::cMultiMesh();
-    p_CommonData->p_hoopHump = new chai3d::cMultiMesh();
-    p_CommonData->p_hump->rotateAboutGlobalAxisDeg(1,0,0,-90);
-    p_CommonData->p_hoopHump->rotateAboutGlobalAxisDeg(1,0,0,-90);
-
     p_CommonData->p_expFrictionBox = new chai3d::cMesh();
-
-    p_CommonData->p_tissueCyl = new chai3d::cMesh();
-    p_CommonData->p_tissueLump = new chai3d::cMesh();
-    p_CommonData->p_tissueLumpCenter = new chai3d::cMesh();
-    p_CommonData->p_tissueLumpCenter1 = new chai3d::cMesh();
-    p_CommonData->p_tissueLumpCenter2 = new chai3d::cMesh();
-    p_CommonData->p_tissueLumpCenter3 = new chai3d::cMesh();
-    p_CommonData->p_tissueBox = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
@@ -718,11 +691,6 @@ void haptics_thread::InitDynamicBodies()
 
     // create an ODE world to simulate dynamic bodies
     ODEWorld = new cODEWorld(p_CommonData->p_world);
-    //give world gravity
-    ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
-    // define damping properties
-    ODEWorld->setAngularDamping(.02);
-    ODEWorld->setLinearDamping(.02);
 
     // Create an ODE Block
     p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
@@ -734,29 +702,16 @@ void haptics_thread::InitDynamicBodies()
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0,-1.0));
 
     //create ground
     ground = new chai3d::cMesh();
 
+    double boxSize = 0.05;
+    cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
+
     //create a plane
     double groundSize = 5.0;
     chai3d::cCreatePlane(ground, groundSize, groundSize);
-
-    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05);
-
-    //define some material properties
-    chai3d::cMaterial matGround;
-    matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.2);
-    matGround.setStaticFriction(0.0);
-    matGround.setGrayLight();
-    matGround.m_emission.setGrayLevel(0.3);
-    ground->setMaterial(matGround);
-
-    // setup collision detector
-    //ground->createAABBCollisionDetector(toolRadius);
 }
 
 void haptics_thread::RenderDynamicBodies()
@@ -767,33 +722,18 @@ void haptics_thread::RenderDynamicBodies()
     //--------------------------------------------------------------------------
 
     // create an ODE world to simulate dynamic bodies
-    ODEWorld = new cODEWorld(p_CommonData->p_world);
     p_CommonData->p_world->addChild(ODEWorld);
 
     // give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
-    ODEWorld->setAngularDamping(.1);
+    ODEWorld->setAngularDamping(.01);
     ODEWorld->setLinearDamping(.002);
-
-    // Create an ODE Block
-    p_CommonData->ODEBody0 = new cODEGenericBody(ODEWorld);
-
-    // create a virtual mesh that will be used for the geometry representation of the dynamic body
-    p_CommonData->p_dynamicBox = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
-    ODEGPlane0 = new cODEGenericBody(ODEWorld);
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
-    //create ground
-    ground = new chai3d::cMesh();
-
-    //create a plane
-    double groundSize = 5.0;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
 
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
     ground->setLocalPos(0,0,0.05);
@@ -807,13 +747,9 @@ void haptics_thread::RenderDynamicBodies()
     matGround.m_emission.setGrayLevel(0.3);
     ground->setMaterial(matGround);
 
-    // setup collision detector
-    //ground->createAABBCollisionDetector(toolRadius);
-
     double boxSize = 0.05;
     cCreateBox(p_CommonData->p_dynamicBox, boxSize, boxSize, boxSize); // make mesh a box
     p_CommonData->p_dynamicBox->createAABBCollisionDetector(toolRadius);
-
 
     chai3d::cMaterial mat0;
     mat0.setBlueRoyal();
@@ -824,8 +760,6 @@ void haptics_thread::RenderDynamicBodies()
     mat0.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox->setMaterial(mat0);
     p_CommonData->p_dynamicBox->setUseMaterial(true);
-
-
 
     // add mesh to ODE object
     p_CommonData->ODEBody0->setImageModel(p_CommonData->p_dynamicBox);
@@ -904,15 +838,14 @@ void haptics_thread::RenderTwoFriction()
     p_CommonData->p_frictionBox2->setLocalPos(0,-.05, 0);
 
     p_CommonData->p_frictionBox1->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(1580);
+    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(600);
     p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.25);
     p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*0.9);
 
-
     p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(1580);
-    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.4);
-    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.4*.9);
+    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(600);
+    p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
+    p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8*.9);
 
     world->addChild(p_CommonData->p_frictionBox1);
     world->addChild(p_CommonData->p_frictionBox2);
@@ -1180,16 +1113,42 @@ void haptics_thread::SetInitJointAngles()
     double moveTime = 2.0;
     if (p_CommonData->calibClock.getCurrentTimeSeconds() < moveTime)
     {
-        double curr1 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr2 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;        
+        double curr1, curr2, curr3, curr4, curr5, curr6;
+
+        // handle device 0
+        if (p_CommonData->device0Initing == true)
+        {
+            curr1 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr2 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        } else
+        {
+            curr1 = 45*PI/180;
+            curr2 = 45*PI/180;
+            curr3 = 45*PI/180;
+        }
         p_CommonData->desJointInits0 << curr1, curr2, curr3;
 
-        double curr4 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr5 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-        double curr6 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        // handle device 1
+        if (p_CommonData->device1Initing == true)
+        {
+            curr4 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr5 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr6 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+        } else
+        {
+            curr4 = 45*PI/180;
+            curr5 = 45*PI/180;
+            curr6 = 45*PI/180;
+        }
         p_CommonData->desJointInits1 << curr4, curr5, curr6;
+    } else
+    {
+        p_CommonData->device0Initing = false;
+        p_CommonData->device1Initing = false;
     }
+
+
 }
 
 void haptics_thread::RenderPalpation()

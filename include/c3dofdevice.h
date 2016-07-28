@@ -118,6 +118,10 @@ public:
     Eigen::Vector3d desiredPos;
     Eigen::Vector3d jointTorques;
     Eigen::Vector3d motorTorques;
+    Eigen::Vector3d lastAngles;
+    Eigen::Vector3d lastAngVel;
+    double KdEffort;
+    double KpEffort;
 
     // Physical parameters of build thumb assigned based on whether index or thumb in init
     double ATTACHL;                  // distance from base joint to tether attachment point [mm]

@@ -49,16 +49,22 @@ public:
     // functions
     void Initialize();
     void processEvents();
-    void updateQwtPlot();
 
     // vars
     Widget_OpenGLDisplay* windowGLDisplay;
     shared_data* p_CommonData;
 
+    double updateHz = 100;
+
+
     // qwtVars
-    QwtPlotCurve *curve;
+    QwtPlotCurve *curve1;
+    QwtPlotCurve *curve2;
+    QwtPlotCurve *curve3;
     QwtPlotGrid *grid;
-    QPolygonF points;
+    QPolygonF points1;
+    QPolygonF points2;
+    QPolygonF points3;
     QPointF point;
     double i;
 
@@ -79,6 +85,12 @@ public:
     Eigen::Vector3d localOutputVoltages1;
     Eigen::Vector3d localDesiredPos1;
     Eigen::Vector3d localDesiredJointAngle1;
+
+    // Controller slider params
+    double KpScale;
+    double KdScale;
+    double KpInit;
+    double KdInit;
 
     // Oculus Rift
     // display context
@@ -129,6 +141,7 @@ private slots:
     void on_loadProtocol_3_clicked();
     void on_pushButton_clicked();
     void on_AllDown0_clicked();
+    void on_AllDown1_clicked();
 };
 
 #endif // MAINWINDOW_H

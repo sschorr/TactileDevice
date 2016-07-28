@@ -22,9 +22,11 @@ c3DOFDevice::c3DOFDevice(int num)
         L_EE = L_EE_1;                       // length of end effector (center to joint)[mm]
     }
     this->desiredForce << 0,0,0;
-    this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180));
+    this->neutralPos = Eigen::Vector3d(0,0,L_LA*sin(45*PI/180)+L_UA*sin(45*PI/180)); //This causes thumb device to init with neutral pos .5 mm off
     this->motorTorques << 0,0,0;
     this->jointTorques << 0,0,0;
+
+    KpEffort = 0; KdEffort = 0;
 }
 
 c3DOFDevice::~c3DOFDevice()
@@ -517,8 +519,6 @@ void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double
 void c3DOFDevice::JointController(double Kp, double Kd)
 {
     static bool firstTimeThrough = true;
-    static Eigen::Vector3d lastAngles;
-    static Eigen::Vector3d lastAngVel;
     Eigen::Vector3d desAngleVel(0,0,0);
     double alpha = 0.5;
 
@@ -530,11 +530,16 @@ void c3DOFDevice::JointController(double Kp, double Kd)
         lastAngles = jointAngles;
         lastAngVel << 0,0,0;
         firstTimeThrough = false;
+
     }
 
-    Eigen::Vector3d currAngVel = jointAngles-lastAngles;
-    Eigen::Vector3d filteredVel = alpha*currAngVel + (1-alpha)*lastAngVel;
+    Eigen::Vector3d currAngVel = (jointAngles-lastAngles)/(1.0/(3000.0));
+    Eigen::Vector3d filteredVel = alpha*currAngVel + (1.0-alpha)*lastAngVel;
     jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
+
+    KdEffort = (Kd*(desAngleVel-filteredVel))[0];
+    KpEffort = (Kp*(desJointAngles - jointAngles))[0];
+
 
     // Adjust the torque needed by the bias spring force
     double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
