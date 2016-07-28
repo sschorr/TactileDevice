@@ -120,13 +120,10 @@ private slots:
     void on_ZeroSliders_clicked();
     void onGUIchanged();
     void on_startSin_clicked();
-    void on_stopRecord_clicked();
     void on_setDirectory_clicked();
     void on_turnOff_clicked();
     void on_palpationButton_clicked();
     void on_frictionButton_clicked();
-    void on_humpButton_clicked();
-    void on_hoopHumpButton_clicked();
     void on_startCircle_clicked();
     void on_loadProtocol_clicked();
     void on_startExperiment_clicked();
@@ -134,7 +131,6 @@ private slots:
     void on_setNeutral_clicked();
     void on_setTrial_clicked();
     void on_dynamicEnvironment_clicked();
-    void on_paperEnvironment_clicked();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
     void on_startExperiment_3_clicked();

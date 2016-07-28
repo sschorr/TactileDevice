@@ -463,11 +463,6 @@ void MainWindow::on_startCircle_clicked()
     p_CommonData->circStartTime = p_CommonData->overallClock.getCurrentTimeSeconds();
 }
 
-void MainWindow::on_stopRecord_clicked()
-{
-    p_CommonData->recordFlag = false;
-}
-
 void MainWindow::on_setDirectory_clicked()
 {    
     bool ok;
@@ -861,28 +856,10 @@ void MainWindow::on_frictionButton_clicked()
     p_CommonData->currentEnvironmentState = friction;
 }
 
-void MainWindow::on_humpButton_clicked()
-{
-    p_CommonData->environmentChange = true;
-    p_CommonData->currentEnvironmentState = hump;
-}
-
-void MainWindow::on_hoopHumpButton_clicked()
-{
-    p_CommonData->environmentChange = true;
-    p_CommonData->currentEnvironmentState = hoopHump;
-}
-
 void MainWindow::on_dynamicEnvironment_clicked()
 {
     p_CommonData->environmentChange = true;
     p_CommonData->currentEnvironmentState = dynamicBodies;
-}
-
-void MainWindow::on_paperEnvironment_clicked()
-{
-    p_CommonData->environmentChange = true;
-    p_CommonData->currentEnvironmentState = paperEnvironment;
 }
 
 void MainWindow::on_loadProtocol_clicked()
