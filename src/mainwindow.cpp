@@ -202,19 +202,19 @@ void MainWindow::UpdateGUIInfo()
     i += 1/updateHz;
 
     // assign values to first curve
-    points1 << QPointF( i , p_CommonData->wearableDelta0->KdEffort );
+    points1 << QPointF( i , localDesiredPos0[2]);
     if (points1.length() > 5*updateHz)
         points1.removeFirst();
 
     // assign values to second curve
-    points2 << QPointF( i , p_CommonData->wearableDelta0->KpEffort );
+    points2 << QPointF( i , localCartesianPos0[2]);
     if (points2.length() > 5*updateHz)
         points2.removeFirst();
 
     // assign values to third curve
-    points3 << QPointF( i , localCartesianPos0[2] );
-    if (points3.length() > 5*updateHz)
-        points3.removeFirst();
+//    points3 << QPointF( i , localCartesianPos0[2] );
+//    if (points3.length() > 5*updateHz)
+//        points3.removeFirst();
 
     QRectF rect = points1.boundingRect();
     ui->qwtPlot->setAxisScale(QwtPlot::xBottom, rect.left(), rect.right());
@@ -230,10 +230,10 @@ void MainWindow::UpdateGUIInfo()
 //    curve2->setPen(* new QPen(Qt::red));
 //    curve2->attach(ui->qwtPlot);
 
-    curve3 = new QwtPlotCurve("Points3");
-    curve3->setSamples( points3 );
-    curve3->setPen(* new QPen(Qt::black));
-    curve3->attach(ui->qwtPlot);
+//    curve3 = new QwtPlotCurve("Points3");
+//    curve3->setSamples( points3 );
+//    curve3->setPen(* new QPen(Qt::black));
+//    curve3->attach(ui->qwtPlot);
 #endif
 
     // index device
@@ -371,15 +371,15 @@ void MainWindow::onGUIchanged()
     {
         p_CommonData->currentControlState = sliderControlMode;
 
-        double xSlider0 = this->ui->verticalSliderX0->value()/22.2;
-        double ySlider0 = this->ui->verticalSliderY0->value()/22.2;
-        double zSlider0 = this->ui->verticalSliderZ0->value()/22.2+p_CommonData->wearableDelta0->neutralPos[2];
+        double xSlider0 = this->ui->verticalSliderX0->value()/20.0;
+        double ySlider0 = this->ui->verticalSliderY0->value()/20.0;
+        double zSlider0 = this->ui->verticalSliderZ0->value()/20.0+p_CommonData->wearableDelta0->neutralPos[2];
         Eigen::Vector3d tempDesiredPos0(xSlider0, ySlider0, zSlider0);
         p_CommonData->wearableDelta0->SetDesiredPos(tempDesiredPos0);
 
-        double xSlider1 = this->ui->verticalSliderX1->value()/22.2;
-        double ySlider1 = this->ui->verticalSliderY1->value()/22.2;
-        double zSlider1 = this->ui->verticalSliderZ1->value()/22.2+p_CommonData->wearableDelta1->neutralPos[2];
+        double xSlider1 = this->ui->verticalSliderX1->value()/20.0;
+        double ySlider1 = this->ui->verticalSliderY1->value()/20.0;
+        double zSlider1 = this->ui->verticalSliderZ1->value()/20.0+p_CommonData->wearableDelta1->neutralPos[2];
         Eigen::Vector3d tempDesiredPos1(xSlider1, ySlider1, zSlider1);
         p_CommonData->wearableDelta1->SetDesiredPos(tempDesiredPos1);
     }
@@ -928,8 +928,8 @@ void MainWindow::on_startExperiment_3_clicked()
 
 void MainWindow::on_setNeutral_clicked()
 {
-    p_CommonData->wearableDelta0->neutralPos[2] = localCartesianPos0[2];
-    p_CommonData->wearableDelta1->neutralPos[2] = localCartesianPos1[2];
+    p_CommonData->wearableDelta0->neutralPos[2] = localDesiredPos0[2];
+    p_CommonData->wearableDelta1->neutralPos[2] = localDesiredPos1[2];
     on_ZeroSliders_clicked();
 }
 

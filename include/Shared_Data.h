@@ -7,7 +7,7 @@
 //#define MAGTRACKER
 //#define SENSORAY826
 //#define OCULUS
-//#define QWT
+#define QWT
 
 #include <qDebug>
 #include <QVector>

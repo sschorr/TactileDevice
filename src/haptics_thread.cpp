@@ -54,6 +54,10 @@ void haptics_thread::initialize()
     // setup the calibration clock
     p_CommonData->calibClock.reset();
 
+    // init values for first time through on filter
+    lastFilteredDeviceForce0.set(0,0,0);
+    lastFilteredDeviceForce1.set(0,0,0);
+
     currTime = 0;
     lastTime = 0;
 
@@ -406,46 +410,43 @@ void haptics_thread::UpdateVRGraphics()
 void haptics_thread::ComputeVRDesiredDevicePos()
 {
     //perform transformation to get "device forces"
-    lastComputedForce0 = m_tool0->getDeviceGlobalForce();
-    lastComputedForce1 = m_tool1->getDeviceGlobalForce();
+    computedForce0 = m_tool0->getDeviceGlobalForce();
+    computedForce1 = m_tool1->getDeviceGlobalForce();
 
     // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
     rotation1.trans();
 
-    // create new device rotation (this essentially just flips the tail in/out of mag tracker
+    // create another rotation (this essentially just flips the tail in/out of mag tracker
     deviceRotation0.identity();
     deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
     deviceRotation0.trans();
-
     deviceRotation1.identity();
     deviceRotation1.rotateAboutLocalAxisDeg(0,0,1,180);
     deviceRotation1.trans();
 
-    magTrackerLastComputedForce0 = rotation0*lastComputedForce0; //rotation between force in world and chai device returned orientation (already includes small degree tracker offset from chai class)
-    magTrackerLastComputedForce1 = rotation1*lastComputedForce1;
+    // this are the forces in the device frames
+    deviceComputedForce0 = deviceRotation0*rotation0*computedForce0; // rotation between force in world and delta frames
+    deviceComputedForce1 = deviceRotation1*rotation1*computedForce1; // rotation between force in world and delta frames
 
-    deviceLastLastComputedForce0 = deviceLastComputedForce0;
-    deviceLastComputedForce0 = deviceRotation0*rotation0*lastComputedForce0; // rotation between force in world and delta frames
+    // write down the most recent device and world forces for recording
+    deviceForceRecord0 << deviceComputedForce0.x(),deviceComputedForce0.y(),deviceComputedForce0.z();
+    globalForceRecord0 << computedForce0.x(), computedForce0.y(), computedForce0.z();
+    deviceForceRecord1 << deviceComputedForce1.x(),deviceComputedForce1.y(),deviceComputedForce1.z();
+    globalForceRecord1 << computedForce1.x(), computedForce1.y(), computedForce1.z();
 
-    deviceLastLastComputedForce1 = deviceLastComputedForce1;
-    deviceLastComputedForce1 = deviceRotation1*rotation1*lastComputedForce1; // rotation between force in world and delta frames
+    // filter param
+    double alpha = 0.5;
 
-    // write down the most recent device and world forces
-    deviceLastForceRecord0 << deviceLastComputedForce0.x(),deviceLastComputedForce0.y(),deviceLastComputedForce0.z();
-    globalLastForceRecord0 << lastComputedForce0.x(), lastComputedForce0.y(), lastComputedForce0.z();
-
-    deviceLastForceRecord1 << deviceLastComputedForce1.x(),deviceLastComputedForce1.y(),deviceLastComputedForce1.z();
-    globalLastForceRecord1 << lastComputedForce1.x(), lastComputedForce1.y(), lastComputedForce1.z();
+    // get filtered force
+    filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)    
 
     // Pos movements in delta mechanism frame (index)
-    chai3d::cVector3d desiredPosMovement0 = forceToPosMult*deviceLastComputedForce0; //this is only for lateral if we override normal later
-
-    // Pos movements in delta mechanism frame (thumb)
-    chai3d::cVector3d desiredPosMovement1 = forceToPosMult*deviceLastComputedForce1; //this is only for lateral if we override normal later
+    chai3d::cVector3d desiredPosMovement0 = forceToPosMult*filteredDeviceForce0; //this is only for lateral if we override normal later
+    chai3d::cVector3d desiredPosMovement1 = forceToPosMult*filteredDeviceForce1; //this is only for lateral if we override normal later
 
     // check to see if we are rendering only normal or only lateral
     if(p_CommonData->flagNormal == false)
@@ -473,7 +474,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     Eigen::Vector3d neutralPos0 = p_CommonData->wearableDelta0->neutralPos;
     Eigen::Vector3d desiredPos0(3);
     desiredPos0 << desiredPosMovement0.x()+neutralPos0[0], desiredPosMovement0.y()+neutralPos0[1], vertPosMovement0+neutralPos0[2];
-
     Eigen::Vector3d neutralPos1 = p_CommonData->wearableDelta1->neutralPos;
     Eigen::Vector3d desiredPos1(3);
     desiredPos1 << desiredPosMovement1.x()+neutralPos1[0], desiredPosMovement1.y()+neutralPos1[1], vertPosMovement1+neutralPos1[2];
@@ -488,6 +488,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     // Perform control based on desired position
     p_CommonData->wearableDelta0->SetDesiredPos(desiredPos0);
     p_CommonData->wearableDelta1->SetDesiredPos(desiredPos1);
+
+    lastFilteredDeviceForce0 = filteredDeviceForce0;
+    lastFilteredDeviceForce1 = filteredDeviceForce1;
 }
 
 void haptics_thread::RecordData()
@@ -499,8 +502,8 @@ void haptics_thread::RecordData()
     dataRecorder.pos = p_CommonData->wearableDelta0->GetCartesianPos();
     dataRecorder.desiredPos = p_CommonData->wearableDelta0->ReadDesiredPos();
     dataRecorder.voltageOut = p_CommonData->wearableDelta0->ReadVoltageOutput();
-    dataRecorder.VRInteractionForce = deviceLastForceRecord0; // last force on tool0
-    dataRecorder.VRInteractionForceGlobal = globalLastForceRecord0; // last force on tool0 in global coords
+    dataRecorder.VRInteractionForce = deviceForceRecord0; // last force on tool0
+    dataRecorder.VRInteractionForceGlobal = globalForceRecord0; // last force on tool0 in global coords
     dataRecorder.motorTorque = p_CommonData->wearableDelta0->motorTorques;
     dataRecorder.magTrackerPos0 = position0;
     dataRecorder.magTrackerPos1 = position1;

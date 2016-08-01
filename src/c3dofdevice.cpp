@@ -400,14 +400,22 @@ void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 // Set the desired pos
 void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
 {
+    double xRange = 5.5;
+    double yRange = 5.5;
+    double zRange = 4.5;
     // limit workspace motion (plus or minus)
-    double xLimit = 4.5; double yLimit = 4.5; double zLimit = 4.5;
-    if (desiredPosArg[0] > xLimit) desiredPosArg[0] = xLimit;
-    if (desiredPosArg[0] < -xLimit) desiredPosArg[0] = -xLimit;
-    if (desiredPosArg[1] > yLimit) desiredPosArg[1] = yLimit;
-    if (desiredPosArg[1] < -yLimit) desiredPosArg[1] = -yLimit;
-    if (desiredPosArg[2] > (neutralPos[2] + zLimit)) desiredPosArg[2] = neutralPos[2] + zLimit;
-    if (desiredPosArg[2] < (neutralPos[2] - zLimit)) desiredPosArg[2] = neutralPos[2] - zLimit;
+    double xPosLimit = this->neutralPos[0] + xRange;
+    double xNegLimit = this->neutralPos[0] - xRange;
+    double yPosLimit = this->neutralPos[1] + yRange;
+    double yNegLimit = this->neutralPos[1] - yRange;
+    double zPosLimit = this->neutralPos[2] + zRange;
+    double zNegLimit = this->neutralPos[2] - zRange;
+    if (desiredPosArg[0] > xPosLimit) desiredPosArg[0] = xPosLimit;
+    if (desiredPosArg[0] < xNegLimit) desiredPosArg[0] = xNegLimit;
+    if (desiredPosArg[1] > yPosLimit) desiredPosArg[1] = yPosLimit;
+    if (desiredPosArg[1] < yNegLimit) desiredPosArg[1] = yNegLimit;
+    if (desiredPosArg[2] > zPosLimit) desiredPosArg[2] = zPosLimit;
+    if (desiredPosArg[2] < zNegLimit) desiredPosArg[2] = zNegLimit;
 
     this->desiredPos = desiredPosArg;
 }

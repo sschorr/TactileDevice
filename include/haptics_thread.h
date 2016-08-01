@@ -100,20 +100,20 @@ public:
 
     // vars for computed forces
     double toolRadius;
-    chai3d::cVector3d lastComputedForce0;
-    chai3d::cVector3d magTrackerLastComputedForce0;
-    chai3d::cVector3d deviceLastComputedForce0;
-    Eigen::Vector3d deviceLastForceRecord0;
-    Eigen::Vector3d globalLastForceRecord0;
-    chai3d::cVector3d deviceLastLastComputedForce0;
+    chai3d::cVector3d filteredDeviceForce0;
+    chai3d::cVector3d computedForce0;
+    chai3d::cVector3d deviceComputedForce0;
+    Eigen::Vector3d deviceForceRecord0;
+    Eigen::Vector3d globalForceRecord0;
+    chai3d::cVector3d lastFilteredDeviceForce0;
     chai3d::cVector3d estimatedVel0;
 
-    chai3d::cVector3d lastComputedForce1;
-    chai3d::cVector3d magTrackerLastComputedForce1;
-    chai3d::cVector3d deviceLastComputedForce1;
-    Eigen::Vector3d deviceLastForceRecord1;
-    Eigen::Vector3d globalLastForceRecord1;
-    chai3d::cVector3d deviceLastLastComputedForce1;
+    chai3d::cVector3d filteredDeviceForce1;
+    chai3d::cVector3d computedForce1;
+    chai3d::cVector3d deviceComputedForce1;
+    Eigen::Vector3d deviceForceRecord1;
+    Eigen::Vector3d globalForceRecord1;
+    chai3d::cVector3d lastFilteredDeviceForce1;
     chai3d::cVector3d estimatedVel1;
 
     // tracker rotation variables
