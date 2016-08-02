@@ -57,6 +57,8 @@ void haptics_thread::initialize()
     // init values for first time through on filter
     lastFilteredDeviceForce0.set(0,0,0);
     lastFilteredDeviceForce1.set(0,0,0);
+    p_CommonData->deviceComputedForce.set(0,0,0);
+    p_CommonData->deviceComputedForce.set(0,0,0);
 
     currTime = 0;
     lastTime = 0;
@@ -440,6 +442,10 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
+
+    // assign to the shared data structure to allow plotting from window thread
+    p_CommonData->deviceComputedForce = deviceComputedForce0;
+    p_CommonData->filteredDeviceComputedForce = deviceComputedForce0;
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)    

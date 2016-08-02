@@ -202,12 +202,12 @@ void MainWindow::UpdateGUIInfo()
     i += 1/updateHz;
 
     // assign values to first curve
-    points1 << QPointF( i , localDesiredPos0[2]);
+    points1 << QPointF( i , p_CommonData->deviceComputedForce.z());
     if (points1.length() > 5*updateHz)
         points1.removeFirst();
 
     // assign values to second curve
-    points2 << QPointF( i , localCartesianPos0[2]);
+    points2 << QPointF( i , p_CommonData->filteredDeviceComputedForce.z());
     if (points2.length() > 5*updateHz)
         points2.removeFirst();
 
@@ -220,15 +220,15 @@ void MainWindow::UpdateGUIInfo()
     ui->qwtPlot->setAxisScale(QwtPlot::xBottom, rect.left(), rect.right());
 
     ui->qwtPlot->detachItems(QwtPlotItem::Rtti_PlotItem, true);
-//    curve1 = new QwtPlotCurve("Points1");
-//    curve1->setSamples( points1 );
-//    curve1->setPen(* new QPen(Qt::blue));
-//    curve1->attach(ui->qwtPlot);
+    curve1 = new QwtPlotCurve("Points1");
+    curve1->setSamples( points1 );
+    curve1->setPen(* new QPen(Qt::blue));
+    curve1->attach(ui->qwtPlot);
 
-//    curve2 = new QwtPlotCurve("Points2");
-//    curve2->setSamples( points2 );
-//    curve2->setPen(* new QPen(Qt::red));
-//    curve2->attach(ui->qwtPlot);
+    curve2 = new QwtPlotCurve("Points2");
+    curve2->setSamples( points2 );
+    curve2->setPen(* new QPen(Qt::red));
+    curve2->attach(ui->qwtPlot);
 
 //    curve3 = new QwtPlotCurve("Points3");
 //    curve3->setSamples( points3 );

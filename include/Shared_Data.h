@@ -181,6 +181,10 @@ typedef struct
     double Kp;
     double Kd;
 
+    // vars for plotting real time force and filtered force from haptics thread
+    chai3d::cVector3d deviceComputedForce;
+    chai3d::cVector3d filteredDeviceComputedForce;
+
     // joint controller variables
     double jointKp;
     double jointKd;
@@ -245,10 +249,6 @@ typedef struct
     chai3d::cMesh* p_tissueLumpCenter3;
     chai3d::cMesh* p_tissueBox;
 
-    // random positions for lump in tissue
-    double xRandPos;
-    double yRandPos;
-
     // rotation of line in tissue
     double tissueRot;
     double indicatorRot;
@@ -260,14 +260,6 @@ typedef struct
     // haptics thread objects for visual representation of dynamic objects
     chai3d::cMesh* p_dynamicBox1;
     chai3d::cMesh* p_dynamicBox2;
-
-    // planes confining objects
-//    cODEGenericBody* ODEGPlane0;
-//    cODEGenericBody* ODEGPlane1;
-
-    // haptics thread objects for hump environment
-    chai3d::cMultiMesh* p_hump;
-    chai3d::cMultiMesh* p_hoopHump;
 
     // flags for environment change and tissue transparency
     bool environmentChange;
