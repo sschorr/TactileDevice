@@ -184,7 +184,10 @@ void MainWindow::UpdateGUIInfo()
     localDesiredForce0 = p_CommonData->wearableDelta0->ReadDesiredForce();
     localOutputVoltages0 = p_CommonData->wearableDelta0->ReadVoltageOutput();
     localDesiredPos0 = p_CommonData->wearableDelta0->ReadDesiredPos();
-    localDesiredJointAngle0 = p_CommonData->desJointInits0;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
+    if(p_CommonData->currentControlState == initCalibControl)
+        localDesiredJointAngle0 = p_CommonData->desJointInits0;
+    else
+        localDesiredJointAngle0 = p_CommonData->wearableDelta0->CalcInverseKinJoint();
 
     localMotorAngles1 = p_CommonData->wearableDelta1->GetMotorAngles();
     localJointAngles1 = p_CommonData->wearableDelta1->GetJointAngles();
@@ -192,7 +195,10 @@ void MainWindow::UpdateGUIInfo()
     localDesiredForce1 = p_CommonData->wearableDelta1->ReadDesiredForce();
     localOutputVoltages1 = p_CommonData->wearableDelta1->ReadVoltageOutput();
     localDesiredPos1 = p_CommonData->wearableDelta1->ReadDesiredPos();
-    localDesiredJointAngle1 = p_CommonData->desJointInits1;//p_CommonData->wearableDelta0->CalcInverseKinJoint();
+    if(p_CommonData->currentControlState == initCalibControl)
+        localDesiredJointAngle1 = p_CommonData->desJointInits1;
+    else
+        localDesiredJointAngle1 = p_CommonData->wearableDelta1->CalcInverseKinJoint();
 
 #ifdef QWT
     ////////////////////////////////////////////////////
