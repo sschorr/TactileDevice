@@ -51,7 +51,6 @@ void cMotorController::SetOffsetAngle()
         EncoderPos = -(MAXCOUNT)+ EncoderRaw;
 
     offsetAngle = ENCCOUNT_TO_RAD*EncoderPos;
-
 #endif
 }
 

@@ -142,17 +142,17 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double b = sp/2.0 - sqrt(3.0)/2.0*wb;
     double c = wp - 0.5*wb;
 
-    double E1 = 2.0*L*(-x + a);
-    double F1 = 2.0*(-z)*L;
-    double G1 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(a,2.0) + pow(L,2.0) -2.0*x*a - pow(l,2.0);
+    double E1 = 2.0*L*(-x + a); // x = -y,
+    double F1 = 2.0*(-z)*L; // z = -z
+    double G1 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(a,2.0) + pow(L,2.0) -2.0*x*a - pow(l,2.0);
 
     double E2 = -L*(sqrt(3.0)*(-y+b) - x + c);
     double F2 = -2.0*z*L;
-    double G2 =pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((-y)*b - x*c) - pow(l,2.0);
+    double G2 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((-y)*b + (-x)*c) - pow(l,2.0);
 
     double E3 = L*(sqrt(3.0)*(-y-b) + x - c);
     double F3 = 2.0*(-z)*L;
-    double G3 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*(y*b-x*c) - pow(l,2.0);
+    double G3 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*(y*b-x*c) - pow(l,2.0);
 
     double t1 = (-F1 - sqrt(pow(E1,2.0) + pow(F1,2.0) - pow(G1,2.0)))/(G1 - E1);
     double theta1 = 2.0*atan(t1);
@@ -164,6 +164,7 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double theta3 = 2.0*atan(t3);
 
     returnAngles << theta1, theta2, theta3;
+    qDebug() << this->finger << theta1;
     return returnAngles;
 }
 

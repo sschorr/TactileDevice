@@ -255,11 +255,12 @@ void haptics_thread::UpdateVRGraphics()
     thumb->setLocalRot(fingerRotation1);
     thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
 
+    currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
+    timeInterval = currTime - lastTime;
+
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
     {
-        currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
-        timeInterval = currTime - lastTime;
         if(timeInterval > 0.01) timeInterval = 0.01;
         //---------------------------------------------------
         // Implement Dynamic simulation
@@ -324,8 +325,8 @@ void haptics_thread::UpdateVRGraphics()
         }
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
-        lastTime = currTime;
-    }
+    }    
+    lastTime = currTime;
 
     /*
     // THIS SLOPPY STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
@@ -439,11 +440,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     // filter param
     double fc = 10.0;
-    double RC = 1/(fc*2.0*PI);
+    double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
+    qDebug() << timeInterval;
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
+
 
     // assign to the shared data structure to allow plotting from window thread
     p_CommonData->deviceComputedForce = deviceComputedForce0;
