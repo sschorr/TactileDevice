@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define MAGTRACKER
-//#define SENSORAY826
+#define MAGTRACKER
+#define SENSORAY826
 //#define OCULUS
 #define QWT
 
@@ -234,8 +234,8 @@ typedef struct
     chai3d::cMultiMesh* p_indicator;
 
     // haptics thread objects for friction environment
-    chai3d::cMesh* p_frictionBox1;
-    chai3d::cMesh* p_frictionBox2;
+    chai3d::cMesh* p_frictionBox1; //mesh for left friction surface
+    chai3d::cMesh* p_frictionBox2; //mesh for right friction surface
 
     // haptics thread objects for friction experiment
     chai3d::cMesh* p_expFrictionBox;
@@ -254,12 +254,14 @@ typedef struct
     double indicatorRot;
 
     // haptics thread objects for Dynamic (ODE) environments
-    cODEGenericBody* ODEBody1;
-    cODEGenericBody* ODEBody2;
+    cODEGenericBody* ODEBody1; //ODE body for box 1
+    cODEGenericBody* ODEBody2; //ODE body for box 2
+    cODEGenericBody* ODECup; //ODE body for cup
 
     // haptics thread objects for visual representation of dynamic objects
-    chai3d::cMesh* p_dynamicBox1;
-    chai3d::cMesh* p_dynamicBox2;
+    chai3d::cMesh* p_dynamicBox1; // mesh for box 1
+    chai3d::cMesh* p_dynamicBox2; // mesh for box 2
+    chai3d::cMultiMesh* p_dynamicCup; //multimesh for cup
 
     // flags for environment change and tissue transparency
     bool environmentChange;

@@ -173,7 +173,7 @@ void haptics_thread::UpdateVRGraphics()
     p_CommonData->cameraPos.set(xPos, yPos, zPos);
 
 #ifdef OCULUS
-    p_CommonData->lookatPos.set(-1, 0, p_CommonData->cameraPos.z());
+    p_CommonData->lookatPos.set(0, 0, p_CommonData->cameraPos.z());
 #endif
 
 #ifndef OCULUS
@@ -259,7 +259,7 @@ void haptics_thread::UpdateVRGraphics()
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
     {
         currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
-        double timeInterval = currTime - lastTime;
+        timeInterval = currTime - lastTime;
         if(timeInterval > 0.01) timeInterval = 0.01;
         //---------------------------------------------------
         // Implement Dynamic simulation
@@ -438,14 +438,16 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     globalForceRecord1 << computedForce1.x(), computedForce1.y(), computedForce1.z();
 
     // filter param
-    double alpha = 0.5;
+    double fc = 10.0;
+    double RC = 1/(fc*2.0*PI);
+    double alpha = (timeInterval)/(RC + timeInterval);
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
 
     // assign to the shared data structure to allow plotting from window thread
     p_CommonData->deviceComputedForce = deviceComputedForce0;
-    p_CommonData->filteredDeviceComputedForce = deviceComputedForce0;
+    p_CommonData->filteredDeviceComputedForce = filteredDeviceForce0;
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)    
@@ -550,17 +552,18 @@ void haptics_thread::InitGeneralChaiStuff()
     p_CommonData->cameraPos.set(0.18, 0.0, 0);
     p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
     p_CommonData->upVector.set(0.0, 0.0, -1.0);
-    p_CommonData->p_camera->set( p_CommonData->cameraPos,//(0.25, 0, -.25),    // camera position (eye)
+    p_CommonData->p_camera->set( p_CommonData->cameraPos,    //(0.25, 0, -.25),    // camera position (eye)
                                  p_CommonData->lookatPos,    // lookat position (target)
-                                 p_CommonData->upVector);   // direction of the "up" vector
+                                 p_CommonData->upVector);    // direction of the "up" vector
 
     // set the near and far clipping planes of the camera
     // anything in front/behind these clipping planes will not be rendered
     p_CommonData->p_camera->setClippingPlanes(0.01, 20.0);
 
+    // the camera is updated to a position based on these params
     p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 150.0;
-    p_CommonData->camRadius = 0.25;
+    p_CommonData->polar = 125.0;
+    p_CommonData->camRadius = 0.35;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -582,6 +585,7 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
     m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool0->enableDynamicObjects(true);
+    m_tool0->setWaitForSmallForce(true);
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
@@ -591,6 +595,7 @@ void haptics_thread::InitFingerAndTool()
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
     m_tool1->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool1->enableDynamicObjects(true);
+    m_tool1->setWaitForSmallForce(true);
     m_tool1->start();
 
     // Can use this to show frames on tool if so desired
@@ -700,13 +705,15 @@ void haptics_thread::InitDynamicBodies()
     // create an ODE world to simulate dynamic bodies
     ODEWorld = new cODEWorld(p_CommonData->p_world);
 
-    // Create an ODE Block
+    // Create the ODE objects for the blocks and cup
     p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
     p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODECup = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
     p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
+    p_CommonData->p_dynamicCup = new chai3d::cMultiMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
@@ -715,6 +722,10 @@ void haptics_thread::InitDynamicBodies()
 
     //create ground
     ground = new chai3d::cMesh();
+
+    //create background mesh
+    globe = new chai3d::cMesh();
+
 }
 
 void haptics_thread::RenderDynamicBodies()
@@ -722,10 +733,13 @@ void haptics_thread::RenderDynamicBodies()
     delete ODEWorld;
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
+    delete p_CommonData->ODECup;
     delete p_CommonData->p_dynamicBox1;
     delete p_CommonData->p_dynamicBox2;
+    delete p_CommonData->p_dynamicCup;
     delete ODEGPlane0;
     delete ground;
+    delete globe;
 
     InitDynamicBodies();
     ODEWorld->deleteAllChildren();
@@ -739,23 +753,47 @@ void haptics_thread::RenderDynamicBodies()
     // give world gravity
     ODEWorld->setGravity(chai3d::cVector3d(0.0, 0.0, 9.81));
     // define damping properties
-    ODEWorld->setAngularDamping(.005);
-    ODEWorld->setLinearDamping(.002);
+    ODEWorld->setAngularDamping(.02);
+    ODEWorld->setLinearDamping(.005);
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
-    boxSize = 0.05;
+    // create the visual boxes on the dynamicbox meshes
+    boxSize = 0.03;
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize, boxSize, boxSize); // make mesh a box
     cCreateBox(p_CommonData->p_dynamicBox2, boxSize, boxSize, boxSize); // make mesh a box
+
+    // load the cup object mesh
+    // load an object file
+    if(cLoadFileOBJ(p_CommonData->p_dynamicCup, "./Resources/Cup.obj")){
+        qDebug() << "Cup file loaded";
+    }
+
+    // setup collision detectorsfor the dynamic objects
     p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_dynamicCup->createAABBCollisionDetector(toolRadius);
 
     //create a plane
-    groundSize = 5.0;
-    chai3d::cCreatePlane(ground, groundSize, groundSize);
+    groundSize = .3;
+    chai3d::cCreatePlane(ground, groundSize, 2*groundSize);
+
+    //create globe
+    chai3d::cCreateSphere(globe, 6, 350, 360);
+    globe->setUseDisplayList(true);
+    globe->deleteCollisionDetector();
+
+    // create a texture
+    textureSpace = chai3d::cTexture2d::create();
+    textureSpace->loadFromFile("./Resources/sky.jpg");
+
+    globe->setTexture(textureSpace, true); //apply texture to globe
+//    globe->setUseTexture(true, true);      // enable texture rendering
+    globe->setUseCulling(false, true);     // Since we don't need to see our polygons from both sides, we enable culling.
+//    globe->setUseMaterial(false);    // disable material properties and lighting
 
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
     ground->setLocalPos(0,0,0.05);
@@ -765,50 +803,68 @@ void haptics_thread::RenderDynamicBodies()
     matGround.setStiffness(300);
     matGround.setDynamicFriction(0.2);
     matGround.setStaticFriction(0.0);
-    matGround.setGrayLight();
-    matGround.m_emission.setGrayLevel(0.3);
+    matGround.setBrownSandy();
     ground->setMaterial(matGround);
 
     double staticFriction = 2.0;
     double dynamicFriction = staticFriction*0.9;
 
-    // define material properties for object 1
+    // define material properties for box 1
     chai3d::cMaterial mat1;
     mat1.setBlueRoyal();
-    mat1.setStiffness(600);
-    mat1.setLateralStiffness(1000);
+    mat1.setStiffness(500);
+    mat1.setLateralStiffness(750);
     mat1.setDynamicFriction(dynamicFriction);
     mat1.setStaticFriction(staticFriction);
     mat1.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox1->setMaterial(mat1);
     p_CommonData->p_dynamicBox1->setUseMaterial(true);
 
-    // define material properties for object 2
+    // define material properties for box 2
     chai3d::cMaterial mat2;
     mat2.setRedCrimson();
-    mat2.setStiffness(600);
-    mat2.setLateralStiffness(1000);
+    mat2.setStiffness(500);
+    mat2.setLateralStiffness(750);
     mat2.setDynamicFriction(dynamicFriction);
     mat2.setStaticFriction(staticFriction);
     mat2.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox2->setMaterial(mat2);
     p_CommonData->p_dynamicBox2->setUseMaterial(true);
 
+    // define material properties for cup
+    chai3d::cMaterial matCup;
+    matCup.setBlueAqua();
+    matCup.setStiffness(500);
+    matCup.setLateralStiffness(750);
+    matCup.setDynamicFriction(dynamicFriction);
+    matCup.setStaticFriction(staticFriction);
+    matCup.setUseHapticFriction(true);
+    p_CommonData->p_dynamicCup->setMaterial(matCup);
+    p_CommonData->p_dynamicCup->setUseMaterial(true);
+//    p_CommonData->p_dynamicCup->setTransparencyLevel(0.8);
+
     // add mesh to ODE object
     p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
     p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
+    p_CommonData->ODECup->setImageModel(p_CommonData->p_dynamicCup);
 
     // create a dynamic model of the ODE object
     p_CommonData->ODEBody1->createDynamicBox(boxSize, boxSize, boxSize);
     p_CommonData->ODEBody2->createDynamicBox(boxSize, boxSize, boxSize);
+    p_CommonData->ODECup->createDynamicMesh();
 
     // set mass of box
-    p_CommonData->ODEBody1->setMass(0.2);
-    p_CommonData->ODEBody2->setMass(0.4);
+    p_CommonData->ODEBody1->setMass(0.1);
+    p_CommonData->ODEBody2->setMass(0.2);
+    p_CommonData->ODECup->setMass(0.2);
 
     // set position of box
     p_CommonData->ODEBody1->setLocalPos(0,.1,0);
     p_CommonData->ODEBody2->setLocalPos(0,-.1,0);
+    p_CommonData->ODECup->setLocalPos(0,0, -0.05);
+
+    //set position of backgroundObject
+    globe->setLocalPos(0,0,0);
 
     // setup tools for dynamic interaction
     m_tool0->enableDynamicObjects(true);
@@ -820,6 +876,7 @@ void haptics_thread::RenderDynamicBodies()
     world->addChild(m_tool1);
     world->addChild(finger);
     world->addChild(thumb);
+    world->addChild(globe);
 }
 
 

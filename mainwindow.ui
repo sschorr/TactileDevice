@@ -1838,10 +1838,10 @@
    <widget class="QwtPlot" name="qwtPlot">
     <property name="geometry">
      <rect>
-      <x>910</x>
-      <y>510</y>
-      <width>400</width>
-      <height>200</height>
+      <x>470</x>
+      <y>480</y>
+      <width>741</width>
+      <height>301</height>
      </rect>
     </property>
    </widget>

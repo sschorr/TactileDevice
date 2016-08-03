@@ -100,6 +100,7 @@ int cMotorController::close()
     }
     uint setPoint = (0.0-Vmin)/(Vmax-Vmin) * MAXSETPNT;
     S826_DacDataWrite(PCI_BOARD, channelNum, setPoint, 0);
+    S826_CounterStateWrite(PCI_BOARD, channelNum, 0);
 #endif
     return 0;
 }

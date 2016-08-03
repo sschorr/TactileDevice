@@ -69,6 +69,7 @@ int c3DOFDevice::Init3DOFDeviceEnc()
     motor_1->SetOffsetAngle();
     motor_2->SetOffsetAngle();
     motor_3->SetOffsetAngle();
+
     this->neutralPos = this->GetCartesianPos();
     return 0;
 }
@@ -135,7 +136,7 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double ub = 2*L_BASE;
     double up = L_EE;
     double wp = 0.5*L_EE;
-    double sp = 2*L_EE*0.864;
+    double sp = L_EE*1.7321;
 
     double a = wb - up;
     double b = sp/2.0 - sqrt(3.0)/2.0*wb;
