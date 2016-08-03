@@ -6,6 +6,7 @@
 #include <chai3d.h>
 #include <QGLWidget>
 #include "Shared_Data.h"
+#include "GL/glut.h"
 
 
 

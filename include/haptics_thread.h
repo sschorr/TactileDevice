@@ -65,7 +65,6 @@ public:
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
 
-
     void InitAccel();
     chai3d::cVector3d ReadAccel();
 
@@ -74,6 +73,7 @@ public:
     chai3d::cPrecisionClock rateDisplayClock;
 
     double currTime;
+    double timeInterval;
     double lastTime;
 
     // Public Variables ============================================
@@ -91,6 +91,10 @@ public:
     chai3d::cMultiMesh* thumb;
     chai3d::cEffectSurface* newEffect;
     cODEGenericBody* ODEGPlane0;
+    chai3d::cMesh* globe;
+
+    //texture for globe
+    chai3d::cTexture2dPtr textureSpace;
 
     double boxSize;
     double groundSize;
