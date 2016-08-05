@@ -57,8 +57,11 @@ public:
     // zeros all of the encoders on each cMotorController
     void ZeroEncoders();
 
-    // gets the end effector position
+    // gets the end effector position (ZF method)
     Eigen::Vector3d GetCartesianPos();
+
+    //try old method of end effector pos
+    Eigen::Vector3d GetCartesianPosOld();
 
     // determine the required joint torques for a given force (positive torque about joint pushes end effector)
     Eigen::Vector3d CalcDesiredJointTorques(Eigen::Vector3d);
@@ -111,6 +114,10 @@ public:
     // allows setting individual joints on startup
     void IndivJointController(Eigen::Vector3d desJointAnglesArg, double Kp, double Kd);
 
+    // easy rotation functions
+    chai3d::cMatrix3d rotX1(double a_angle);
+    chai3d::cMatrix3d rotY1(double a_angle);
+    chai3d::cMatrix3d rotZ1(double a_angle);
 
     // Public Vars ==========================================
     Eigen::Vector3d neutralPos;

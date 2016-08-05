@@ -133,26 +133,26 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double x = this->desiredPos[0]; double y = this->desiredPos[1]; double z = this->desiredPos[2];
     double l = L_UA; double L = L_LA;
     double wb = L_BASE;
-    double ub = 2*L_BASE;
+    double ub = 2.0*wb;
     double up = L_EE;
-    double wp = 0.5*L_EE;
-    double sp = L_EE*1.7321;
+    double wp = 0.5*up;
+    double sp = up*1.7321;
 
     double a = wb - up;
-    double b = sp/2.0 - sqrt(3.0)/2.0*wb;
+    double b = sp/2.0 - (sqrt(3.0)/2.0)*wb;
     double c = wp - 0.5*wb;
 
-    double E1 = 2.0*L*(-x + a); // x = -y,
-    double F1 = 2.0*(-z)*L; // z = -z
-    double G1 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(a,2.0) + pow(L,2.0) -2.0*x*a - pow(l,2.0);
+    double E1 = 2.0*L*(-x + a);
+    double F1 = 2.0*(-z)*L;
+    double G1 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(a,2.0) + pow(L,2.0) + 2.0*(-x)*a - pow(l,2.0);
 
-    double E2 = -L*(sqrt(3.0)*(-y+b) - x + c);
-    double F2 = -2.0*z*L;
-    double G2 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((-y)*b + (-x)*c) - pow(l,2.0);
+    double E2 = -L*(sqrt(3.0)*((-y)+b) - x + c);
+    double F2 = 2.0*(-z)*L;
+    double G2 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((-y)*b + (-x)*c) - pow(l,2.0);
 
-    double E3 = L*(sqrt(3.0)*(-y-b) + x - c);
+    double E3 = L*(sqrt(3.0)*((-y)-b) + x - c);
     double F3 = 2.0*(-z)*L;
-    double G3 = pow(-y,2.0) + pow(-x,2.0) + pow(-z,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*(y*b-x*c) - pow(l,2.0);
+    double G3 = pow(y,2.0) + pow(x,2.0) + pow(z,2.0) + pow(b,2.0) + pow(c,2.0) + pow(L,2.0) + 2.0*((y)*b + (-x)*c) - pow(l,2.0);
 
     double t1 = (-F1 - sqrt(pow(E1,2.0) + pow(F1,2.0) - pow(G1,2.0)))/(G1 - E1);
     double theta1 = 2.0*atan(t1);
@@ -164,11 +164,80 @@ Eigen::Vector3d c3DOFDevice::CalcInverseKinJoint()
     double theta3 = 2.0*atan(t3);
 
     returnAngles << theta1, theta2, theta3;
-    qDebug() << this->finger << theta1;
     return returnAngles;
 }
 
 Eigen::Vector3d c3DOFDevice::GetCartesianPos()
+{
+    Eigen::Vector3d pos(3);
+    pos << 0,0,0;
+    Eigen::Vector3d jointAngles = GetJointAngles();
+
+    chai3d::cVector3d p_F1; chai3d::cVector3d p_F2; chai3d::cVector3d p_F3;
+
+    p_F1.set(L_BASE,  0.0, 0.0);
+    p_F2 = rotZ1(2.0*PI/3.0)*p_F1;
+    p_F3 = rotZ1(4.0*PI/3.0)*p_F1;
+
+    chai3d::cMatrix3d t_R_y_Theta1; t_R_y_Theta1.identity();
+    chai3d::cMatrix3d t_R_y_Theta2; t_R_y_Theta2.identity();
+    chai3d::cMatrix3d t_R_y_Theta3; t_R_y_Theta3.identity();
+
+    t_R_y_Theta1 = rotY1(-jointAngles[0]) *  t_R_y_Theta1;
+    t_R_y_Theta2 = rotY1(-jointAngles[1]) *  t_R_y_Theta2;
+    t_R_y_Theta3 = rotY1(-jointAngles[2]) *  t_R_y_Theta3;
+
+    chai3d::cVector3d t_tempVect;
+    t_tempVect.set(L_LA, 0.0, 0.0);
+
+    chai3d::cVector3d F1_J1 = t_R_y_Theta1 * t_tempVect;
+    chai3d::cVector3d F2_J2 = rotZ1(2*M_PI/3) * t_R_y_Theta2 * t_tempVect;
+    chai3d::cVector3d F3_J3 = rotZ1(4*M_PI/3) * t_R_y_Theta3 * t_tempVect;
+
+    t_tempVect.set(-L_EE, 0.0, 0.0);
+
+    chai3d::cVector3d J1_J1P = rotZ1(0*M_PI/3) * t_tempVect;
+    chai3d::cVector3d J2_J2P = rotZ1(2*M_PI/3) * t_tempVect;
+    chai3d::cVector3d J3_J3P = rotZ1(4*M_PI/3) * t_tempVect;
+
+    chai3d::cVector3d p_J1 = p_F1 + F1_J1;
+    chai3d::cVector3d p_J2 = p_F2 + F2_J2;
+    chai3d::cVector3d p_J3 = p_F3 + F3_J3;
+
+    chai3d::cVector3d p_J1P = p_F1 + F1_J1 + J1_J1P;
+    chai3d::cVector3d p_J2P = p_F2 + F2_J2 + J2_J2P;
+    chai3d::cVector3d p_J3P = p_F3 + F3_J3 + J3_J3P;
+
+    double x1 = p_J1P(0); double y1 = p_J1P(1); double z1 = p_J1P(2);
+    double x2 = p_J2P(0); double y2 = p_J2P(1); double z2 = p_J2P(2);
+    double x3 = p_J3P(0); double y3 = p_J3P(1); double z3 = p_J3P(2);
+
+    double w1 = p_J1P.lengthsq();
+    double w2 = p_J2P.lengthsq();
+    double w3 = p_J3P.lengthsq();
+
+    double d = ((y2-y1) * (x3-x1) - (y3-y1)*(x2-x1));
+    double a1 = -1/d * ((y3-y1)*(z1-z2) + (z3-z1)*(y2-y1));
+    double b1 = 1/(2*d) * ((y1-y2)*(w1-w3) - (y1-y3)*(w1-w2));
+    double a2 = 1/d*((z2-z1)*(x1-x3) + (z3-z1)*(x2-x1));
+    double b2 = 1/(2*d) * ((w2-w1)*(x3-x1) - (w3-w1)*(x2-x1));
+
+    double a = pow(a1,2) + pow(a2,2) + 1;
+    double b = 2*a1*b1 + 2*a2*b2 - 2*a1*x1 - 2*a2*y1 - 2*z1;
+    double c = w1 - pow(L_UA,2) - 2*x1*b1 - 2*y1*b2 + pow(b1,2) + pow(b2,2);
+
+    double discriminant = pow(b,2) - 4*a*c;
+    if (discriminant >= 0)
+    {
+        double z = (-b + sqrt(discriminant))/ (2*a);
+        double x = a1*z + b1;
+        double y = a2*z + b2;
+        pos << x, y, z;
+    }
+    return pos;
+}
+
+Eigen::Vector3d c3DOFDevice::GetCartesianPosOld()
 {
     Eigen::Vector3d pos(3);
     Eigen::Vector3d jointAngles = GetJointAngles();
@@ -179,24 +248,36 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
 
     double sqrt3 = sqrt(3.0); double tan60 = sqrt3; double sin30 = 0.5; double tan30 = 1/sqrt3;
 
-    double t = (base-ee)*tan30/2;
-    double y1 = -(t+L_LA*cos(jointAngles[0])); double z1 = -L_LA*sin(jointAngles[0]);
-    double y2 = (t+L_LA*cos(jointAngles[2]))*sin30; double x2 = y2*tan60; double z2 = -L_LA*sin(jointAngles[2]);
-    double y3 = (t+L_LA*cos(jointAngles[1]))*sin30; double x3 = -y3*tan60; double z3 = -L_LA*sin(jointAngles[1]);
+    double t = (base-ee)*tan30/2.0;
+    double x1 = 0;
+    double y1 = -(t+L_LA*cos(jointAngles[0]));
+    double z1 = -L_LA*sin(jointAngles[0]);
+
+    double y2 = (t+L_LA*cos(jointAngles[2]))*sin30;
+    double x2 = y2*tan60;
+    double z2 = -L_LA*sin(jointAngles[2]);
+
+    double y3 = (t+L_LA*cos(jointAngles[1]))*sin30;
+    double x3 = -y3*tan60;
+    double z3 = -L_LA*sin(jointAngles[1]);
 
     double dnm = (y2-y1)*x3-(y3-y1)*x2;
-    double w1 = y1*y1 + z1*z1; double w2 = x2*x2 + y2*y2 + z2*z2; double w3 = x3*x3 + y3*y3 + z3*z3;
+
+    double w1 = y1*y1 + z1*z1;
+    double w2 = x2*x2 + y2*y2 + z2*z2;
+    double w3 = x3*x3 + y3*y3 + z3*z3;
 
     double a1 = (z2-z1)*(y3-y1)-(z3-z1)*(y2-y1);
-    double b1 = -((w2-w1)*(y3-y1)-(w3-w1)*(y2-y1))/2;
+    double b1 = -((w2-w1)*(y3-y1)-(w3-w1)*(y2-y1))/2.0;
+
     double a2 = -(z2-z1)*x3+(z3-z1)*x2;
-    double b2 = ((w2-w1)*x3-(w3-w1)*x2)/2;
+    double b2 = ((w2-w1)*x3-(w3-w1)*x2)/2.0;
 
     double a = a1*a1 + a2*a2 + dnm*dnm;
     double b = 2*(a1*b1+a2*(b2-y1*dnm)-z1*dnm*dnm);
     double c = (b2-y1*dnm)*(b2-y1*dnm)+b1*b1+dnm*dnm*(z1*z1-L_UA*L_UA);
 
-    double d = b*b-4*a*c;
+    double d = b*b-4.0*a*c;
     if (d < 0)
     {
        qDebug() << "Invalid position";
@@ -592,6 +673,41 @@ void c3DOFDevice::TestMotorTorqueController()
     motor_1->SetOutputTorque(torque1);
     motor_2->SetOutputTorque(torque2);
     motor_3->SetOutputTorque(torque3);
+}
+
+chai3d::cMatrix3d c3DOFDevice::rotX1(double a_angle)
+{
+    chai3d::cMatrix3d t_tempMatrix;
+
+    t_tempMatrix(0,0) = 1; t_tempMatrix(0,1) = 0; t_tempMatrix(0,2) = 0;
+    t_tempMatrix(1,0) = 0; t_tempMatrix(1,1) = cos(a_angle); t_tempMatrix(1,2) = -sin(a_angle);
+    t_tempMatrix(2,0) = 0; t_tempMatrix(2,1) = sin(a_angle); t_tempMatrix(2,2) =  cos(a_angle);
+
+    return t_tempMatrix;
+}
+
+// =========================================================================================
+chai3d::cMatrix3d c3DOFDevice::rotY1(double a_angle)
+{
+    chai3d::cMatrix3d t_tempMatrix;
+
+    t_tempMatrix(0,0) =  cos(a_angle); t_tempMatrix(0,1) = 0; t_tempMatrix(0,2) =  sin(a_angle);
+    t_tempMatrix(1,0) = 0;             t_tempMatrix(1,1) = 1; t_tempMatrix(1,2) =             0;
+    t_tempMatrix(2,0) = -sin(a_angle); t_tempMatrix(2,1) = 0; t_tempMatrix(2,2) =  cos(a_angle);
+
+    return t_tempMatrix;
+}
+
+// =========================================================================================
+chai3d::cMatrix3d c3DOFDevice::rotZ1(double a_angle)
+{
+    chai3d::cMatrix3d t_tempMatrix;
+
+    t_tempMatrix(0,0) = cos(a_angle); t_tempMatrix(0,1) = -sin(a_angle); t_tempMatrix(0,2) = 0;
+    t_tempMatrix(1,0) = sin(a_angle); t_tempMatrix(1,1) =  cos(a_angle); t_tempMatrix(1,2) = 0;
+    t_tempMatrix(2,0) = 0           ; t_tempMatrix(2,1) = 0            ; t_tempMatrix(2,2) = 1;
+
+    return t_tempMatrix;
 }
 
 
