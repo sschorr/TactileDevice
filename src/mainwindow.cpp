@@ -284,6 +284,9 @@ void MainWindow::UpdateGUIInfo()
     ui->VoltageLCD1_1->display((double)(localOutputVoltages1[0]));
     ui->VoltageLCD2_1->display((double)(localOutputVoltages1[1]));
     ui->VoltageLCD3_1->display((double)(localOutputVoltages1[2]));
+
+    //qDebug() << 1 << localOutputVoltages1[0] << 2 << localOutputVoltages1[1] << 3 << localOutputVoltages1[2];
+
     ui->DesX1->display(localDesiredPos1[0]);
     ui->DesY1->display(localDesiredPos1[1]);
     ui->DesZ1->display(localDesiredPos1[2]);
@@ -375,8 +378,6 @@ void MainWindow::onGUIchanged()
     }
     if(ui->sliderControl->isChecked())
     {
-        p_CommonData->currentControlState = sliderControlMode;
-
         double xSlider0 = this->ui->verticalSliderX0->value()/20.0;
         double ySlider0 = this->ui->verticalSliderY0->value()/20.0;
         double zSlider0 = this->ui->verticalSliderZ0->value()/20.0+p_CommonData->wearableDelta0->neutralPos[2];
@@ -388,6 +389,8 @@ void MainWindow::onGUIchanged()
         double zSlider1 = this->ui->verticalSliderZ1->value()/20.0+p_CommonData->wearableDelta1->neutralPos[2];
         Eigen::Vector3d tempDesiredPos1(xSlider1, ySlider1, zSlider1);
         p_CommonData->wearableDelta1->SetDesiredPos(tempDesiredPos1);
+
+        p_CommonData->currentControlState = sliderControlMode;
     }
 
     else if(ui->VRControl->isChecked())

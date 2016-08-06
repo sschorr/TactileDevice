@@ -71,6 +71,7 @@ int c3DOFDevice::Init3DOFDeviceEnc()
     motor_3->SetOffsetAngle();
 
     this->neutralPos = this->GetCartesianPos();
+    firstTimeThrough = true;
     return 0;
 }
 
@@ -483,8 +484,8 @@ void c3DOFDevice::SetDesiredForce(Eigen::Vector3d desiredForceArg)
 // Set the desired pos
 void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
 {
-    double xRange = 5.5;
-    double yRange = 5.5;
+    double xRange = 5.0;
+    double yRange = 5.0;
     double zRange = 4.5;
     // limit workspace motion (plus or minus)
     double xPosLimit = this->neutralPos[0] + xRange;
@@ -604,8 +605,7 @@ void c3DOFDevice::IndivJointController(Eigen::Vector3d desJointAnglesArg, double
 
 // joint controller that reads device desired joint angles
 void c3DOFDevice::JointController(double Kp, double Kd)
-{
-    static bool firstTimeThrough = true;
+{    
     Eigen::Vector3d desAngleVel(0,0,0);
     double alpha = 0.5;
 
@@ -617,20 +617,16 @@ void c3DOFDevice::JointController(double Kp, double Kd)
         lastAngles = jointAngles;
         lastAngVel << 0,0,0;
         firstTimeThrough = false;
-
     }
 
     Eigen::Vector3d currAngVel = (jointAngles-lastAngles)/(1.0/(3000.0));
     Eigen::Vector3d filteredVel = alpha*currAngVel + (1.0-alpha)*lastAngVel;
     jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
 
-    KdEffort = (Kd*(desAngleVel-filteredVel))[0];
-    KpEffort = (Kp*(desJointAngles - jointAngles))[0];
-
 
     // Adjust the torque needed by the bias spring force
-    double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
-    /*jointTorques << jointTorques[0]-springTorStiff*(PI-jointAngles[0]),
+    /*double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
+    jointTorques << jointTorques[0]-springTorStiff*(PI-jointAngles[0]),
                     jointTorques[1]-springTorStiff*(PI-jointAngles[1]),
                     jointTorques[2]-springTorStiff*(PI-jointAngles[2]);*/
 

@@ -442,11 +442,10 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double fc = 10.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
-    qDebug() << timeInterval;
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
-
+    filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;
 
     // assign to the shared data structure to allow plotting from window thread
     p_CommonData->deviceComputedForce = deviceComputedForce0;
@@ -765,7 +764,7 @@ void haptics_thread::RenderDynamicBodies()
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
     // create the visual boxes on the dynamicbox meshes
-    boxSize = 0.03;
+    boxSize = 0.05;
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize, boxSize, boxSize); // make mesh a box
     cCreateBox(p_CommonData->p_dynamicBox2, boxSize, boxSize, boxSize); // make mesh a box
 

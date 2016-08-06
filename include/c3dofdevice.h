@@ -129,6 +129,7 @@ public:
     Eigen::Vector3d lastAngVel;
     double KdEffort;
     double KpEffort;
+    bool firstTimeThrough;
 
     // Physical parameters of build thumb assigned based on whether index or thumb in init
     double ATTACHL;                  // distance from base joint to tether attachment point [mm]
