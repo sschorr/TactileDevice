@@ -819,7 +819,7 @@ void haptics_thread::RenderDynamicBodies()
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     case dimension:
-        boxSize1 = 0.03; boxSize2 = 0.05; boxSize3 = 0.07;
+        boxSize1 = 0.03; boxSize2 = 0.045; boxSize3 = 0.06;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
         mass1 = .1; mass2 = 0.1; mass3 = 0.1;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
