@@ -64,6 +64,7 @@ void MainWindow::Initialize()
 
     // Set our current state
     p_CommonData->currentControlState = idleControl;
+    p_CommonData->currentDynamicObjectState = standard;
 
     // Initialize shared memory for OpenGL widget
     //ui->displayWidget->p_CommonData = p_CommonData;
@@ -862,7 +863,7 @@ void MainWindow::on_palpationButton_clicked()
 void MainWindow::on_frictionButton_clicked()
 {
     p_CommonData->environmentChange = true;
-    p_CommonData->currentEnvironmentState = friction;
+    p_CommonData->currentEnvironmentState = twoFriction;
 }
 
 void MainWindow::on_dynamicEnvironment_clicked()
@@ -1035,4 +1036,28 @@ void MainWindow::on_AllDown1_clicked()
     p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
     p_CommonData->calibClock.start();
     p_CommonData->device1Initing = true;
+}
+
+void MainWindow::on_Mass_clicked()
+{
+    p_CommonData->currentDynamicObjectState = mass;
+    on_dynamicEnvironment_clicked();
+}
+
+void MainWindow::on_Friction_clicked()
+{
+    p_CommonData->currentDynamicObjectState = friction;
+    on_dynamicEnvironment_clicked();
+}
+
+void MainWindow::on_Size_clicked()
+{
+    p_CommonData->currentDynamicObjectState = dimension;
+    on_dynamicEnvironment_clicked();
+}
+
+void MainWindow::on_Stiffness_clicked()
+{
+    p_CommonData->currentDynamicObjectState = stiffness;
+    on_dynamicEnvironment_clicked();
 }

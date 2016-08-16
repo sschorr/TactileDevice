@@ -95,7 +95,7 @@ typedef enum
 {
     none,
     palpation,
-    friction,
+    twoFriction,
     hump,
     hoopHump,
     experimentFriction,
@@ -103,6 +103,15 @@ typedef enum
     dynamicBodies,
     paperEnvironment
 } environment_states;
+
+typedef enum
+{
+    standard,
+    mass,
+    friction,
+    dimension,
+    stiffness
+} dynamicObject_states;
 
 
 // define the data structure that contains data that we share between threads
@@ -155,6 +164,9 @@ typedef struct
 
     // The experiment state we are in
     experiment_states currentExperimentState;
+
+    // Which one of the dynamic object states we are in
+    dynamicObject_states currentDynamicObjectState;
 
     // circle drawing radius
     double circRadius;
@@ -256,12 +268,12 @@ typedef struct
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody1; //ODE body for box 1
     cODEGenericBody* ODEBody2; //ODE body for box 2
-    cODEGenericBody* ODECup; //ODE body for cup
+    cODEGenericBody* ODEBody3; //ODE body for box 3
 
     // haptics thread objects for visual representation of dynamic objects
     chai3d::cMesh* p_dynamicBox1; // mesh for box 1
     chai3d::cMesh* p_dynamicBox2; // mesh for box 2
-    chai3d::cMultiMesh* p_dynamicCup; //multimesh for cup
+    chai3d::cMesh* p_dynamicBox3; // mesh for box 3
 
     // flags for environment change and tissue transparency
     bool environmentChange;

@@ -197,7 +197,7 @@ void haptics_thread::UpdateVRGraphics()
             RenderExpFriction();
             break;
 
-        case friction:
+        case twoFriction:
             world->clearAllChildren();
             RenderTwoFriction();
             break;
@@ -329,7 +329,7 @@ void haptics_thread::UpdateVRGraphics()
     lastTime = currTime;
 
     /*
-    // THIS SLOPPY STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
+    // THIS IS SLOPPY CODE STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
     // mainwindow makes the line visible after palpationLine trial, this makes it opaque again and starts the next trial
     if(p_CommonData->palpPostTrialClock.timeoutOccurred())
     {
@@ -710,12 +710,12 @@ void haptics_thread::InitDynamicBodies()
     // Create the ODE objects for the blocks and cup
     p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
     p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
-    p_CommonData->ODECup = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODEBody3 = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
     p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
-    p_CommonData->p_dynamicCup = new chai3d::cMultiMesh();
+    p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
@@ -735,10 +735,10 @@ void haptics_thread::RenderDynamicBodies()
     delete ODEWorld;
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
-    delete p_CommonData->ODECup;
+    delete p_CommonData->ODEBody3;
     delete p_CommonData->p_dynamicBox1;
     delete p_CommonData->p_dynamicBox2;
-    delete p_CommonData->p_dynamicCup;
+    delete p_CommonData->p_dynamicBox3;
     delete ODEGPlane0;
     delete ground;
     delete globe;
@@ -763,22 +763,6 @@ void haptics_thread::RenderDynamicBodies()
     //--------------------------------------------------------------------------
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
-    // create the visual boxes on the dynamicbox meshes
-    boxSize = 0.05;
-    cCreateBox(p_CommonData->p_dynamicBox1, boxSize, boxSize, boxSize); // make mesh a box
-    cCreateBox(p_CommonData->p_dynamicBox2, boxSize, boxSize, boxSize); // make mesh a box
-
-    // load the cup object mesh
-    // load an object file
-    if(cLoadFileOBJ(p_CommonData->p_dynamicCup, "./Resources/Cup.obj")){
-        qDebug() << "Cup file loaded";
-    }
-
-    // setup collision detectorsfor the dynamic objects
-    p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_dynamicCup->createAABBCollisionDetector(toolRadius);
-
     //create a plane
     groundSize = .3;
     chai3d::cCreatePlane(ground, groundSize, 2*groundSize);
@@ -793,9 +777,7 @@ void haptics_thread::RenderDynamicBodies()
     textureSpace->loadFromFile("./Resources/sky.jpg");
 
     globe->setTexture(textureSpace, true); //apply texture to globe
-//    globe->setUseTexture(true, true);      // enable texture rendering
     globe->setUseCulling(false, true);     // Since we don't need to see our polygons from both sides, we enable culling.
-//    globe->setUseMaterial(false);    // disable material properties and lighting
 
     //position ground in world where the invisible ODE plane is located (ODEGPlane1)
     ground->setLocalPos(0,0,0.05);
@@ -808,62 +790,114 @@ void haptics_thread::RenderDynamicBodies()
     matGround.setBrownSandy();
     ground->setMaterial(matGround);
 
-    double staticFriction = 2.0;
-    double dynamicFriction = staticFriction*0.9;
+    double boxSize1, boxSize2, boxSize3;
+    double mass1, mass2, mass3;
+    double friction1, friction2, friction3;
+    double dynFriction1, dynFriction2, dynFriction3;
+    double stiffness1, stiffness2, stiffness3;
+    double latStiffness1, latStiffness2, latStiffness3;
+
+    // choose which type of dynamic object environ to render
+    switch(p_CommonData->currentDynamicObjectState)
+    {
+    case standard:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
+    case mass:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = .1; mass2 = 0.2; mass3 = 0.3;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
+    case friction:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 1.0; friction2 = 2.0; friction3 = 3.0;
+        mass1 = .1; mass2 = 0.2; mass3 = 0.3;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
+    case dimension:
+        boxSize1 = 0.03; boxSize2 = 0.05; boxSize3 = 0.07;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
+    case stiffness:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        stiffness1 = 300; stiffness2 = 500; stiffness3 = 700;
+        break;
+    }
+
+    //assign the params dependent on the others
+    latStiffness1 = stiffness1*1.5; latStiffness2 = stiffness2*1.5; latStiffness3 = stiffness3*1.5;
+    dynFriction1 = 0.9*friction1; dynFriction2 = 0.9*friction2; dynFriction3 = 0.9*friction3;
+
+    // create the visual boxes on the dynamicbox meshes
+    cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+    cCreateBox(p_CommonData->p_dynamicBox2, boxSize2, boxSize2, boxSize2); // make mesh a box
+    cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
+
+    // setup collision detectorsfor the dynamic objects
+    p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
+    p_CommonData->p_dynamicBox3->createAABBCollisionDetector(toolRadius);
 
     // define material properties for box 1
     chai3d::cMaterial mat1;
-    mat1.setBlueRoyal();
-    mat1.setStiffness(500);
-    mat1.setLateralStiffness(750);
-    mat1.setDynamicFriction(dynamicFriction);
-    mat1.setStaticFriction(staticFriction);
+    mat1.setRedCrimson();
+    mat1.setStiffness(stiffness1);
+    mat1.setLateralStiffness(latStiffness1);
+    mat1.setDynamicFriction(dynFriction1);
+    mat1.setStaticFriction(friction1);
     mat1.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox1->setMaterial(mat1);
     p_CommonData->p_dynamicBox1->setUseMaterial(true);
 
     // define material properties for box 2
     chai3d::cMaterial mat2;
-    mat2.setRedCrimson();
-    mat2.setStiffness(500);
-    mat2.setLateralStiffness(750);
-    mat2.setDynamicFriction(dynamicFriction);
-    mat2.setStaticFriction(staticFriction);
+    mat2.setBlueRoyal();
+    mat2.setStiffness(stiffness2);
+    mat2.setLateralStiffness(latStiffness2);
+    mat2.setDynamicFriction(dynFriction2);
+    mat2.setStaticFriction(friction2);
     mat2.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox2->setMaterial(mat2);
     p_CommonData->p_dynamicBox2->setUseMaterial(true);
 
     // define material properties for cup
-    chai3d::cMaterial matCup;
-    matCup.setBlueAqua();
-    matCup.setStiffness(500);
-    matCup.setLateralStiffness(750);
-    matCup.setDynamicFriction(dynamicFriction);
-    matCup.setStaticFriction(staticFriction);
-    matCup.setUseHapticFriction(true);
-    p_CommonData->p_dynamicCup->setMaterial(matCup);
-    p_CommonData->p_dynamicCup->setUseMaterial(true);
-//    p_CommonData->p_dynamicCup->setTransparencyLevel(0.8);
+    chai3d::cMaterial mat3;
+    mat3.setGreenLawn();
+    mat3.setStiffness(stiffness3);
+    mat3.setLateralStiffness(latStiffness3);
+    mat3.setDynamicFriction(dynFriction3);
+    mat3.setStaticFriction(friction3);
+    mat3.setUseHapticFriction(true);
+    p_CommonData->p_dynamicBox3->setMaterial(mat3);
+    p_CommonData->p_dynamicBox3->setUseMaterial(true);
 
     // add mesh to ODE object
     p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
     p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
-    p_CommonData->ODECup->setImageModel(p_CommonData->p_dynamicCup);
+    p_CommonData->ODEBody3->setImageModel(p_CommonData->p_dynamicBox3);
 
     // create a dynamic model of the ODE object
-    p_CommonData->ODEBody1->createDynamicBox(boxSize, boxSize, boxSize);
-    p_CommonData->ODEBody2->createDynamicBox(boxSize, boxSize, boxSize);
-    p_CommonData->ODECup->createDynamicMesh();
+    p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
+    p_CommonData->ODEBody2->createDynamicBox(boxSize2, boxSize2, boxSize2);
+    p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, boxSize3);
 
     // set mass of box
-    p_CommonData->ODEBody1->setMass(0.1);
-    p_CommonData->ODEBody2->setMass(0.2);
-    p_CommonData->ODECup->setMass(0.2);
+    p_CommonData->ODEBody1->setMass(mass1);
+    p_CommonData->ODEBody2->setMass(mass2);
+    p_CommonData->ODEBody3->setMass(mass3);
 
     // set position of box
-    p_CommonData->ODEBody1->setLocalPos(0,.1,0);
-    p_CommonData->ODEBody2->setLocalPos(0,-.1,0);
-    p_CommonData->ODECup->setLocalPos(0,0, -0.05);
+    p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0);
+    p_CommonData->ODEBody2->setLocalPos(.05,   0,  0);
+    p_CommonData->ODEBody3->setLocalPos(.05, -.12,  0);
 
     //set position of backgroundObject
     globe->setLocalPos(0,0,0);

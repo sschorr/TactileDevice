@@ -138,6 +138,10 @@ private slots:
     void on_pushButton_clicked();
     void on_AllDown0_clicked();
     void on_AllDown1_clicked();
+    void on_Mass_clicked();
+    void on_Friction_clicked();
+    void on_Size_clicked();
+    void on_Stiffness_clicked();
 };
 
 #endif // MAINWINDOW_H
