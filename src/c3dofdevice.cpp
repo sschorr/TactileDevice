@@ -623,7 +623,6 @@ void c3DOFDevice::JointController(double Kp, double Kd)
     Eigen::Vector3d filteredVel = alpha*currAngVel + (1.0-alpha)*lastAngVel;
     jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
 
-    qDebug() << jointTorques[2];
     // Adjust the torque needed by the bias spring force
     /*double springTorStiff = SPRING_TORQUE/180*113*180/PI; // stiffness in mNm/rad
     jointTorques << jointTorques[0]-springTorStiff*(PI-jointAngles[0]),
