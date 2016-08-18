@@ -444,7 +444,7 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     static double counter = 0;
     counter = counter ++;
     x = 0.06; y = .09*sin(.0001*counter);
-    z = -0.005; // + .05*sin(.0001*counter);
+    z = -0.05; // + .05*sin(.0001*counter);
 
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // these axes align assuming the box is facing you and the chord of the tracker faces the box.
@@ -473,7 +473,6 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     chai3d::cVector3d posOffsetinA;
     R_BtoA.mulr(posOffsetinB, posOffsetinA);
     a_position = a_position + posOffsetinA;
-
 
     // estimate linear velocity
     estimateLinearVelocity(a_position);

@@ -192,7 +192,7 @@
     <property name="geometry">
      <rect>
       <x>1320</x>
-      <y>660</y>
+      <y>560</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -823,8 +823,8 @@
    <widget class="QPushButton" name="startSin">
     <property name="geometry">
      <rect>
-      <x>1440</x>
-      <y>560</y>
+      <x>1560</x>
+      <y>420</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -1182,8 +1182,8 @@
    <widget class="QPushButton" name="startCircle">
     <property name="geometry">
      <rect>
-      <x>1320</x>
-      <y>560</y>
+      <x>1440</x>
+      <y>420</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -1812,7 +1812,7 @@
     <property name="geometry">
      <rect>
       <x>1440</x>
-      <y>660</y>
+      <y>560</y>
       <width>111</width>
       <height>41</height>
      </rect>
@@ -1904,6 +1904,32 @@
     </property>
     <property name="text">
      <string>Stiffness</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="loadProtocol_2">
+    <property name="geometry">
+     <rect>
+      <x>1320</x>
+      <y>660</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Load SizeWeight Protocol</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="startExperiment_2">
+    <property name="geometry">
+     <rect>
+      <x>1440</x>
+      <y>660</y>
+      <width>111</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start SizeWeight Exp</string>
     </property>
    </widget>
   </widget>
