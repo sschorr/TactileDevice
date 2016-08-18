@@ -72,6 +72,7 @@ typedef enum
 {
     idleExperiment,
     frictionTrial,
+    sizeWeightTrial,
     palpationTrial,
     palpationLineTrial,
     palpationLineWritingToFile,
@@ -110,7 +111,8 @@ typedef enum
     mass,
     friction,
     dimension,
-    stiffness
+    stiffness,
+    dynamicExperiment
 } dynamicObject_states;
 
 
@@ -224,9 +226,11 @@ typedef struct
     QString frictionProtocolLocation;
     QString palpationProtocolLocation;
     QString palpationLineProtocolLocation;
+    QString sizeWeightProtocolLocation;
     CSimpleIniA frictionProtocolFile;
     CSimpleIniA palpationProtocolFile;
     CSimpleIniA palpationLineProtocolFile;
+    CSimpleIniA sizeWeightProtocolFile;
 
     // haptics thread objects for palpation environment
     chai3d::cMultiMesh* p_table;

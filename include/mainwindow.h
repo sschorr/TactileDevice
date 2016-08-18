@@ -142,6 +142,8 @@ private slots:
     void on_Friction_clicked();
     void on_Size_clicked();
     void on_Stiffness_clicked();
+    void on_loadProtocol_2_clicked();
+    void on_startExperiment_2_clicked();
 };
 
 #endif // MAINWINDOW_H

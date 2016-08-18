@@ -452,11 +452,12 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     p_CommonData->filteredDeviceComputedForce = filteredDeviceForce0;
 
     //convert device "force" to a mapped position
-    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)    
+    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
+    double forceToPosMultThumb = forceToPosMult*1.2;
 
     // Pos movements in delta mechanism frame (index)
     chai3d::cVector3d desiredPosMovement0 = forceToPosMult*filteredDeviceForce0; //this is only for lateral if we override normal later
-    chai3d::cVector3d desiredPosMovement1 = forceToPosMult*filteredDeviceForce1; //this is only for lateral if we override normal later
+    chai3d::cVector3d desiredPosMovement1 = forceToPosMultThumb*filteredDeviceForce1; //this is only for lateral if we override normal later
 
     // check to see if we are rendering only normal or only lateral
     if(p_CommonData->flagNormal == false)
@@ -830,74 +831,105 @@ void haptics_thread::RenderDynamicBodies()
         mass1 = .1; mass2 = 0.1; mass3 = 0.1;
         stiffness1 = 300; stiffness2 = 500; stiffness3 = 700;
         break;
+    case dynamicExperiment:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
     }
 
     //assign the params dependent on the others
     latStiffness1 = stiffness1*1.5; latStiffness2 = stiffness2*1.5; latStiffness3 = stiffness3*1.5;
     dynFriction1 = 0.9*friction1; dynFriction2 = 0.9*friction2; dynFriction3 = 0.9*friction3;
 
-    // create the visual boxes on the dynamicbox meshes
-    cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
-    cCreateBox(p_CommonData->p_dynamicBox2, boxSize2, boxSize2, boxSize2); // make mesh a box
-    cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
+    if (p_CommonData->currentDynamicObjectState == dynamicExperiment)
+    {
+        cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+        p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+        // define material properties for box 1
+        chai3d::cMaterial mat1;
+        mat1.setRedCrimson();
+        mat1.setStiffness(stiffness1);
+        mat1.setLateralStiffness(latStiffness1);
+        mat1.setDynamicFriction(dynFriction1);
+        mat1.setStaticFriction(friction1);
+        mat1.setUseHapticFriction(true);
+        p_CommonData->p_dynamicBox1->setMaterial(mat1);
+        p_CommonData->p_dynamicBox1->setUseMaterial(true);
+        p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
+        p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
+        p_CommonData->ODEBody1->setMass(mass1);
+        p_CommonData->ODEBody1->setLocalPos(.05,   0,  0);
+    }
+    else {
+        // create the visual boxes on the dynamicbox meshes
+        cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicBox2, boxSize2, boxSize2, boxSize2); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
 
-    // setup collision detectorsfor the dynamic objects
-    p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_dynamicBox3->createAABBCollisionDetector(toolRadius);
+        // setup collision detectorsfor the dynamic objects
+        p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+        p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
+        p_CommonData->p_dynamicBox3->createAABBCollisionDetector(toolRadius);
 
-    // define material properties for box 1
-    chai3d::cMaterial mat1;
-    mat1.setRedCrimson();
-    mat1.setStiffness(stiffness1);
-    mat1.setLateralStiffness(latStiffness1);
-    mat1.setDynamicFriction(dynFriction1);
-    mat1.setStaticFriction(friction1);
-    mat1.setUseHapticFriction(true);
-    p_CommonData->p_dynamicBox1->setMaterial(mat1);
-    p_CommonData->p_dynamicBox1->setUseMaterial(true);
+        // define material properties for box 1
+        chai3d::cMaterial mat1;
+        mat1.setRedCrimson();
+        mat1.setStiffness(stiffness1);
+        mat1.setLateralStiffness(latStiffness1);
+        mat1.setDynamicFriction(dynFriction1);
+        mat1.setStaticFriction(friction1);
+        mat1.setUseHapticFriction(true);
+        p_CommonData->p_dynamicBox1->setMaterial(mat1);
+        p_CommonData->p_dynamicBox1->setUseMaterial(true);
 
-    // define material properties for box 2
-    chai3d::cMaterial mat2;
-    mat2.setBlueRoyal();
-    mat2.setStiffness(stiffness2);
-    mat2.setLateralStiffness(latStiffness2);
-    mat2.setDynamicFriction(dynFriction2);
-    mat2.setStaticFriction(friction2);
-    mat2.setUseHapticFriction(true);
-    p_CommonData->p_dynamicBox2->setMaterial(mat2);
-    p_CommonData->p_dynamicBox2->setUseMaterial(true);
+        // define material properties for box 2
+        chai3d::cMaterial mat2;
+        mat2.setBlueRoyal();
+        mat2.setStiffness(stiffness2);
+        mat2.setLateralStiffness(latStiffness2);
+        mat2.setDynamicFriction(dynFriction2);
+        mat2.setStaticFriction(friction2);
+        mat2.setUseHapticFriction(true);
+        p_CommonData->p_dynamicBox2->setMaterial(mat2);
+        p_CommonData->p_dynamicBox2->setUseMaterial(true);
 
-    // define material properties for cup
-    chai3d::cMaterial mat3;
-    mat3.setGreenLawn();
-    mat3.setStiffness(stiffness3);
-    mat3.setLateralStiffness(latStiffness3);
-    mat3.setDynamicFriction(dynFriction3);
-    mat3.setStaticFriction(friction3);
-    mat3.setUseHapticFriction(true);
-    p_CommonData->p_dynamicBox3->setMaterial(mat3);
-    p_CommonData->p_dynamicBox3->setUseMaterial(true);
+        // define material properties for box 3
+        chai3d::cMaterial mat3;
+        mat3.setGreenLawn();
+        mat3.setStiffness(stiffness3);
+        mat3.setLateralStiffness(latStiffness3);
+        mat3.setDynamicFriction(dynFriction3);
+        mat3.setStaticFriction(friction3);
+        mat3.setUseHapticFriction(true);
+        p_CommonData->p_dynamicBox3->setMaterial(mat3);
+        p_CommonData->p_dynamicBox3->setUseMaterial(true);
 
-    // add mesh to ODE object
-    p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
-    p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
-    p_CommonData->ODEBody3->setImageModel(p_CommonData->p_dynamicBox3);
+        // add mesh to ODE object
+        p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
+        p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
+        p_CommonData->ODEBody3->setImageModel(p_CommonData->p_dynamicBox3);
 
-    // create a dynamic model of the ODE object
-    p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
-    p_CommonData->ODEBody2->createDynamicBox(boxSize2, boxSize2, boxSize2);
-    p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, boxSize3);
+        // create a dynamic model of the ODE object
+        p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
+        p_CommonData->ODEBody2->createDynamicBox(boxSize2, boxSize2, boxSize2);
+        p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, boxSize3);
 
-    // set mass of box
-    p_CommonData->ODEBody1->setMass(mass1);
-    p_CommonData->ODEBody2->setMass(mass2);
-    p_CommonData->ODEBody3->setMass(mass3);
+        // set mass of box
+        p_CommonData->ODEBody1->setMass(mass1);
+        p_CommonData->ODEBody2->setMass(mass2);
+        p_CommonData->ODEBody3->setMass(mass3);
 
-    // set position of box
-    p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0);
-    p_CommonData->ODEBody2->setLocalPos(.05,   0,  0);
-    p_CommonData->ODEBody3->setLocalPos(.05, -.12,  0);
+        // set position of box
+        p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0);
+        p_CommonData->ODEBody2->setLocalPos(.05,   0,  0);
+        p_CommonData->ODEBody3->setLocalPos(.05, -.12,  0);
+    }
+
+
+
+    // make only the desired boxes visible if running an experiment (moved the others out of view)
 
     //set position of backgroundObject
     globe->setLocalPos(0,0,0);

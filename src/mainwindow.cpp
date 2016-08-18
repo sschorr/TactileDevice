@@ -881,6 +881,15 @@ void MainWindow::on_loadProtocol_clicked()
     qDebug() << p_CommonData->frictionProtocolLocation;
 }
 
+void MainWindow::on_loadProtocol_2_clicked()
+{
+    //Open dialog box to get protocol file and save into variable
+    QString temp = QFileDialog::getOpenFileName();
+    p_CommonData->sizeWeightProtocolLocation = temp;
+    int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());
+    qDebug() << p_CommonData->sizeWeightProtocolLocation;
+}
+
 void MainWindow::on_loadProtocol_3_clicked()
 {
     //Open dialog box to get protocol file and save into variable
@@ -898,6 +907,21 @@ void MainWindow::on_startExperiment_clicked()
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
     p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+    double degInc = 5.0;
+    double radInc = 0.05;
+    p_CommonData->polar = p_CommonData->polar - 5*degInc;
+    p_CommonData->camRadius = p_CommonData->camRadius + radInc;
+    p_CommonData->debugData.clear();
+}
+
+void MainWindow::on_startExperiment_2_clicked()
+{
+    p_CommonData->environmentChange = true;
+    p_CommonData->currentExperimentState = sizeWeightTrial;
+    p_CommonData->currentEnvironmentState = dynamicBodies;
+    p_CommonData->currentDynamicObjectState = dynamicExperiment;
+    p_CommonData->currentControlState = VRControlMode;
+    p_CommonData->pairNo = 1;
     double degInc = 5.0;
     double radInc = 0.05;
     p_CommonData->polar = p_CommonData->polar - 5*degInc;
@@ -1061,3 +1085,7 @@ void MainWindow::on_Stiffness_clicked()
     p_CommonData->currentDynamicObjectState = stiffness;
     on_dynamicEnvironment_clicked();
 }
+
+
+
+
