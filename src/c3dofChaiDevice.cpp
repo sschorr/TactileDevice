@@ -474,7 +474,6 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     R_BtoA.mulr(posOffsetinB, posOffsetinA);
     a_position = a_position + posOffsetinA;
 
-
     // estimate linear velocity
     estimateLinearVelocity(a_position);
 

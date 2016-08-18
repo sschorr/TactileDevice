@@ -525,7 +525,6 @@ void haptics_thread::RecordData()
     dataRecorder.referenceFriction = p_CommonData->referenceFriction;
     dataRecorder.comparisonFriction = p_CommonData->comparisonFriction;
     dataRecorder.subjectAnswer = p_CommonData->subjectAnswer;
-    dataRecorder.lumpLocation = p_CommonData->p_tissueLump->getLocalPos();
     dataRecorder.lineAngle = p_CommonData->indicatorRot;
     dataRecorder.lineAngleTruth = p_CommonData->tissueRot;
     dataRecorder.deviceRotation = deviceRotation;
@@ -712,16 +711,19 @@ void haptics_thread::InitDynamicBodies()
     p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
     p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
     p_CommonData->ODEBody3 = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODEBody4 = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
     p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
+    p_CommonData->p_dynamicBox4 = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
+    ODEGPlane1 = new cODEGenericBody(ODEWorld);
 
     //create ground
     ground = new chai3d::cMesh();
@@ -737,10 +739,13 @@ void haptics_thread::RenderDynamicBodies()
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
     delete p_CommonData->ODEBody3;
+    delete p_CommonData->ODEBody4;
     delete p_CommonData->p_dynamicBox1;
     delete p_CommonData->p_dynamicBox2;
     delete p_CommonData->p_dynamicBox3;
+    delete p_CommonData->p_dynamicBox4;
     delete ODEGPlane0;
+    delete ODEGPlane1;
     delete ground;
     delete globe;
 
@@ -763,13 +768,14 @@ void haptics_thread::RenderDynamicBodies()
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+    ODEGPlane1->createStaticPlane(chai3d::cVector3d(1, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
     //create a plane
     groundSize = .3;
     chai3d::cCreatePlane(ground, groundSize, 2*groundSize);
 
     //create globe
-    chai3d::cCreateSphere(globe, 6, 350, 360);
+    chai3d::cCreateSphere(globe, 10, 30, 30);
     globe->setUseDisplayList(true);
     globe->deleteCollisionDetector();
 
@@ -785,9 +791,6 @@ void haptics_thread::RenderDynamicBodies()
 
     // define some material properties for ground
     chai3d::cMaterial matGround;
-    matGround.setStiffness(300);
-    matGround.setDynamicFriction(0.2);
-    matGround.setStaticFriction(0.0);
     matGround.setBrownSandy();
     ground->setMaterial(matGround);
 
@@ -834,7 +837,7 @@ void haptics_thread::RenderDynamicBodies()
     case dynamicExperiment:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        mass1 = 0.1; mass2 = 0.1; mass3 = 0.1;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     }
@@ -846,7 +849,13 @@ void haptics_thread::RenderDynamicBodies()
     if (p_CommonData->currentDynamicObjectState == dynamicExperiment)
     {
         cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicBox2, boxSize2, boxSize2, 2*boxSize2); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, 3*boxSize3); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicBox4, boxSize3, boxSize3, 2*boxSize3); // make mesh a box
         p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+        p_CommonData->p_dynamicBox2->createAABBCollisionDetector(toolRadius);
+        p_CommonData->p_dynamicBox3->createAABBCollisionDetector(toolRadius);
+        p_CommonData->p_dynamicBox4->createAABBCollisionDetector(toolRadius);
         // define material properties for box 1
         chai3d::cMaterial mat1;
         mat1.setRedCrimson();
@@ -855,12 +864,43 @@ void haptics_thread::RenderDynamicBodies()
         mat1.setDynamicFriction(dynFriction1);
         mat1.setStaticFriction(friction1);
         mat1.setUseHapticFriction(true);
+        // define material properties for box 2
+        chai3d::cMaterial mat2;
+        mat2.setBlueRoyal();
+        mat2.setStiffness(stiffness2);
+        mat2.setLateralStiffness(latStiffness2);
+        mat2.setDynamicFriction(dynFriction2);
+        mat2.setStaticFriction(friction2);
+        mat2.setUseHapticFriction(true);
         p_CommonData->p_dynamicBox1->setMaterial(mat1);
         p_CommonData->p_dynamicBox1->setUseMaterial(true);
+        p_CommonData->p_dynamicBox2->setMaterial(mat1);
+        p_CommonData->p_dynamicBox2->setUseMaterial(true);
+        p_CommonData->p_dynamicBox3->setMaterial(mat1);
+        p_CommonData->p_dynamicBox3->setUseMaterial(true);
+        p_CommonData->p_dynamicBox4->setMaterial(mat2);
+        p_CommonData->p_dynamicBox4->setUseMaterial(true);
+        // add mesh to ODE object
         p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
+        p_CommonData->ODEBody2->setImageModel(p_CommonData->p_dynamicBox2);
+        p_CommonData->ODEBody3->setImageModel(p_CommonData->p_dynamicBox3);
+        p_CommonData->ODEBody4->setImageModel(p_CommonData->p_dynamicBox4);
+        // create a dynamic model of the ODE object
         p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
-        p_CommonData->ODEBody1->setMass(mass1);
-        p_CommonData->ODEBody1->setLocalPos(.05,   0,  0);
+        p_CommonData->ODEBody2->createDynamicBox(boxSize2, boxSize2, 2*boxSize2);
+        p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, 3*boxSize3);
+        p_CommonData->ODEBody4->createDynamicBox(boxSize3, boxSize3, 2*boxSize3);
+        // set position of box
+        p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0.025);
+        p_CommonData->ODEBody2->setLocalPos(.05,   0,   0);
+        p_CommonData->ODEBody3->setLocalPos(.05, -.12, -0.025);
+        p_CommonData->ODEBody4->setLocalPos(.12,   0,  0);
+
+        chai3d::cMatrix3d temp; temp.set(0,0,0,0,0,0,0,0,0);
+        p_CommonData->ODEBody1->setLocalRot(temp);
+        p_CommonData->ODEBody2->setLocalRot(temp);
+        p_CommonData->ODEBody3->setLocalRot(temp);
+        p_CommonData->ODEBody4->setLocalRot(temp);
     }
     else {
         // create the visual boxes on the dynamicbox meshes
@@ -926,10 +966,6 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody2->setLocalPos(.05,   0,  0);
         p_CommonData->ODEBody3->setLocalPos(.05, -.12,  0);
     }
-
-
-
-    // make only the desired boxes visible if running an experiment (moved the others out of view)
 
     //set position of backgroundObject
     globe->setLocalPos(0,0,0);
@@ -1203,8 +1239,6 @@ void haptics_thread::WriteDataToFile()
         << p_CommonData->debugData[i].referenceFriction << "," << " "
         << p_CommonData->debugData[i].comparisonFriction << "," << " "
         << p_CommonData->debugData[i].subjectAnswer << "," << " "
-        << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
-        << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
         << p_CommonData->debugData[i].lineAngleTruth << "," << " "
         << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "

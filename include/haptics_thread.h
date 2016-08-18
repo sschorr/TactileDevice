@@ -91,6 +91,7 @@ public:
     chai3d::cMultiMesh* thumb;
     chai3d::cEffectSurface* newEffect;
     cODEGenericBody* ODEGPlane0;
+    cODEGenericBody* ODEGPlane1;
     chai3d::cMesh* globe;
 
     //texture for globe

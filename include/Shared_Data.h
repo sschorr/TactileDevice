@@ -222,6 +222,10 @@ typedef struct
     // answer to which was stiffer
     int subjectAnswer;
 
+    // which sizeWeight box are we using
+    int sizeWeightBox;
+    double sizeWeightBoxWeight;
+
     // protocol loading
     QString frictionProtocolLocation;
     QString palpationProtocolLocation;
@@ -273,11 +277,13 @@ typedef struct
     cODEGenericBody* ODEBody1; //ODE body for box 1
     cODEGenericBody* ODEBody2; //ODE body for box 2
     cODEGenericBody* ODEBody3; //ODE body for box 3
+    cODEGenericBody* ODEBody4; //ODE body for box 3
 
     // haptics thread objects for visual representation of dynamic objects
     chai3d::cMesh* p_dynamicBox1; // mesh for box 1
     chai3d::cMesh* p_dynamicBox2; // mesh for box 2
     chai3d::cMesh* p_dynamicBox3; // mesh for box 3
+    chai3d::cMesh* p_dynamicBox4; // mesh for box 3
 
     // flags for environment change and tissue transparency
     bool environmentChange;

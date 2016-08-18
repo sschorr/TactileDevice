@@ -501,6 +501,62 @@ void MainWindow::on_turnOff_clicked()
 
 void MainWindow::keyPressEvent(QKeyEvent *a_event)
 {
+    // used for progressing through size-weight illusion experiment trials
+    if (a_event->key() == Qt::Key_Control)
+    {
+        chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
+        if(p_CommonData->currentExperimentState == sizeWeightTrial)
+        {
+            if(p_CommonData->pairNo == 1)
+            {
+                // Put the other blocks out of view
+                p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
+                p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
+                p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+
+                // Put standard block on the table
+                p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
+                p_CommonData->ODEBody4->setLocalRot(zeroRot);
+
+                p_CommonData->pairNo = 2;
+            }
+            else if(p_CommonData->pairNo == 2)
+            {
+                // put all the blocks out of view
+                p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
+                p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
+                p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+                p_CommonData->ODEBody4->setLocalPos(1,  0.4, -0.2);
+
+                p_CommonData->sizeWeightBox = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "BoxNo", NULL /*default*/));
+                p_CommonData->sizeWeightBoxWeight = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Weight", NULL /*default*/));
+                p_CommonData->sizeWeightBoxWeight = p_CommonData->sizeWeightBoxWeight*0.001; //convert grams to kg
+
+                //qDebug() <<  p_CommonData->sizeWeightBox << p_CommonData->sizeWeightBoxWeight;
+                if(p_CommonData->sizeWeightBox == 1)
+                {
+                    p_CommonData->ODEBody1->setLocalPos(0, 0, -0.2);
+                    p_CommonData->ODEBody1->setLocalRot(zeroRot);
+                    p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxWeight);
+                }
+                else if(p_CommonData->sizeWeightBox == 2)
+                {
+                    p_CommonData->ODEBody2->setLocalPos(0, 0, -0.2);
+                    p_CommonData->ODEBody2->setLocalRot(zeroRot);
+                    p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxWeight);
+                }
+                else if(p_CommonData->sizeWeightBox == 3)
+                {
+                    p_CommonData->ODEBody3->setLocalPos(0, 0, -0.2);
+                    p_CommonData->ODEBody3->setLocalRot(zeroRot);
+                    p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxWeight);
+                }
+
+                p_CommonData->pairNo = 1;
+                p_CommonData->trialNo = p_CommonData->trialNo + 1;
+            }
+        }
+    }
     if (a_event->key() == Qt::Key_T)
     {
         if (p_CommonData->m_flagTissueTransparent == true)
@@ -753,13 +809,16 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
         else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
-            if(p_CommonData->pairNo == 1)
+            if( p_CommonData->currentExperimentState == frictionTrial)
             {
-                p_CommonData->pairNo = 2;
-                p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
-                double max = 0.01; double min = -0.01;
-                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+                if(p_CommonData->pairNo == 1)
+                {
+                    p_CommonData->pairNo = 2;
+                    p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
+                    double max = 0.01; double min = -0.01;
+                    double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+                    p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+                }
             }
         }
     }
@@ -835,8 +894,6 @@ void MainWindow::WriteDataToFile()
         << p_CommonData->debugData[i].referenceFriction << "," << " "
         << p_CommonData->debugData[i].comparisonFriction << "," << " "
         << p_CommonData->debugData[i].subjectAnswer << "," << " "
-        << p_CommonData->debugData[i].lumpLocation.x() << "," << " "
-        << p_CommonData->debugData[i].lumpLocation.y() << "," << " "
         << p_CommonData->debugData[i].lineAngle << "," << " "
         << p_CommonData->debugData[i].lineAngleTruth << "," << " "
         << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "
@@ -884,10 +941,10 @@ void MainWindow::on_loadProtocol_clicked()
 void MainWindow::on_loadProtocol_2_clicked()
 {
     //Open dialog box to get protocol file and save into variable
-    QString temp = QFileDialog::getOpenFileName();
+    QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
     p_CommonData->sizeWeightProtocolLocation = temp;
     int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());
-    qDebug() << p_CommonData->sizeWeightProtocolLocation;
+    qDebug() << "error" << error << p_CommonData->sizeWeightProtocolLocation;
 }
 
 void MainWindow::on_loadProtocol_3_clicked()
@@ -922,10 +979,6 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->currentDynamicObjectState = dynamicExperiment;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
-    double degInc = 5.0;
-    double radInc = 0.05;
-    p_CommonData->polar = p_CommonData->polar - 5*degInc;
-    p_CommonData->camRadius = p_CommonData->camRadius + radInc;
     p_CommonData->debugData.clear();
 }
 
