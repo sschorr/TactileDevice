@@ -201,6 +201,8 @@ void MainWindow::UpdateGUIInfo()
     else
         localDesiredJointAngle1 = p_CommonData->wearableDelta1->CalcInverseKinJoint();
 
+    CheckFingers();
+
 #ifdef QWT
     ////////////////////////////////////////////////////
     // update real time plotting
@@ -504,57 +506,78 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     // used for progressing through size-weight illusion experiment trials
     if (a_event->key() == Qt::Key_Control)
     {
-        chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
-        if(p_CommonData->currentExperimentState == sizeWeightTrial)
+        if(CheckFingers()) //check that fingers aren't where the block is gonna go
         {
-            if(p_CommonData->pairNo == 1)
+            p_CommonData->sharedMutex.lock();
+            chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
+            if((p_CommonData->pairNo == 2) || (p_CommonData->currentExperimentState == trialBreak))
             {
-                // Put the other blocks out of view
-                p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
-                p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
-                p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
-
-                // Put standard block on the table
-                p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
-                p_CommonData->ODEBody4->setLocalRot(zeroRot);
-
-                p_CommonData->pairNo = 2;
+                p_CommonData->currentExperimentState = sizeWeightTrial;
+                p_CommonData->trialNo = p_CommonData->trialNo + 1;
             }
-            else if(p_CommonData->pairNo == 2)
+
+            QString nextTrialType = p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/);
+            //qDebug() << nextTrialType;
+            if (nextTrialType == "break")
             {
-                // put all the blocks out of view
+                //qDebug() << "made it into break";
+                p_CommonData->currentExperimentState = trialBreak;
                 p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
                 p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
                 p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
                 p_CommonData->ODEBody4->setLocalPos(1,  0.4, -0.2);
-
-                p_CommonData->sizeWeightBox = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "BoxNo", NULL /*default*/));
-                p_CommonData->sizeWeightBoxWeight = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Weight", NULL /*default*/));
-                p_CommonData->sizeWeightBoxWeight = p_CommonData->sizeWeightBoxWeight*0.001; //convert grams to kg
-
-                //qDebug() <<  p_CommonData->sizeWeightBox << p_CommonData->sizeWeightBoxWeight;
-                if(p_CommonData->sizeWeightBox == 1)
-                {
-                    p_CommonData->ODEBody1->setLocalPos(0, 0, -0.2);
-                    p_CommonData->ODEBody1->setLocalRot(zeroRot);
-                    p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxWeight);
-                }
-                else if(p_CommonData->sizeWeightBox == 2)
-                {
-                    p_CommonData->ODEBody2->setLocalPos(0, 0, -0.2);
-                    p_CommonData->ODEBody2->setLocalRot(zeroRot);
-                    p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxWeight);
-                }
-                else if(p_CommonData->sizeWeightBox == 3)
-                {
-                    p_CommonData->ODEBody3->setLocalPos(0, 0, -0.2);
-                    p_CommonData->ODEBody3->setLocalRot(zeroRot);
-                    p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxWeight);
-                }
-
-                p_CommonData->pairNo = 1;
-                p_CommonData->trialNo = p_CommonData->trialNo + 1;
             }
+            else if(p_CommonData->currentExperimentState == sizeWeightTrial || p_CommonData->currentExperimentState == trialBreak)
+            {
+                //qDebug() << "In standard section";
+                if(p_CommonData->pairNo == 2)
+                {
+                    p_CommonData->pairNo = 1;
+
+                    // Put the other blocks out of view
+                    p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
+                    p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
+                    p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+
+                    // Put standard block on the table
+                    p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
+                    p_CommonData->ODEBody4->setLocalRot(zeroRot);
+                }
+                else if(p_CommonData->pairNo == 1)
+                {
+                    p_CommonData->pairNo = 2;
+                    // put all the blocks out of view
+                    p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
+                    p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
+                    p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+                    p_CommonData->ODEBody4->setLocalPos(1,  0.4, -0.2);
+
+                    p_CommonData->sizeWeightBox = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "BoxNo", NULL /*default*/));
+                    p_CommonData->sizeWeightBoxWeight = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Weight", NULL /*default*/));
+                    p_CommonData->sizeWeightBoxWeight = p_CommonData->sizeWeightBoxWeight*0.001; //convert grams to kg
+
+                    //qDebug() <<  p_CommonData->sizeWeightBox << p_CommonData->sizeWeightBoxWeight;
+                    if(p_CommonData->sizeWeightBox == 1)
+                    {
+                        p_CommonData->ODEBody1->setLocalPos(0, 0, -0.025);
+                        p_CommonData->ODEBody1->setLocalRot(zeroRot);
+                        p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxWeight);
+                    }
+                    else if(p_CommonData->sizeWeightBox == 2)
+                    {
+                        p_CommonData->ODEBody2->setLocalPos(0, 0, -0.05);
+                        p_CommonData->ODEBody2->setLocalRot(zeroRot);
+                        p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxWeight);
+                    }
+                    else if(p_CommonData->sizeWeightBox == 3)
+                    {
+                        p_CommonData->ODEBody3->setLocalPos(0, 0, -0.075);
+                        p_CommonData->ODEBody3->setLocalRot(zeroRot);
+                        p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxWeight);
+                    }
+                }
+            }
+            p_CommonData->sharedMutex.unlock();
         }
     }
     if (a_event->key() == Qt::Key_T)
@@ -677,7 +700,6 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                 }
             }
         }
-
 
         // palpation Line experiment
         if(p_CommonData->currentExperimentState == palpationLineTrial)
@@ -941,7 +963,9 @@ void MainWindow::on_loadProtocol_clicked()
 void MainWindow::on_loadProtocol_2_clicked()
 {
     //Open dialog box to get protocol file and save into variable
-    QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
+    //QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
+    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";
+
     p_CommonData->sizeWeightProtocolLocation = temp;
     int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());
     qDebug() << "error" << error << p_CommonData->sizeWeightProtocolLocation;
@@ -980,6 +1004,7 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
     p_CommonData->debugData.clear();
+    ui->VRControl->setChecked(true);
 }
 
 void MainWindow::on_startExperiment_3_clicked()
@@ -1137,6 +1162,23 @@ void MainWindow::on_Stiffness_clicked()
 {
     p_CommonData->currentDynamicObjectState = stiffness;
     on_dynamicEnvironment_clicked();
+}
+
+bool MainWindow::CheckFingers()
+{
+    // returns true if fingers out of the way, false if they're in the way
+    chai3d::cVector3d fingerPos, thumbPos;
+    p_CommonData->chaiMagDevice0->getPosition(fingerPos);
+    p_CommonData->chaiMagDevice1->getPosition(thumbPos);
+
+    // it returns in meters
+    bool logicFinger, logicThumb;
+    logicFinger = (abs(fingerPos.x()) > 0.07) || (abs(fingerPos.y()) > 0.07);
+    logicThumb = (abs(thumbPos.x()) > 0.07) || (abs(thumbPos.y()) > 0.07);
+    if(logicFinger && logicThumb)
+        return true;
+    else
+        return false;
 }
 
 

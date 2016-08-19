@@ -258,6 +258,8 @@ void haptics_thread::UpdateVRGraphics()
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
 
+    //LOCK SO THAT WE CAN MOVE DYNAMIC BODIES AROUND
+    p_CommonData->sharedMutex.lock();
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
     {
@@ -326,6 +328,7 @@ void haptics_thread::UpdateVRGraphics()
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
     }    
+    p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
 
     /*
@@ -564,8 +567,8 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // the camera is updated to a position based on these params
     p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 125.0;
-    p_CommonData->camRadius = 0.35;
+    p_CommonData->polar = 135.0; //higher number puts us higher in the air
+    p_CommonData->camRadius = 0.45;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -837,7 +840,7 @@ void haptics_thread::RenderDynamicBodies()
     case dynamicExperiment:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = 0.1; mass2 = 0.1; mass3 = 0.1;
+        mass1 = 0.150; mass2 = 0.150; mass3 = 0.150;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     }
@@ -890,18 +893,25 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody2->createDynamicBox(boxSize2, boxSize2, 2*boxSize2);
         p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, 3*boxSize3);
         p_CommonData->ODEBody4->createDynamicBox(boxSize3, boxSize3, 2*boxSize3);
-        // set position of box
-        p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0.025);
-        p_CommonData->ODEBody2->setLocalPos(.05,   0,   0);
-        p_CommonData->ODEBody3->setLocalPos(.05, -.12, -0.025);
-        p_CommonData->ODEBody4->setLocalPos(.12,   0,  0);
 
-        chai3d::cMatrix3d temp; temp.set(0,0,0,0,0,0,0,0,0);
-        p_CommonData->ODEBody1->setLocalRot(temp);
-        p_CommonData->ODEBody2->setLocalRot(temp);
-        p_CommonData->ODEBody3->setLocalRot(temp);
-        p_CommonData->ODEBody4->setLocalRot(temp);
+         chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
+        p_CommonData->ODEBody1->setLocalRot(zeroRot);
+        p_CommonData->ODEBody2->setLocalRot(zeroRot);
+        p_CommonData->ODEBody3->setLocalRot(zeroRot);
+        p_CommonData->ODEBody4->setLocalRot(zeroRot);
+
+        //put things where they go for start of experiment
+        // Put the other blocks out of view
+        p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
+        p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
+        p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+
+        // Put standard block on the table
+        p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
+        p_CommonData->ODEBody4->setLocalRot(zeroRot);
+        p_CommonData->ODEBody4->setMass(mass2);
     }
+    // if just rendering dynamic environments without an experiment
     else {
         // create the visual boxes on the dynamicbox meshes
         cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box

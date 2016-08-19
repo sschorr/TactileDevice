@@ -13,7 +13,7 @@ void Experiment_Thread::initialize()
 {
     p_CommonData->currentEnvironmentState = none;
     p_CommonData->currentExperimentState = idleExperiment;
-    p_CommonData->pairNo = 1;
+    p_CommonData->pairNo = 2;
     p_CommonData->trialNo = 1;
 }
 
