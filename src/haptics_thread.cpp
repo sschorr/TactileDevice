@@ -142,7 +142,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 5)
+            if(recordDataCounter == 10)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
