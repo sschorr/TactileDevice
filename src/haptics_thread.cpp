@@ -532,8 +532,8 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.motorTorque1 = p_CommonData->wearableDelta1->motorTorques;
     p_CommonData->dataRecorder.magTrackerPos1 = position1;
 
-    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0;
-    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1;
+    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0*rotation0;
+    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
     p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
     p_CommonData->dataRecorder.boxMass = p_CommonData->sizeWeightBoxMass;
     p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;

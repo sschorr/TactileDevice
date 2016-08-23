@@ -904,7 +904,6 @@ void MainWindow::WriteDataToFile()
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
         file << localDataRecorderVector[i].time << "," << " "
-
         << localDataRecorderVector[i].pos0[0] << "," << " "
         << localDataRecorderVector[i].pos0[1] << "," << " "
         << localDataRecorderVector[i].pos0[2] << "," << " "

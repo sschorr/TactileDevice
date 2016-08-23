@@ -466,7 +466,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
     if (trackerNo == 1)
     {
-        posOffsetinB.set(-.067, 0, .020);
+        posOffsetinB.set(-.067, 0, .020); //Thumb dimensions
+        //posOffsetinB.set(-.060, 0, .018); //index dimensions
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
