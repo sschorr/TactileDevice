@@ -65,6 +65,7 @@ typedef struct
     chai3d::cMatrix3d deviceRotation0;
     chai3d::cMatrix3d deviceRotation1;
     double boxMass;
+    int boxNo;
     double subjectValue;
 
 } DataRecordStruct;
