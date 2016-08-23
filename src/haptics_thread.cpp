@@ -142,7 +142,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 5)
+            if(recordDataCounter == 10)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -847,7 +847,7 @@ void haptics_thread::RenderDynamicBodies()
     case dynamicExperiment:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = 0.150; mass2 = 0.150; mass3 = 0.150;
+        mass1 = 0.2; mass2 = 0.2; mass3 = 0.2;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     }
