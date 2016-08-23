@@ -56,6 +56,9 @@ public:
 
     double updateHz = 100;
 
+    // duplicate data record vector to limit thread locking
+    std::vector<DataRecordStruct> localDataRecorderVector;
+
 
     // qwtVars
     QwtPlotCurve *curve1;

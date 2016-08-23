@@ -5,7 +5,7 @@
 
 // defines indicating what physical hardware is present
 //#define MAGTRACKER
-#define SENSORAY826
+//#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -43,28 +43,29 @@
 typedef struct
 {
     double time;
-    Eigen::Vector3d pos;
-    Eigen::Vector3d desiredPos;
-    Eigen::Vector3d motorAngles;
-    Eigen::Vector3d jointAngles;
-    Eigen::Vector3d motorTorque;
-    Eigen::Vector3d voltageOut;
-    Eigen::Vector3d VRInteractionForce;
-    Eigen::Vector3d VRInteractionForceGlobal;
+    Eigen::Vector3d pos0;
+    Eigen::Vector3d desiredPos0;
+    Eigen::Vector3d motorAngles0;
+    Eigen::Vector3d jointAngles0;
+    Eigen::Vector3d motorTorque0;
+    Eigen::Vector3d voltageOut0;
+    Eigen::Vector3d VRInteractionForce0;
+    Eigen::Vector3d VRInteractionForceGlobal0;
+    Eigen::Vector3d pos1;
+    Eigen::Vector3d desiredPos1;
+    Eigen::Vector3d motorAngles1;
+    Eigen::Vector3d jointAngles1;
+    Eigen::Vector3d motorTorque1;
+    Eigen::Vector3d voltageOut1;
+    Eigen::Vector3d VRInteractionForce1;
+    Eigen::Vector3d VRInteractionForceGlobal1;
     chai3d::cVector3d magTrackerPos0;
-    chai3d::cVector3d magTrackerPos1;
-    chai3d::cVector3d accelSignal;
-    int tactileFeedback;
-    int referenceFirst;
-    int pairNo;
-    double referenceFriction;
-    double comparisonFriction;
-    int subjectAnswer;
-    chai3d::cVector3d lumpLocation;
-    chai3d::cVector3d lumpAnswerLocation;
-    double lineAngle;
-    double lineAngleTruth;
-    chai3d::cMatrix3d deviceRotation;
+    chai3d::cVector3d magTrackerPos1;   
+    int pairNo;   
+    chai3d::cMatrix3d deviceRotation0;
+    chai3d::cMatrix3d deviceRotation1;
+    double boxMass;
+    double subjectValue;
 
 } DataRecordStruct;
 
@@ -134,6 +135,7 @@ typedef struct
     double camRadius;
 
     QMutex sharedMutex;
+    QMutex dataRecordMutex;
 
     // the delta mechanism class
     c3DOFDevice* wearableDelta0;
@@ -183,7 +185,8 @@ typedef struct
     bool tempTransparentFlag;
 
     // our data storage variable
-    std::vector<DataRecordStruct> debugData;
+    DataRecordStruct dataRecorder;
+    std::vector<DataRecordStruct> dataRecorderVector;
 
     // bandwidth sin variables
     double bandSinAmpDisp;
@@ -224,7 +227,10 @@ typedef struct
 
     // which sizeWeight box are we using
     int sizeWeightBox;
-    double sizeWeightBoxWeight;
+    double sizeWeightBoxMass;
+
+    // what does the participant respond
+    double subjectResponseWeight;
 
     // protocol loading
     QString frictionProtocolLocation;

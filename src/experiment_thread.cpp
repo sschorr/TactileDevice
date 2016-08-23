@@ -41,7 +41,7 @@ void Experiment_Thread::run()
         case palpationLineBreak:
             break;
         case sizeWeightTrial:
-            //p_CommonData->recordFlag = true;
+            p_CommonData->recordFlag = true;
             break;
 
         case frictionTrial:

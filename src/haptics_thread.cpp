@@ -12,7 +12,6 @@ haptics_thread::~haptics_thread()
 
 void haptics_thread::initialize()
 {
-    InitAccel();
     InitGeneralChaiStuff();
     InitFingerAndTool();
     InitEnvironments();
@@ -87,7 +86,6 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
-            accelSignal = ReadAccel();
             Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
@@ -167,10 +165,10 @@ void haptics_thread::run()
 void haptics_thread::UpdateVRGraphics()
 {
     // Update camera Pos
-    double xPos = p_CommonData->camRadius*cos(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
+    /*double xPos = p_CommonData->camRadius*cos(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
     double yPos = p_CommonData->camRadius*sin(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
     double zPos = p_CommonData->camRadius*cos(p_CommonData->polar*PI/180.0);
-    p_CommonData->cameraPos.set(xPos, yPos, zPos);
+    p_CommonData->cameraPos.set(xPos, yPos, zPos);*/
 
 #ifdef OCULUS
     p_CommonData->lookatPos.set(0, 0, p_CommonData->cameraPos.z());
@@ -456,7 +454,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
-    double forceToPosMultThumb = forceToPosMult*1.2;
+    double forceToPosMultThumb = forceToPosMult*1.0;
 
     // Pos movements in delta mechanism frame (index)
     chai3d::cVector3d desiredPosMovement0 = forceToPosMult*filteredDeviceForce0; //this is only for lateral if we override normal later
@@ -509,30 +507,39 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
 void haptics_thread::RecordData()
 {
-    recordDataCounter = 0;
-    dataRecorder.time = p_CommonData->overallClock.getCurrentTimeSeconds();
-    dataRecorder.jointAngles = p_CommonData->wearableDelta0->GetJointAngles();
-    dataRecorder.motorAngles = p_CommonData->wearableDelta0->GetMotorAngles();
-    dataRecorder.pos = p_CommonData->wearableDelta0->GetCartesianPos();
-    dataRecorder.desiredPos = p_CommonData->wearableDelta0->ReadDesiredPos();
-    dataRecorder.voltageOut = p_CommonData->wearableDelta0->ReadVoltageOutput();
-    dataRecorder.VRInteractionForce = deviceForceRecord0; // last force on tool0
-    dataRecorder.VRInteractionForceGlobal = globalForceRecord0; // last force on tool0 in global coords
-    dataRecorder.motorTorque = p_CommonData->wearableDelta0->motorTorques;
-    dataRecorder.magTrackerPos0 = position0;
-    dataRecorder.magTrackerPos1 = position1;
-    dataRecorder.accelSignal = accelSignal;
-    dataRecorder.tactileFeedback = p_CommonData->tactileFeedback;
-    dataRecorder.referenceFirst = p_CommonData->referenceFirst;
-    dataRecorder.pairNo = p_CommonData->pairNo;
-    dataRecorder.referenceFriction = p_CommonData->referenceFriction;
-    dataRecorder.comparisonFriction = p_CommonData->comparisonFriction;
-    dataRecorder.subjectAnswer = p_CommonData->subjectAnswer;
-    dataRecorder.lineAngle = p_CommonData->indicatorRot;
-    dataRecorder.lineAngleTruth = p_CommonData->tissueRot;
-    dataRecorder.deviceRotation = deviceRotation;
+    p_CommonData->dataRecordMutex.lock();
 
-    p_CommonData->debugData.push_back(dataRecorder);
+    // modified for new experiment, now with both devices
+    recordDataCounter = 0;
+    p_CommonData->dataRecorder.time = p_CommonData->overallClock.getCurrentTimeSeconds();
+    p_CommonData->dataRecorder.jointAngles0 = p_CommonData->wearableDelta0->GetJointAngles();
+    p_CommonData->dataRecorder.motorAngles0 = p_CommonData->wearableDelta0->GetMotorAngles();
+    p_CommonData->dataRecorder.pos0 = p_CommonData->wearableDelta0->GetCartesianPos();
+    p_CommonData->dataRecorder.desiredPos0 = p_CommonData->wearableDelta0->ReadDesiredPos();
+    p_CommonData->dataRecorder.voltageOut0 = p_CommonData->wearableDelta0->ReadVoltageOutput();
+    p_CommonData->dataRecorder.VRInteractionForce0 = deviceForceRecord0; // last force on tool0
+    p_CommonData->dataRecorder.VRInteractionForceGlobal0 = globalForceRecord0; // last force on tool0 in global coords
+    p_CommonData->dataRecorder.motorTorque0 = p_CommonData->wearableDelta0->motorTorques;
+    p_CommonData->dataRecorder.magTrackerPos0 = position0;
+
+    p_CommonData->dataRecorder.jointAngles1 = p_CommonData->wearableDelta1->GetJointAngles();
+    p_CommonData->dataRecorder.motorAngles1 = p_CommonData->wearableDelta1->GetMotorAngles();
+    p_CommonData->dataRecorder.pos1 = p_CommonData->wearableDelta1->GetCartesianPos();
+    p_CommonData->dataRecorder.desiredPos1 = p_CommonData->wearableDelta1->ReadDesiredPos();
+    p_CommonData->dataRecorder.voltageOut1 = p_CommonData->wearableDelta1->ReadVoltageOutput();
+    p_CommonData->dataRecorder.VRInteractionForce1 = deviceForceRecord1; // last force on tool0
+    p_CommonData->dataRecorder.VRInteractionForceGlobal1 = globalForceRecord1; // last force on tool0 in global coords
+    p_CommonData->dataRecorder.motorTorque1 = p_CommonData->wearableDelta1->motorTorques;
+    p_CommonData->dataRecorder.magTrackerPos1 = position1;
+
+    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0;
+    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1;
+    p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
+    p_CommonData->dataRecorder.boxMass = p_CommonData->sizeWeightBoxMass;
+    p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
+    p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
+
+    p_CommonData->dataRecordMutex.unlock();
 }
 
 void haptics_thread::InitGeneralChaiStuff()
@@ -554,7 +561,7 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->cameraPos.set(0.18, 0.0, 0);
+    p_CommonData->cameraPos.set(0.3, 0.0, -.450);
     p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
     p_CommonData->upVector.set(0.0, 0.0, -1.0);
     p_CommonData->p_camera->set( p_CommonData->cameraPos,    //(0.25, 0, -.25),    // camera position (eye)
@@ -566,9 +573,9 @@ void haptics_thread::InitGeneralChaiStuff()
     p_CommonData->p_camera->setClippingPlanes(0.01, 20.0);
 
     // the camera is updated to a position based on these params
-    p_CommonData->azimuth = 0.0;
-    p_CommonData->polar = 135.0; //higher number puts us higher in the air
-    p_CommonData->camRadius = 0.45;
+    //p_CommonData->azimuth = 0.0;
+    //p_CommonData->polar = 135.0; //higher number puts us higher in the air
+    //p_CommonData->camRadius = 0.45;
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -1164,40 +1171,6 @@ void haptics_thread::CommandCircPos(Eigen::Vector3d inputMotionAxis)
     }
 }
 
-void haptics_thread::InitAccel()
-{
-#ifdef SENSORAY626
-    // PERFORM INITIALIZATION OF SENSORAY FOR READING IN ADC
-    // Allocate data structures. We allocate enough space for maximum possible
-    // number of items (16) even though this example only has 3 items. Although
-    // this is not required, it is the recommended practice to prevent programming
-    // errors if your application ever modifies the number of items in the poll list.
-
-    // Populate the poll list.
-    poll_list[0] = 2 | RANGE_5V | EOPL; // Chan 2, ±5V range, mark as list end.
-    // Prepare for A/D conversions by passing the poll list to the driver.
-    S626_ResetADC( 0, poll_list );
-    // Digitize all items in the poll list. As long as the poll list is not modified,
-    // S626_ReadADC() can be called repeatedly without calling S626_ResetADC() again.
-    // This could be implemented as two calls: S626_StartADC() and S626_WaitDoneADC().
-    S626_ReadADC( 0, databuf ); //board 0, data in databuf
-#endif
-}
-
-chai3d::cVector3d haptics_thread::ReadAccel()
-{
-#ifdef SENSORAY626
-    S626_ReadADC(0, databuf);
-    chai3d::cVector3d returnVec;
-    returnVec.set(0,0,databuf[0]);
-    //qDebug() << returnVec.z();
-    return returnVec;
-#endif SENSORAY626
-
-    chai3d::cVector3d emptyVec;
-    return emptyVec; //if sensoray is not active, just return 0
-}
-
 void haptics_thread::WriteDataToFile()
 {
     p_CommonData->recordFlag = false;
@@ -1206,64 +1179,94 @@ void haptics_thread::WriteDataToFile()
     //write data to file when we are done
     std::ofstream file;
     file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + tempFreq.toStdString() + ".txt");
-    for (int i=0; i < p_CommonData->debugData.size(); i++)
+    for (int i=0; i < p_CommonData->dataRecorderVector.size(); i++)
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-        file << p_CommonData->debugData[i].time << "," << " "
-        << p_CommonData->debugData[i].pos[0] << "," << " "
-        << p_CommonData->debugData[i].pos[1] << "," << " "
-        << p_CommonData->debugData[i].pos[2] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[0] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[1] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[2] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-        << p_CommonData->debugData[i].tactileFeedback << "," << " "
-        << p_CommonData->debugData[i].referenceFirst << "," << " "
-        << p_CommonData->debugData[i].pairNo << "," << " "
-        << p_CommonData->debugData[i].referenceFriction << "," << " "
-        << p_CommonData->debugData[i].comparisonFriction << "," << " "
-        << p_CommonData->debugData[i].subjectAnswer << "," << " "
-        << p_CommonData->debugData[i].lineAngle << "," << " "
-        << p_CommonData->debugData[i].lineAngleTruth << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,2) << "," << " "
+        file << p_CommonData->dataRecorderVector[i].time << "," << " "
+
+        << p_CommonData->dataRecorderVector[i].pos0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].pos0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].pos0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut0[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut0[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut0[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos0.x() << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos0.y() << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos0.z() << "," << " "
+
+        << p_CommonData->dataRecorderVector[i].pos1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].pos1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].pos1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].desiredPos1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForce1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].VRInteractionForceGlobal1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorAngles1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].jointAngles1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].motorTorque1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut1[0] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut1[1] << "," << " "
+        << p_CommonData->dataRecorderVector[i].voltageOut1[2] << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos1.x() << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos1.y() << "," << " "
+        << p_CommonData->dataRecorderVector[i].magTrackerPos1.z() << "," << " "
+
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(0,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(0,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(0,2) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(1,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(1,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(1,2) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(2,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(2,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation0(2,2) << "," << " "
+
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(0,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(0,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(0,2) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(1,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(1,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(1,2) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(2,0) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(2,1) << "," << " "
+        << p_CommonData->dataRecorderVector[i].deviceRotation1(2,2) << "," << " "
+
+
+        << p_CommonData->dataRecorderVector[i].pairNo << "," << " "
+
         << std::endl;
     }
     file.close();
-    p_CommonData->debugData.clear();
+    p_CommonData->dataRecorderVector.clear();
 }
 
 void haptics_thread::rotateTissueLineDisp(double angle)

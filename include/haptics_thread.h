@@ -65,9 +65,6 @@ public:
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
 
-    void InitAccel();
-    chai3d::cVector3d ReadAccel();
-
     // clocks
     chai3d::cPrecisionClock rateClock;
     chai3d::cPrecisionClock rateDisplayClock;
@@ -128,8 +125,6 @@ public:
     chai3d::cVector3d position1; chai3d::cMatrix3d rotation1;
     chai3d::cMatrix3d fingerRotation1; chai3d::cMatrix3d deviceRotation1;
 
-    chai3d::cMatrix3d deviceRotation;
-
     // ints for display counters
     int rateDisplayCounter;
     int recordDataCounter;
@@ -137,11 +132,6 @@ public:
     // variables for handling ADC read in
     BYTE poll_list[16]; // List of items to be digitized.
     SHORT databuf[16]; // Buffer to receive digitized data.
-
-    // accelerometer signals
-    chai3d::cVector3d accelSignal;
-
-    DataRecordStruct dataRecorder;
 
 protected:
     void run();

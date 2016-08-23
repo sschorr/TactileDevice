@@ -455,7 +455,7 @@ void MainWindow::on_ZeroSliders_clicked()
 
 void MainWindow::on_startSin_clicked()
 {
-    p_CommonData->debugData.clear();
+    p_CommonData->dataRecorderVector.clear();
     p_CommonData->currentControlState = sinControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
@@ -467,7 +467,7 @@ void MainWindow::on_startSin_clicked()
 
 void MainWindow::on_startCircle_clicked()
 {
-    p_CommonData->debugData.clear();
+    p_CommonData->dataRecorderVector.clear();
     p_CommonData->currentControlState = circControlMode;
     ui->sliderControl->setChecked(false);
     ui->VRControl->setChecked(false);
@@ -478,8 +478,6 @@ void MainWindow::on_startCircle_clicked()
 void MainWindow::on_setDirectory_clicked()
 {    
     bool ok;
-
-
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
                                         "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/PalpationLine Exp/Subjects",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -508,31 +506,60 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(CheckFingers()) //check that fingers aren't where the block is gonna go
         {
-            p_CommonData->sharedMutex.lock();
             chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
+
+            // if coming off of a completed trial or break, increment trial number and set the state to be an experimentTrial
             if((p_CommonData->pairNo == 2) || (p_CommonData->currentExperimentState == trialBreak))
             {
-                p_CommonData->currentExperimentState = sizeWeightTrial;
+                // if it was a trial, record the data from the last trial
+                if(p_CommonData->currentExperimentState == sizeWeightTrial)
+                {
+                    // prompt for comparative weight
+                    bool ok;
+                    QString subjectEval = QInputDialog::getText(0, "Input Weight",
+                                                         "Weight:", QLineEdit::Normal, " ",
+                                                         &ok);
+                    p_CommonData->subjectResponseWeight = subjectEval.toFloat();
+                    p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
+                    p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
+
+                    p_CommonData->dataRecordMutex.lock();
+                    localDataRecorderVector = p_CommonData->dataRecorderVector;
+                    p_CommonData->dataRecorderVector.clear();
+                    p_CommonData->dataRecordMutex.unlock();
+                    WriteDataToFile();
+                }
                 p_CommonData->trialNo = p_CommonData->trialNo + 1;
             }
 
-            QString nextTrialType = p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/);
-            //qDebug() << nextTrialType;
-            if (nextTrialType == "break")
+            // after incrementing, check if this trial is a break and rearrange
+            QString trialType = p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL /*default*/);
+
+            p_CommonData->sharedMutex.lock(); // Lock so we don't disrupt blocks while ODE updates
+            if (trialType == "break")
             {
-                //qDebug() << "made it into break";
                 p_CommonData->currentExperimentState = trialBreak;
+                p_CommonData->dataRecordMutex.lock();
+                p_CommonData->dataRecorderVector.clear();
+                p_CommonData->dataRecordMutex.unlock();
                 p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
                 p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
                 p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
                 p_CommonData->ODEBody4->setLocalPos(1,  0.4, -0.2);
             }
+
+            // trial block manipulation
             else if(p_CommonData->currentExperimentState == sizeWeightTrial || p_CommonData->currentExperimentState == trialBreak)
-            {
-                //qDebug() << "In standard section";
+            {                                
+                // if going into showing standard (going to pair 1)
                 if(p_CommonData->pairNo == 2)
                 {
+                    p_CommonData->dataRecordMutex.lock();
+                    p_CommonData->dataRecorderVector.clear();
+                    p_CommonData->dataRecordMutex.unlock();
+
                     p_CommonData->pairNo = 1;
+                    p_CommonData->currentExperimentState = sizeWeightTrial;
 
                     // Put the other blocks out of view
                     p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
@@ -543,6 +570,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                     p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
                     p_CommonData->ODEBody4->setLocalRot(zeroRot);
                 }
+                // if going into showing "comparison" (going to pair 2)
                 else if(p_CommonData->pairNo == 1)
                 {
                     p_CommonData->pairNo = 2;
@@ -553,33 +581,32 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                     p_CommonData->ODEBody4->setLocalPos(1,  0.4, -0.2);
 
                     p_CommonData->sizeWeightBox = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "BoxNo", NULL /*default*/));
-                    p_CommonData->sizeWeightBoxWeight = atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Weight", NULL /*default*/));
-                    p_CommonData->sizeWeightBoxWeight = p_CommonData->sizeWeightBoxWeight*0.001; //convert grams to kg
+                    p_CommonData->sizeWeightBoxMass = 0.001*atoi(p_CommonData->sizeWeightProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Weight", NULL /*default*/));
 
-                    //qDebug() <<  p_CommonData->sizeWeightBox << p_CommonData->sizeWeightBoxWeight;
                     if(p_CommonData->sizeWeightBox == 1)
                     {
                         p_CommonData->ODEBody1->setLocalPos(0, 0, -0.025);
                         p_CommonData->ODEBody1->setLocalRot(zeroRot);
-                        p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxWeight);
+                        p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxMass);
                     }
                     else if(p_CommonData->sizeWeightBox == 2)
                     {
                         p_CommonData->ODEBody2->setLocalPos(0, 0, -0.05);
                         p_CommonData->ODEBody2->setLocalRot(zeroRot);
-                        p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxWeight);
+                        p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxMass);
                     }
                     else if(p_CommonData->sizeWeightBox == 3)
                     {
                         p_CommonData->ODEBody3->setLocalPos(0, 0, -0.075);
                         p_CommonData->ODEBody3->setLocalRot(zeroRot);
-                        p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxWeight);
+                        p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxMass);
                     }
                 }
             }
             p_CommonData->sharedMutex.unlock();
         }
     }
+
     if (a_event->key() == Qt::Key_T)
     {
         if (p_CommonData->m_flagTissueTransparent == true)
@@ -680,7 +707,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                         {
                             p_CommonData->currentExperimentState = trialBreak;
                             p_CommonData->recordFlag = false;
-                            p_CommonData->debugData.clear();
+                            p_CommonData->dataRecorderVector.clear();
                             p_CommonData->trialNo = p_CommonData->trialNo + 1;
                         }
 
@@ -865,7 +892,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
 void MainWindow::WriteDataToFile()
 {
-    p_CommonData->recordFlag = false;
+    p_CommonData->recordFlag = false;    
 
     char buffer[33];
     itoa(p_CommonData->trialNo,buffer,10);
@@ -873,64 +900,95 @@ void MainWindow::WriteDataToFile()
     //write data to file when we are done
     std::ofstream file;
     file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + buffer + ".txt");
-    for (int i=0; i < p_CommonData->debugData.size(); i++)
+    for (int i=0; i < localDataRecorderVector.size(); i++)
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
-        file << p_CommonData->debugData[i].time << "," << " "
-        << p_CommonData->debugData[i].pos[0] << "," << " "
-        << p_CommonData->debugData[i].pos[1] << "," << " "
-        << p_CommonData->debugData[i].pos[2] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[0] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[1] << "," << " "
-        << p_CommonData->debugData[i].desiredPos[2] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[0] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[1] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForce[2] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[0] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[1] << "," << " "
-        << p_CommonData->debugData[i].VRInteractionForceGlobal[2] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[0] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[1] << "," << " "
-        << p_CommonData->debugData[i].motorAngles[2] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[0] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[1] << "," << " "
-        << p_CommonData->debugData[i].jointAngles[2] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[0] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[1] << "," << " "
-        << p_CommonData->debugData[i].motorTorque[2] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[0] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[1] << "," << " "
-        << p_CommonData->debugData[i].voltageOut[2] << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.x() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.y() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos0.z() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.x() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.y() << "," << " "
-        << p_CommonData->debugData[i].magTrackerPos1.z() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.x() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.y() << "," << " "
-        << p_CommonData->debugData[i].accelSignal.z() << "," << " "
-        << p_CommonData->debugData[i].tactileFeedback << "," << " "
-        << p_CommonData->debugData[i].referenceFirst << "," << " "
-        << p_CommonData->debugData[i].pairNo << "," << " "
-        << p_CommonData->debugData[i].referenceFriction << "," << " "
-        << p_CommonData->debugData[i].comparisonFriction << "," << " "
-        << p_CommonData->debugData[i].subjectAnswer << "," << " "
-        << p_CommonData->debugData[i].lineAngle << "," << " "
-        << p_CommonData->debugData[i].lineAngleTruth << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(0,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(1,2) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,0) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,1) << "," << " "
-        << p_CommonData->debugData[i].deviceRotation(2,2) << "," << " "
+        file << localDataRecorderVector[i].time << "," << " "
+
+        << localDataRecorderVector[i].pos0[0] << "," << " "
+        << localDataRecorderVector[i].pos0[1] << "," << " "
+        << localDataRecorderVector[i].pos0[2] << "," << " "
+        << localDataRecorderVector[i].desiredPos0[0] << "," << " "
+        << localDataRecorderVector[i].desiredPos0[1] << "," << " "
+        << localDataRecorderVector[i].desiredPos0[2] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce0[0] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce0[1] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce0[2] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal0[0] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal0[1] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal0[2] << "," << " "
+        << localDataRecorderVector[i].motorAngles0[0] << "," << " "
+        << localDataRecorderVector[i].motorAngles0[1] << "," << " "
+        << localDataRecorderVector[i].motorAngles0[2] << "," << " "
+        << localDataRecorderVector[i].jointAngles0[0] << "," << " "
+        << localDataRecorderVector[i].jointAngles0[1] << "," << " "
+        << localDataRecorderVector[i].jointAngles0[2] << "," << " "
+        << localDataRecorderVector[i].motorTorque0[0] << "," << " "
+        << localDataRecorderVector[i].motorTorque0[1] << "," << " "
+        << localDataRecorderVector[i].motorTorque0[2] << "," << " "
+        << localDataRecorderVector[i].voltageOut0[0] << "," << " "
+        << localDataRecorderVector[i].voltageOut0[1] << "," << " "
+        << localDataRecorderVector[i].voltageOut0[2] << "," << " "
+        << localDataRecorderVector[i].magTrackerPos0.x() << "," << " "
+        << localDataRecorderVector[i].magTrackerPos0.y() << "," << " "
+        << localDataRecorderVector[i].magTrackerPos0.z() << "," << " "
+
+        << localDataRecorderVector[i].pos1[0] << "," << " "
+        << localDataRecorderVector[i].pos1[1] << "," << " "
+        << localDataRecorderVector[i].pos1[2] << "," << " "
+        << localDataRecorderVector[i].desiredPos1[0] << "," << " "
+        << localDataRecorderVector[i].desiredPos1[1] << "," << " "
+        << localDataRecorderVector[i].desiredPos1[2] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce1[0] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce1[1] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForce1[2] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal1[0] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal1[1] << "," << " "
+        << localDataRecorderVector[i].VRInteractionForceGlobal1[2] << "," << " "
+        << localDataRecorderVector[i].motorAngles1[0] << "," << " "
+        << localDataRecorderVector[i].motorAngles1[1] << "," << " "
+        << localDataRecorderVector[i].motorAngles1[2] << "," << " "
+        << localDataRecorderVector[i].jointAngles1[0] << "," << " "
+        << localDataRecorderVector[i].jointAngles1[1] << "," << " "
+        << localDataRecorderVector[i].jointAngles1[2] << "," << " "
+        << localDataRecorderVector[i].motorTorque1[0] << "," << " "
+        << localDataRecorderVector[i].motorTorque1[1] << "," << " "
+        << localDataRecorderVector[i].motorTorque1[2] << "," << " "
+        << localDataRecorderVector[i].voltageOut1[0] << "," << " "
+        << localDataRecorderVector[i].voltageOut1[1] << "," << " "
+        << localDataRecorderVector[i].voltageOut1[2] << "," << " "
+        << localDataRecorderVector[i].magTrackerPos1.x() << "," << " "
+        << localDataRecorderVector[i].magTrackerPos1.y() << "," << " "
+        << localDataRecorderVector[i].magTrackerPos1.z() << "," << " "
+
+        << localDataRecorderVector[i].deviceRotation0(0,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(0,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(0,2) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(1,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(1,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(1,2) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(2,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(2,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation0(2,2) << "," << " "
+
+        << localDataRecorderVector[i].deviceRotation1(0,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(0,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(0,2) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(1,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(1,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(1,2) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(2,0) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(2,1) << "," << " "
+        << localDataRecorderVector[i].deviceRotation1(2,2) << "," << " "
+
+        << localDataRecorderVector[i].boxMass << "," << " "
+        << localDataRecorderVector[i].subjectValue << "," << " "
+        << localDataRecorderVector[i].pairNo << "," << " "
+
         << std::endl;
     }
     file.close();
-    p_CommonData->debugData.clear();
+    localDataRecorderVector.clear();
 }
 
 void MainWindow::on_palpationButton_clicked()
@@ -963,8 +1021,8 @@ void MainWindow::on_loadProtocol_clicked()
 void MainWindow::on_loadProtocol_2_clicked()
 {
     //Open dialog box to get protocol file and save into variable
-    //QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
-    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";
+    QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
+    //QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";
 
     p_CommonData->sizeWeightProtocolLocation = temp;
     int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());
@@ -992,7 +1050,7 @@ void MainWindow::on_startExperiment_clicked()
     double radInc = 0.05;
     p_CommonData->polar = p_CommonData->polar - 5*degInc;
     p_CommonData->camRadius = p_CommonData->camRadius + radInc;
-    p_CommonData->debugData.clear();
+    p_CommonData->dataRecorderVector.clear();
 }
 
 void MainWindow::on_startExperiment_2_clicked()
@@ -1003,7 +1061,7 @@ void MainWindow::on_startExperiment_2_clicked()
     p_CommonData->currentDynamicObjectState = dynamicExperiment;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
-    p_CommonData->debugData.clear();
+    p_CommonData->dataRecorderVector.clear();
     ui->VRControl->setChecked(true);
 }
 
