@@ -65,6 +65,7 @@ typedef struct
     chai3d::cMatrix3d deviceRotation0;
     chai3d::cMatrix3d deviceRotation1;
     double boxMass;
+    double standardMass;
     int boxNo;
     double subjectValue;
 
@@ -229,6 +230,7 @@ typedef struct
     // which sizeWeight box are we using
     int sizeWeightBox;
     double sizeWeightBoxMass;
+    double sizeWeightStandardMass;
 
     // what does the participant respond
     double subjectResponseWeight;

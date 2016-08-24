@@ -536,6 +536,7 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
     p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
     p_CommonData->dataRecorder.boxMass = p_CommonData->sizeWeightBoxMass;
+    p_CommonData->dataRecorder.standardMass = p_CommonData->sizeWeightStandardMass;
     p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
     p_CommonData->dataRecorder.boxNo = p_CommonData->sizeWeightBox;
     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
@@ -917,6 +918,7 @@ void haptics_thread::RenderDynamicBodies()
         // Put standard block on the table
         p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
         p_CommonData->ODEBody4->setLocalRot(zeroRot);
+        p_CommonData->sizeWeightStandardMass = mass2;
         p_CommonData->ODEBody4->setMass(mass2);
     }
     // if just rendering dynamic environments without an experiment

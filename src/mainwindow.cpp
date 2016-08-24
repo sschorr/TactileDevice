@@ -981,6 +981,7 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].deviceRotation1(2,2) << "," << " "
 
         << localDataRecorderVector[i].boxMass << "," << " "
+        << localDataRecorderVector[i].standardMass << "," << " "
         << localDataRecorderVector[i].boxNo << "," << " "
         << localDataRecorderVector[i].subjectValue << "," << " "
         << localDataRecorderVector[i].pairNo << "," << " "
