@@ -919,6 +919,7 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
         p_CommonData->ODEBody4->setLocalRot(zeroRot);
         p_CommonData->sizeWeightStandardMass = mass2;
+        qDebug() << mass2;
         p_CommonData->ODEBody4->setMass(mass2);
     }
     // if just rendering dynamic environments without an experiment

@@ -1023,7 +1023,7 @@ void MainWindow::on_loadProtocol_2_clicked()
 {
     //Open dialog box to get protocol file and save into variable
     //QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
-    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";
+    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_002/Protocol.ini";
 
     p_CommonData->sizeWeightProtocolLocation = temp;
     int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());
