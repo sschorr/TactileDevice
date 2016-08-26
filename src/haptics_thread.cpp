@@ -443,6 +443,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double fc = 10.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
+    //qDebug() << alpha;
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
@@ -916,7 +917,7 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
 
         // Put standard block on the table
-        p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
+        p_CommonData->ODEBody4->setLocalPos(0.025,0,-0.05);
         p_CommonData->ODEBody4->setLocalRot(zeroRot);
         p_CommonData->sizeWeightStandardMass = mass2;
         qDebug() << mass2;

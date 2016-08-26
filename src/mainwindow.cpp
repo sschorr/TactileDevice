@@ -567,7 +567,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                     p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
 
                     // Put standard block on the table
-                    p_CommonData->ODEBody4->setLocalPos(0,0,-0.05);
+                    p_CommonData->ODEBody4->setLocalPos(0.025,0,-0.05);
                     p_CommonData->ODEBody4->setLocalRot(zeroRot);
                 }
                 // if going into showing "comparison" (going to pair 2)
@@ -585,19 +585,19 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
                     if(p_CommonData->sizeWeightBox == 1)
                     {
-                        p_CommonData->ODEBody1->setLocalPos(0, 0, -0.025);
+                        p_CommonData->ODEBody1->setLocalPos(0.025, 0, -0.025);
                         p_CommonData->ODEBody1->setLocalRot(zeroRot);
                         p_CommonData->ODEBody1->setMass(p_CommonData->sizeWeightBoxMass);
                     }
                     else if(p_CommonData->sizeWeightBox == 2)
                     {
-                        p_CommonData->ODEBody2->setLocalPos(0, 0, -0.05);
+                        p_CommonData->ODEBody2->setLocalPos(0.025, 0, -0.05);
                         p_CommonData->ODEBody2->setLocalRot(zeroRot);
                         p_CommonData->ODEBody2->setMass(p_CommonData->sizeWeightBoxMass);
                     }
                     else if(p_CommonData->sizeWeightBox == 3)
                     {
-                        p_CommonData->ODEBody3->setLocalPos(0, 0, -0.075);
+                        p_CommonData->ODEBody3->setLocalPos(0.025, 0, -0.075);
                         p_CommonData->ODEBody3->setLocalRot(zeroRot);
                         p_CommonData->ODEBody3->setMass(p_CommonData->sizeWeightBoxMass);
                     }
@@ -1023,7 +1023,7 @@ void MainWindow::on_loadProtocol_2_clicked()
 {
     //Open dialog box to get protocol file and save into variable
     //QString temp = "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_001/Protocol.ini";//QFileDialog::getOpenFileName();
-    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_002/Protocol.ini";
+    QString temp = "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/SizeWeight/Subjects/Subject_004/Protocol.ini";
 
     p_CommonData->sizeWeightProtocolLocation = temp;
     int error = p_CommonData->sizeWeightProtocolFile.LoadFile(temp.toStdString().c_str());

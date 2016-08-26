@@ -619,7 +619,7 @@ void c3DOFDevice::JointController(double Kp, double Kd)
         firstTimeThrough = false;
     }
 
-    Eigen::Vector3d currAngVel = (jointAngles-lastAngles)/(1.0/(3000.0));
+    Eigen::Vector3d currAngVel = (jointAngles-lastAngles)/(1.0/(2000.0));
     Eigen::Vector3d filteredVel = alpha*currAngVel + (1.0-alpha)*lastAngVel;
     jointTorques = Kp*(desJointAngles - jointAngles) + Kd*(desAngleVel-filteredVel);
 
