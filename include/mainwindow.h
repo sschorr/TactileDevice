@@ -149,6 +149,11 @@ private slots:
     void on_startExperiment_2_clicked();
     bool CheckFingers();
     void on_impulseForward_clicked();
+    void on_impulseBackward_clicked();
+    void on_impulseRight_clicked();
+    void on_impulseLeft_clicked();
+    void on_impulseUp_clicked();
+    void on_impulseDown_clicked();
 };
 
 #endif // MAINWINDOW_H
