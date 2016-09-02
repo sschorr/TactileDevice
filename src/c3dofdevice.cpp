@@ -492,7 +492,7 @@ void c3DOFDevice::SetDesiredPos(Eigen::Vector3d desiredPosArg)
     double xNegLimit = this->neutralPos[0] - xRange;
     double yPosLimit = this->neutralPos[1] + yRange;
     double yNegLimit = this->neutralPos[1] - yRange;
-    double zPosLimit = this->neutralPos[2] + zRange;
+    double zPosLimit = this->neutralPos[2] + zRange*0.7;
     double zNegLimit = this->neutralPos[2] - zRange;
     if (desiredPosArg[0] > xPosLimit) desiredPosArg[0] = xPosLimit;
     if (desiredPosArg[0] < xNegLimit) desiredPosArg[0] = xNegLimit;

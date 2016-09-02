@@ -59,6 +59,8 @@ void haptics_thread::initialize()
     p_CommonData->deviceComputedForce.set(0,0,0);
     p_CommonData->deviceComputedForce.set(0,0,0);
 
+    p_CommonData->workspaceScaleFactor = 1;
+
     currTime = 0;
     lastTime = 0;
 
@@ -220,30 +222,32 @@ void haptics_thread::UpdateVRGraphics()
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
 
-    m_tool0->updateFromDevice();  // update position and orientation of tool 0(and sphere that represents tool)
-    p_CommonData->chaiMagDevice0->getPosition(position0); // get position and rotation of the delta mechanism (already transformed from magTracker)
+    // update user scale factor (if not 1, need to reevaluate how and where we get data to store our position and rotation
+    m_tool0->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
+    m_tool1->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
+
+    // update position and orientation of tool 0(and sphere that represents tool)
+    m_tool0->updateFromDevice();
+    position0 = m_tool0->m_hapticPoint->getGlobalPosGoal(); // get position and rotation of the delta mechanism (already transformed from magTracker)
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
     deviceRotation0 = rotation0; //the chai device already rotates the tracker return based on the finger harness
-    m_curSphere0->setLocalPos(position0); // set the visual representation to match
-    m_curSphere0->setLocalRot(rotation0);
-    m_tool0->computeInteractionForces();
 
-    // update position of finger to stay on proxy point    
+    // update position and orientation of tool 1
+    m_tool1->updateFromDevice();
+    position1 = m_tool1->m_hapticPoint->getGlobalPosGoal();
+    p_CommonData->chaiMagDevice1->getRotation(rotation1);
+    deviceRotation1 = rotation1;
+
+    // update position of finger to stay on proxy point
     chai3d::cVector3d fingerOffset(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     fingerRotation0 = rotation0;
     fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
     finger->setLocalRot(fingerRotation0);
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
-
-    // update position and orientation of tool 1
-    m_tool1->updateFromDevice();
-    p_CommonData->chaiMagDevice1->getPosition(position1);
-    p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    deviceRotation1 = rotation1;
-    m_curSphere1->setLocalPos(position1);
-    m_curSphere1->setLocalRot(rotation1);
-    m_tool1->computeInteractionForces();
+    m_curSphere0->setLocalPos(position0); // set the sphere visual representation to match
+    m_curSphere0->setLocalRot(rotation0);
+    m_tool0->computeInteractionForces();
 
     // update position of finger to stay on proxy point    
     chai3d::cVector3d thumbOffset(0,-0.01,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
@@ -252,6 +256,11 @@ void haptics_thread::UpdateVRGraphics()
     fingerRotation1.rotateAboutLocalAxisDeg(1,0,0,90);
     thumb->setLocalRot(fingerRotation1);
     thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
+    m_curSphere1->setLocalPos(position1);
+    m_curSphere1->setLocalRot(rotation1);
+    m_tool1->computeInteractionForces();
+
+    //qDebug() << position0.y() << position1.y();
 
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
@@ -413,9 +422,12 @@ void haptics_thread::UpdateVRGraphics()
 
 void haptics_thread::ComputeVRDesiredDevicePos()
 {
-    //perform transformation to get "device forces"
+    // perform transformation to get "device forces"
     computedForce0 = m_tool0->getDeviceGlobalForce();
     computedForce1 = m_tool1->getDeviceGlobalForce();
+
+    // add a component for impulses if need be (will be 0 if no impulses)
+    addImpulseDisp();
 
     // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
@@ -476,7 +488,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         desiredPosMovement1.y(0);
     }    
 
-    // don't allow the tactor to move away from finger
+    // don't allow the tactor to move away from finger when computing VR interaction
     double vertPosMovement0 = desiredPosMovement0.z();
     double vertPosMovement1 = desiredPosMovement1.z();
     if(vertPosMovement0 > 0)
@@ -584,7 +596,7 @@ void haptics_thread::InitGeneralChaiStuff()
     light = new chai3d::cDirectionalLight(world);
     world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(-2.0, -0.5, 1.0));  // define the direction of the light beam
+    light->setDir(chai3d::cVector3d(2.0, -0.5, 1.0));  // define the direction of the light beam
 
 }
 
@@ -640,9 +652,9 @@ void haptics_thread::InitFingerAndTool()
 
     thumb = new chai3d::cMultiMesh(); //create the thumb
     world->addChild(thumb);
-    finger->setShowFrame(false);
-    finger->setFrameSize(0.05);
-    finger->setLocalPos(0,0,0);
+    thumb->setShowFrame(false);
+    thumb->setFrameSize(0.05);
+    thumb->setLocalPos(0,0,0);
 
     // load an object file
     if(cLoadFileOBJ(finger, "./Resources/FingerModel.obj")){
@@ -1586,9 +1598,25 @@ void haptics_thread::RenderPalpation()
     mat0.setRed();
     p_CommonData->p_indicator->setMaterial(mat0);
     p_CommonData->p_indicator->setTransparencyLevel(1);
-
 }
 
+void haptics_thread::addImpulseDisp(void)
+{
+    double t = p_CommonData->impulseClock.getCurrentTimeSeconds();
+    if (t > 1.0)
+        t = 0;
+    double desPeak = 1;
+    double c1 = 3.0;
+    double c2 = 15.0;
+    double tPeak = -log(c1/c2)/(c2-c1);
+    double rawMag = exp(-c1*tPeak) - exp(-c2*tPeak);
+    double A = desPeak/rawMag;
+    double output = A*(exp(-c1*t) - exp(-c2*t));
+
+
+    computedForce0 = computedForce0 + output*p_CommonData->globalImpulseDir;
+    computedForce1 = computedForce1 + output*p_CommonData->globalImpulseDir;
+}
 
 
 

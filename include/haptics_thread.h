@@ -64,6 +64,7 @@ public:
     void SetInitJointAngles();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
+    void addImpulseDisp();
 
     // clocks
     chai3d::cPrecisionClock rateClock;

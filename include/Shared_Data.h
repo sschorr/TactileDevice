@@ -157,6 +157,9 @@ typedef struct
     //clock for doing the startup trajectory
     chai3d::cPrecisionClock calibClock;
 
+    //clock for impulse function
+    chai3d::cPrecisionClock impulseClock;
+
     // determine start time for bandwidth sin
     double sinStartTime;
 
@@ -235,6 +238,13 @@ typedef struct
 
     // what does the participant respond
     double subjectResponseWeight;
+
+    // workspace scale factor
+    double workspaceScaleFactor;
+
+    // added displacement from impulse
+    chai3d::cVector3d globalImpulseDir;
+    chai3d::cVector3d localImpulseTorque;
 
     // protocol loading
     QString frictionProtocolLocation;

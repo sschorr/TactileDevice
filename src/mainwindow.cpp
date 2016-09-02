@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef OCULUS
     windowGLDisplay = new Widget_OpenGLDisplay(this->centralWidget());
     windowGLDisplay->setObjectName(QStringLiteral("windowGLDisplay"));
-    windowGLDisplay->setGeometry(QRect(10, 20, 881, 561));
+    windowGLDisplay->setGeometry(QRect(20, 50, 661, 431));
 #endif
 }
 
@@ -1241,6 +1241,44 @@ bool MainWindow::CheckFingers()
         return false;
 }
 
+void MainWindow::on_impulseForward_clicked()
+{
+    p_CommonData->globalImpulseDir.set(-1,0,0);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
 
+void MainWindow::on_impulseBackward_clicked()
+{
+    p_CommonData->globalImpulseDir.set(1,0,0);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
 
+void MainWindow::on_impulseRight_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,-1,0);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
 
+void MainWindow::on_impulseLeft_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,1,0);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
+
+void MainWindow::on_impulseUp_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,0,-1);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
+
+void MainWindow::on_impulseDown_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,0,1);
+    p_CommonData->impulseClock.reset();
+    p_CommonData->impulseClock.start(true);
+}
