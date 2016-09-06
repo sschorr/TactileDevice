@@ -5,8 +5,8 @@
 
 // defines indicating what physical hardware is present
 
-//#define MAGTRACKER
-//#define SENSORAY826
+#define MAGTRACKER
+#define SENSORAY826
 //#define OCULUS
 //#define QWT
 

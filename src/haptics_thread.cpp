@@ -223,8 +223,9 @@ void haptics_thread::UpdateVRGraphics()
     world->computeGlobalPositions(true);
 
     // update user scale factor (if not 1, need to reevaluate how and where we get data to store our position and rotation
-    m_tool0->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
-    m_tool1->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
+    //breaks dynamic objects
+    //m_tool0->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
+    //m_tool1->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
 
     // update position and orientation of tool 0(and sphere that represents tool)
     m_tool0->updateFromDevice();
@@ -1605,7 +1606,7 @@ void haptics_thread::addImpulseDisp(void)
     double t = p_CommonData->impulseClock.getCurrentTimeSeconds();
     if (t > 1.0)
         t = 0;
-    double desPeak = 1;
+    double desPeak = 3;
     double c1 = 3.0;
     double c2 = 15.0;
     double tPeak = -log(c1/c2)/(c2-c1);
