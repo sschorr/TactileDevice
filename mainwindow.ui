@@ -2020,56 +2020,121 @@
      <string>Down</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="impulseLeftTor">
+   <widget class="QPushButton" name="impulseTorquey">
     <property name="geometry">
      <rect>
-      <x>470</x>
-      <y>560</y>
-      <width>71</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TorqueLeft</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="impulseRightTor">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>560</y>
-      <width>71</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TorqueRight</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="impulseFrontTor">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>530</y>
+      <x>220</x>
+      <y>670</y>
       <width>81</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>TorqueFront</string>
+     <string>Torque y</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="impulseBackTor">
+   <widget class="QPushButton" name="impulseTorquexNeg">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>310</x>
+      <y>640</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torque -x</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="impulseTorquex">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>640</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torque x</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="impulseTorquez">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>700</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torque z</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="impulseOff">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>640</y>
+      <width>51</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Off</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scaleUp">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>560</y>
+      <width>80</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scale Up</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scaleDown">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
       <y>590</y>
-      <width>81</width>
+      <width>80</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>TorqueBack</string>
+     <string>Scale Down</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="impulseTorqueyNeg">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>670</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torque -y</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="impulseTorquezNeg">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>700</y>
+      <width>71</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Torque -z</string>
     </property>
    </widget>
   </widget>

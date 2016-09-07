@@ -222,6 +222,8 @@ c3dofChaiDevice::c3dofChaiDevice(unsigned int a_deviceNumber)
     // *** INSERT YOUR CODE HERE ***
     m_MyVariable = 0;
 
+    scaleFactor = 1.0;
+
     m_deviceAvailable = false; // this value should become 'true' when the device is available.
     m_deviceAvailable = true; // my code making device available
 }
@@ -277,13 +279,6 @@ bool c3dofChaiDevice::open()
 
     // *** INSERT YOUR CODE HERE ***
     // result = openConnectionToMyDevice();
-
-/*#ifdef MAGTRACKER
-    if(trackerNo == 0)
-    {
-        ourMagTracker.InitMagTracker();
-    }
-#endif*/
 
     result = C_SUCCESS; // my code saying connection success
     // update device status
@@ -453,6 +448,9 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     chai3d::cVector3d pos = pose.getLocalPos();
     x = pos.x(); y = pos.y(); z = pos.z();
 #endif
+
+    // scale by scale factor
+    x = x*scaleFactor; y = y*scaleFactor; z = z*scaleFactor;
 
     // store new position values
     a_position.set(x, y, z);

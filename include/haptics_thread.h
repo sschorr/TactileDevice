@@ -64,7 +64,8 @@ public:
     void SetInitJointAngles();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
-    void addImpulseDisp();
+    void AddImpulseDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce);
+    void AddImpulseTorqueDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce);
 
     // clocks
     chai3d::cPrecisionClock rateClock;
@@ -100,6 +101,12 @@ public:
 
     // ODE Module variables
     cODEWorld* ODEWorld;
+
+    // vars for storing computed impulse forces
+    chai3d::cVector3d indexImpulse;
+    chai3d::cVector3d thumbImpulse;
+    chai3d::cVector3d indexTorqueImpulse;
+    chai3d::cVector3d thumbTorqueImpulse;
 
     // vars for computed forces
     double toolRadius;

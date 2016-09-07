@@ -59,7 +59,7 @@ void haptics_thread::initialize()
     p_CommonData->deviceComputedForce.set(0,0,0);
     p_CommonData->deviceComputedForce.set(0,0,0);
 
-    p_CommonData->workspaceScaleFactor = 1;
+    //p_CommonData->workspaceScaleFactor = 1;
 
     currTime = 0;
     lastTime = 0;
@@ -223,7 +223,7 @@ void haptics_thread::UpdateVRGraphics()
     world->computeGlobalPositions(true);
 
     // update user scale factor (if not 1, need to reevaluate how and where we get data to store our position and rotation
-    //breaks dynamic objects
+    // breaks dynamic objects
     //m_tool0->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
     //m_tool1->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
 
@@ -427,9 +427,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     computedForce0 = m_tool0->getDeviceGlobalForce();
     computedForce1 = m_tool1->getDeviceGlobalForce();
 
-    // add a component for impulses if need be (will be 0 if no impulses)
-    addImpulseDisp();
-
     // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
     rotation1.trans();
@@ -456,23 +453,36 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double fc = 10.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
-    //qDebug() << alpha;
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
-    filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;
+    filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;    
 
     // assign to the shared data structure to allow plotting from window thread
     p_CommonData->deviceComputedForce = deviceComputedForce0;
     p_CommonData->filteredDeviceComputedForce = filteredDeviceForce0;
+
+    // add impulses here so as not to affect filter
+    AddImpulseDisp(indexImpulse, thumbImpulse);
+    AddImpulseTorqueDisp(indexTorqueImpulse, thumbTorqueImpulse);
+
+    // rotate impulse into device frames
+    indexImpulse = deviceRotation0*rotation0*indexImpulse;
+    thumbImpulse = deviceRotation1*rotation1*thumbImpulse;
+    indexTorqueImpulse = deviceRotation0*rotation0*indexTorqueImpulse;
+    thumbTorqueImpulse = deviceRotation1*rotation1*thumbTorqueImpulse;
+
+    // assign to the shared data structure to allow plotting from window thread
+    p_CommonData->deviceComputedForce = indexTorqueImpulse;
+    p_CommonData->filteredDeviceComputedForce = thumbTorqueImpulse;
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
     double forceToPosMultThumb = forceToPosMult*1.0;
 
     // Pos movements in delta mechanism frame (index)
-    chai3d::cVector3d desiredPosMovement0 = forceToPosMult*filteredDeviceForce0; //this is only for lateral if we override normal later
-    chai3d::cVector3d desiredPosMovement1 = forceToPosMultThumb*filteredDeviceForce1; //this is only for lateral if we override normal later
+    chai3d::cVector3d desiredPosMovement0 = forceToPosMult*(filteredDeviceForce0 + indexImpulse + indexTorqueImpulse); //this is only for lateral if we override normal later
+    chai3d::cVector3d desiredPosMovement1 = forceToPosMultThumb*(filteredDeviceForce1 + thumbImpulse + thumbTorqueImpulse); //this is only for lateral if we override normal later
 
     // check to see if we are rendering only normal or only lateral
     if(p_CommonData->flagNormal == false)
@@ -833,7 +843,7 @@ void haptics_thread::RenderDynamicBodies()
     case standard:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
+        mass1 = .15; mass2 = 0.15; mass3 = 0.15;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     case mass:
@@ -845,7 +855,7 @@ void haptics_thread::RenderDynamicBodies()
     case friction:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 1.0; friction2 = 2.0; friction3 = 3.0;
-        mass1 = .1; mass2 = 0.2; mass3 = 0.3;
+        mass1 = 0.15; mass2 = 0.15; mass3 = 0.15;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     case dimension:
@@ -857,8 +867,8 @@ void haptics_thread::RenderDynamicBodies()
     case stiffness:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = .1; mass2 = 0.1; mass3 = 0.1;
-        stiffness1 = 300; stiffness2 = 500; stiffness3 = 700;
+        mass1 = .15; mass2 = 0.15; mass3 = 0.15;
+        stiffness1 = 200; stiffness2 = 400; stiffness3 = 600;
         break;
     case dynamicExperiment:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
@@ -997,9 +1007,9 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody3->setMass(mass3);
 
         // set position of box
-        p_CommonData->ODEBody1->setLocalPos(.05,  .12,  0);
-        p_CommonData->ODEBody2->setLocalPos(.05,   0,  0);
-        p_CommonData->ODEBody3->setLocalPos(.05, -.12,  0);
+        p_CommonData->ODEBody1->setLocalPos(.05,  .1,  0);
+        p_CommonData->ODEBody2->setLocalPos( 1,   0,  0);
+        p_CommonData->ODEBody3->setLocalPos(.05, -.1,  0);
     }
 
     //set position of backgroundObject
@@ -1601,22 +1611,71 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_indicator->setTransparencyLevel(1);
 }
 
-void haptics_thread::addImpulseDisp(void)
+void haptics_thread::AddImpulseDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce)
 {
+    // check delay since last impulse
+    double delay = p_CommonData->impulseDelayClock.getCurrentTimeSeconds();
+    if (delay > 0.5)
+    {
+        p_CommonData->impulseDelayClock.reset();
+        p_CommonData->impulseDelayClock.start();
+        p_CommonData->impulseClock.reset();
+        p_CommonData->impulseClock.start();
+    }
+
     double t = p_CommonData->impulseClock.getCurrentTimeSeconds();
-    if (t > 1.0)
+    if (t > 1.5)
         t = 0;
     double desPeak = 3;
-    double c1 = 3.0;
-    double c2 = 15.0;
+    double c1 = 5.0;
+    double c2 = 50.0;
     double tPeak = -log(c1/c2)/(c2-c1);
     double rawMag = exp(-c1*tPeak) - exp(-c2*tPeak);
     double A = desPeak/rawMag;
-    double output = A*(exp(-c1*t) - exp(-c2*t));
+    double impulse = A*(exp(-c1*t) - exp(-c2*t));
 
 
-    computedForce0 = computedForce0 + output*p_CommonData->globalImpulseDir;
-    computedForce1 = computedForce1 + output*p_CommonData->globalImpulseDir;
+    indexForce = impulse*p_CommonData->globalImpulseDir;
+    thumbForce = impulse*p_CommonData->globalImpulseDir;
+}
+
+void haptics_thread::AddImpulseTorqueDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce)
+{
+    // check delay since last impulse
+    double delay = p_CommonData->impulseTorqueDelayClock.getCurrentTimeSeconds();
+    if (delay > 0.5)
+    {
+        p_CommonData->impulseTorqueDelayClock.reset();
+        p_CommonData->impulseTorqueDelayClock.start();
+        p_CommonData->impulseTorqueClock.reset();
+        p_CommonData->impulseTorqueClock.start();
+    }
+
+    // determine the pulse magnitude
+    double t = p_CommonData->impulseTorqueClock.getCurrentTimeSeconds();
+    if (t > 1.5)
+        t = 0;
+    double desPeak = 3;
+    double c1 = 5.0;
+    double c2 = 50.0;
+    double tPeak = -log(c1/c2)/(c2-c1);
+    double rawMag = exp(-c1*tPeak) - exp(-c2*tPeak);
+    double A = desPeak/rawMag;
+    double impulse = A*(exp(-c1*t) - exp(-c2*t));
+
+    // determine the direction of the torque impulse in world coordinates
+    chai3d::cVector3d vecIndexToCenter = position1 - position0; vecIndexToCenter.normalize();
+    chai3d::cVector3d vecThumbToCenter = position0 - position1; vecThumbToCenter.normalize();
+
+    chai3d::cVector3d crossIndex;
+    chai3d::cVector3d crossThumb;
+
+    // to determine torque displacements, take cross product with torque direction
+    vecIndexToCenter.crossr(p_CommonData->globalImpulseDir, crossIndex);
+    vecThumbToCenter.crossr(p_CommonData->globalImpulseDir, crossThumb);
+
+    indexForce = impulse*crossIndex;
+    thumbForce = impulse*crossThumb;
 }
 
 

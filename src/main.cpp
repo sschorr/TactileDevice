@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     window.Initialize();
     window.show();
 
-
     hapticsThread.start();
     experimentThread.start();
     magTrackerThread.start();

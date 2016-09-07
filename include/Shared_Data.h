@@ -4,11 +4,10 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-
-//#define MAGTRACKER
+#define MAGTRACKER
 #define SENSORAY826
 //#define OCULUS
-//#define QWT
+#define QWT
 
 #include <qDebug>
 #include <QVector>
@@ -159,6 +158,15 @@ typedef struct
 
     //clock for impulse function
     chai3d::cPrecisionClock impulseClock;
+
+    //clock for torque impulse function
+    chai3d::cPrecisionClock impulseTorqueClock;
+
+    //clock for gap between impulses
+    chai3d::cPrecisionClock impulseDelayClock;
+
+    //clock for gap between impulses torques
+    chai3d::cPrecisionClock impulseTorqueDelayClock;
 
     // determine start time for bandwidth sin
     double sinStartTime;
