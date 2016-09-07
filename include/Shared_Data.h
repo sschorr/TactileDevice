@@ -5,8 +5,8 @@
 
 // defines indicating what physical hardware is present
 
-#define MAGTRACKER
-#define SENSORAY826
+//#define MAGTRACKER
+//#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -159,6 +159,12 @@ typedef struct
 
     //clock for impulse function
     chai3d::cPrecisionClock impulseClock;
+
+    //clock for torque impulse function
+    chai3d::cPrecisionClock impulseTorqueClock;
+
+    //clock for gap between impulses
+    chai3d::cPrecisionClock impulseDelayClock;
 
     // determine start time for bandwidth sin
     double sinStartTime;

@@ -1244,41 +1244,77 @@ bool MainWindow::CheckFingers()
 void MainWindow::on_impulseForward_clicked()
 {
     p_CommonData->globalImpulseDir.set(-1,0,0);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
 void MainWindow::on_impulseBackward_clicked()
 {
     p_CommonData->globalImpulseDir.set(1,0,0);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
 void MainWindow::on_impulseRight_clicked()
 {
     p_CommonData->globalImpulseDir.set(0,-1,0);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
 void MainWindow::on_impulseLeft_clicked()
 {
     p_CommonData->globalImpulseDir.set(0,1,0);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
 void MainWindow::on_impulseUp_clicked()
 {
     p_CommonData->globalImpulseDir.set(0,0,-1);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
 void MainWindow::on_impulseDown_clicked()
 {
     p_CommonData->globalImpulseDir.set(0,0,1);
-    p_CommonData->impulseClock.reset();
-    p_CommonData->impulseClock.start(true);
+    p_CommonData->impulseClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
+}
+
+
+
+
+
+
+
+void MainWindow::on_scaleUp_clicked()
+{
+    ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor = ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor + 0.1;
+    ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->scaleFactor = ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->scaleFactor + 0.1;
+}
+
+void MainWindow::on_scaleDown_clicked()
+{
+    ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor = ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor - 0.1;
+    ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->scaleFactor = ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->scaleFactor - 0.1;
+}
+
+void MainWindow::on_impulseOff_clicked()
+{
+    p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseDelayClock.stop();
+}
+
+void MainWindow::on_impulseTorquezNeg_clicked()
+{
+
+}
+
+void MainWindow::on_impulseTorquex_clicked()
+{
+    p_CommonData->globalImpulseDir.set(1,0,0);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
