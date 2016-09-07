@@ -1283,12 +1283,6 @@ void MainWindow::on_impulseDown_clicked()
     p_CommonData->impulseClock.start(true); p_CommonData->impulseDelayClock.start(true);
 }
 
-
-
-
-
-
-
 void MainWindow::on_scaleUp_clicked()
 {
     ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor = ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->scaleFactor + 0.1;
@@ -1309,14 +1303,44 @@ void MainWindow::on_impulseOff_clicked()
     p_CommonData->impulseTorqueDelayClock.stop();
 }
 
-void MainWindow::on_impulseTorquezNeg_clicked()
-{
-
-}
-
 void MainWindow::on_impulseTorquex_clicked()
 {
     p_CommonData->globalImpulseDir.set(1,0,0);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
+}
+
+void MainWindow::on_impulseTorquexNeg_clicked()
+{
+    p_CommonData->globalImpulseDir.set(-1,0,0);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
+}
+
+void MainWindow::on_impulseTorquey_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,1,0);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
+}
+
+void MainWindow::on_impulseTorqueyNeg_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,-1,0);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
+}
+
+void MainWindow::on_impulseTorquez_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,0,1);
+    p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
+    p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
+}
+
+void MainWindow::on_impulseTorquezNeg_clicked()
+{
+    p_CommonData->globalImpulseDir.set(0,0,-1);
     p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
