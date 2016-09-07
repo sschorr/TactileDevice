@@ -159,6 +159,10 @@ private slots:
     void on_impulseOff_clicked();
     void on_impulseTorquezNeg_clicked();
     void on_impulseTorquex_clicked();
+    void on_impulseTorquexNeg_clicked();
+    void on_impulseTorquey_clicked();
+    void on_impulseTorqueyNeg_clicked();
+    void on_impulseTorquez_clicked();
 };
 
 #endif // MAINWINDOW_H
