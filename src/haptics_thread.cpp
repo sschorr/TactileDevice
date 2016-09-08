@@ -261,8 +261,6 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
-    //qDebug() << position0.y() << position1.y();
-
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
 
@@ -335,6 +333,10 @@ void haptics_thread::UpdateVRGraphics()
         }
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
+        p_CommonData->box1Pos = p_CommonData->ODEBody1->getLocalPos();
+        p_CommonData->box2Pos = p_CommonData->ODEBody3->getLocalPos();
+        p_CommonData->box1Rot = p_CommonData->ODEBody1->getLocalRot();
+        p_CommonData->box2Rot = p_CommonData->ODEBody3->getLocalRot();
     }    
     p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
@@ -564,6 +566,11 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
     p_CommonData->dataRecorder.boxNo = p_CommonData->sizeWeightBox;
     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
+
+    p_CommonData->dataRecorder.box1Pos = p_CommonData->box1Pos;
+    p_CommonData->dataRecorder.box2Pos = p_CommonData->box2Pos;
+    p_CommonData->dataRecorder.box1Rot = p_CommonData->box1Rot;
+    p_CommonData->dataRecorder.box2Rot = p_CommonData->box2Rot;
 
     p_CommonData->dataRecordMutex.unlock();
 }
@@ -1007,9 +1014,9 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody3->setMass(mass3);
 
         // set position of box
-        p_CommonData->ODEBody1->setLocalPos(.05,  .1,  0);
+        p_CommonData->ODEBody1->setLocalPos(.025,  .1,  0);
         p_CommonData->ODEBody2->setLocalPos( 1,   0,  0);
-        p_CommonData->ODEBody3->setLocalPos(.05, -.1,  0);
+        p_CommonData->ODEBody3->setLocalPos(.025, -.1,  0);
     }
 
     //set position of backgroundObject

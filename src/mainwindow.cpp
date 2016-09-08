@@ -986,6 +986,38 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].subjectValue << "," << " "
         << localDataRecorderVector[i].pairNo << "," << " "
 
+
+
+
+        // write downdata of boxes
+        << localDataRecorderVector[i].box1Pos[0] << "," << " "
+        << localDataRecorderVector[i].box1Pos[1] << "," << " "
+        << localDataRecorderVector[i].box1Pos[2] << "," << " "
+
+        << localDataRecorderVector[i].box2Pos[0] << "," << " "
+        << localDataRecorderVector[i].box2Pos[1] << "," << " "
+        << localDataRecorderVector[i].box2Pos[2] << "," << " "
+
+        << localDataRecorderVector[i].box1Rot(0,0) << "," << " "
+        << localDataRecorderVector[i].box1Rot(0,1) << "," << " "
+        << localDataRecorderVector[i].box1Rot(0,2) << "," << " "
+        << localDataRecorderVector[i].box1Rot(1,0) << "," << " "
+        << localDataRecorderVector[i].box1Rot(1,1) << "," << " "
+        << localDataRecorderVector[i].box1Rot(1,2) << "," << " "
+        << localDataRecorderVector[i].box1Rot(2,0) << "," << " "
+        << localDataRecorderVector[i].box1Rot(2,1) << "," << " "
+        << localDataRecorderVector[i].box1Rot(2,2) << "," << " "
+
+        << localDataRecorderVector[i].box2Rot(0,0) << "," << " "
+        << localDataRecorderVector[i].box2Rot(0,1) << "," << " "
+        << localDataRecorderVector[i].box2Rot(0,2) << "," << " "
+        << localDataRecorderVector[i].box2Rot(1,0) << "," << " "
+        << localDataRecorderVector[i].box2Rot(1,1) << "," << " "
+        << localDataRecorderVector[i].box2Rot(1,2) << "," << " "
+        << localDataRecorderVector[i].box2Rot(2,0) << "," << " "
+        << localDataRecorderVector[i].box2Rot(2,1) << "," << " "
+        << localDataRecorderVector[i].box2Rot(2,2) << "," << " "
+
         << std::endl;
     }
     file.close();
@@ -1354,4 +1386,5 @@ void MainWindow::on_stopRecord_clicked()
 {
     p_CommonData->recordFlag = false;
     WriteDataToFile();
+    p_CommonData->trialNo = p_CommonData->trialNo + 1;
 }

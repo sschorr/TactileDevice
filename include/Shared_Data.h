@@ -68,6 +68,10 @@ typedef struct
     double standardMass;
     int boxNo;
     double subjectValue;
+    chai3d::cVector3d box1Pos;
+    chai3d::cVector3d box2Pos;
+    chai3d::cMatrix3d box1Rot;
+    chai3d::cMatrix3d box2Rot;
 
 } DataRecordStruct;
 
@@ -300,6 +304,12 @@ typedef struct
     // rotation of line in tissue
     double tissueRot;
     double indicatorRot;
+
+    // status of cubes
+    chai3d::cVector3d box1Pos;
+    chai3d::cVector3d box2Pos;
+    chai3d::cMatrix3d box1Rot;
+    chai3d::cMatrix3d box2Rot;
 
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody1; //ODE body for box 1
