@@ -121,9 +121,15 @@ void magTracker_thread::CheckTrackerPoses()
         returnTransform.set(returnVec, returnMatrix);
 
         if(tracker == 0)
+        {
            ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->poseCache = returnTransform;
+           ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->otherPoseCache = returnTransform;
+        }
         else if (tracker == 1)
+        {
            ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice1.get()))->poseCache = returnTransform;
+           ((chai3d::c3dofChaiDevice *)(p_CommonData->chaiMagDevice0.get()))->otherPoseCache = returnTransform;
+        }
     }
 
 #endif

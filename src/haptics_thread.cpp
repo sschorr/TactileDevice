@@ -849,12 +849,12 @@ void haptics_thread::RenderDynamicBodies()
     case mass:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
         friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = .1; mass2 = 0.2; mass3 = 0.3;
+        mass1 = .05; mass2 = 0.2; mass3 = 0.25;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     case friction:
         boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
-        friction1 = 1.0; friction2 = 2.0; friction3 = 3.0;
+        friction1 = 0.5; friction2 = 2.0; friction3 = 4.0;
         mass1 = 0.15; mass2 = 0.15; mass3 = 0.15;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;

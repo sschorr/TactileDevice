@@ -435,22 +435,39 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
 
     bool result = C_SUCCESS;
-    double x,y,z;
+    double x1, y1, z1, x2, y2, z2, xc, yc, zc, x, y, z;
     static double counter = 0;
     counter = counter ++;
     x = 0.06; y = .09*sin(.0001*counter);
     z = -0.15; // + .05*sin(.0001*counter);
 
+    if (trackerNo == 1)
+    {
+        y = y + 0.02;
+    }
+
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // these axes align assuming the box is facing you and the chord of the tracker faces the box.
 #ifdef MAGTRACKER
+    // get position of this tracker
     pose = poseCache;
-    chai3d::cVector3d pos = pose.getLocalPos();
-    x = pos.x(); y = pos.y(); z = pos.z();
+    pos = pose.getLocalPos();
+
+    // get position of the other tracker
+    otherPose = otherPoseCache;
+    otherPos = otherPose.getLocalPos();
+
+    x1 = pos.x(); y1 = pos.y(); z1 = pos.z();
+    x2 = otherPos.x(); y2 = otherPos.y(); z2 = otherPos.z();
 #endif
 
+    centerPoint.set((x1+x2)/2.0, (y1+y2)/2.0, (z1+z2)/2.0);
+
     // scale by scale factor
-    x = x*scaleFactor; y = y*scaleFactor; z = z*scaleFactor;
+    xc = centerPoint.x()*scaleFactor; yc = centerPoint.y()*scaleFactor; zc = centerPoint.z()*scaleFactor;
+    scaledCenterPoint.set(xc, yc, zc);
+
+    x = xc+(x1-centerPoint.x()) + yc+(y1-centerPoint.y()) + zc+(z1-centerPoint.z());
 
     // store new position values
     a_position.set(x, y, z);
