@@ -2137,6 +2137,32 @@
      <string>Torque -z</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="startRecord">
+    <property name="geometry">
+     <rect>
+      <x>1050</x>
+      <y>710</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>start record</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="stopRecord">
+    <property name="geometry">
+     <rect>
+      <x>1150</x>
+      <y>710</y>
+      <width>91</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>stop record</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

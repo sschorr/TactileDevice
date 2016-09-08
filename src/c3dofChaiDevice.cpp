@@ -467,7 +467,9 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     xc = centerPoint.x()*scaleFactor; yc = centerPoint.y()*scaleFactor; zc = centerPoint.z()*scaleFactor;
     scaledCenterPoint.set(xc, yc, zc);
 
-    x = xc+(x1-centerPoint.x()) + yc+(y1-centerPoint.y()) + zc+(z1-centerPoint.z());
+    x = xc+(x1-centerPoint.x());
+    y = yc+(y1-centerPoint.y());
+    z = zc+(z1-centerPoint.z());
 
     // store new position values
     a_position.set(x, y, z);

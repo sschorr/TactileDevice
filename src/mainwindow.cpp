@@ -1344,3 +1344,14 @@ void MainWindow::on_impulseTorquezNeg_clicked()
     p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
+
+void MainWindow::on_startRecord_clicked()
+{
+    p_CommonData->recordFlag = true;
+}
+
+void MainWindow::on_stopRecord_clicked()
+{
+    p_CommonData->recordFlag = false;
+    WriteDataToFile();
+}

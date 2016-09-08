@@ -163,6 +163,8 @@ private slots:
     void on_impulseTorquey_clicked();
     void on_impulseTorqueyNeg_clicked();
     void on_impulseTorquez_clicked();
+    void on_startRecord_clicked();
+    void on_stopRecord_clicked();
 };
 
 #endif // MAINWINDOW_H
