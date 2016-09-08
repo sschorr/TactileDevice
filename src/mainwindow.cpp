@@ -986,17 +986,14 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].subjectValue << "," << " "
         << localDataRecorderVector[i].pairNo << "," << " "
 
+        // write down data of boxes
+        << localDataRecorderVector[i].box1Pos.x() << "," << " "
+        << localDataRecorderVector[i].box1Pos.y() << "," << " "
+        << localDataRecorderVector[i].box1Pos.z() << "," << " "
 
-
-
-        // write downdata of boxes
-        << localDataRecorderVector[i].box1Pos[0] << "," << " "
-        << localDataRecorderVector[i].box1Pos[1] << "," << " "
-        << localDataRecorderVector[i].box1Pos[2] << "," << " "
-
-        << localDataRecorderVector[i].box2Pos[0] << "," << " "
-        << localDataRecorderVector[i].box2Pos[1] << "," << " "
-        << localDataRecorderVector[i].box2Pos[2] << "," << " "
+        << localDataRecorderVector[i].box2Pos.x() << "," << " "
+        << localDataRecorderVector[i].box2Pos.y() << "," << " "
+        << localDataRecorderVector[i].box2Pos.z() << "," << " "
 
         << localDataRecorderVector[i].box1Rot(0,0) << "," << " "
         << localDataRecorderVector[i].box1Rot(0,1) << "," << " "
@@ -1385,6 +1382,10 @@ void MainWindow::on_startRecord_clicked()
 void MainWindow::on_stopRecord_clicked()
 {
     p_CommonData->recordFlag = false;
+    p_CommonData->dataRecordMutex.lock();
+    localDataRecorderVector = p_CommonData->dataRecorderVector;
     WriteDataToFile();
+    p_CommonData->dataRecorderVector.clear();
+    p_CommonData->dataRecordMutex.unlock();
     p_CommonData->trialNo = p_CommonData->trialNo + 1;
 }
