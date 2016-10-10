@@ -62,6 +62,7 @@ public:
     void InitDynamicBodies();
     void RenderDynamicBodies();
     void SetInitJointAngles();
+    void UpdateScaledPositions();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
     void AddImpulseDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce);
@@ -91,7 +92,12 @@ public:
     chai3d::cEffectSurface* newEffect;
     cODEGenericBody* ODEGPlane0;
     cODEGenericBody* ODEGPlane1;
-    chai3d::cMesh* globe;
+    chai3d::cMesh* globe;    
+
+    // objects for doing display scaling
+    chai3d::cMultiMesh* scaledFinger;
+    chai3d::cMultiMesh* scaledThumb;
+
 
     //texture for globe
     chai3d::cTexture2dPtr textureSpace;

@@ -76,6 +76,8 @@ void haptics_thread::initialize()
     p_CommonData->recordFlag = false;
 
     p_CommonData->currentControlState = idleControl;
+
+    p_CommonData->displayScale = 0.5;
 }
 
 void haptics_thread::run()
@@ -250,6 +252,17 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere0->setLocalRot(rotation0);
     m_tool0->computeInteractionForces();
 
+    // update scaledFinger and scaledThumb position
+    chai3d::cVector3d scaledFingerPos; scaledFingerPos = finger->getLocalPos()*p_CommonData->displayScale;
+    chai3d::cMatrix3d scaledFingerRot; scaledFingerRot = finger->getLocalRot();
+    scaledFinger->setLocalPos(scaledFingerPos);
+    scaledFinger->setLocalRot(scaledFingerRot);
+    chai3d::cVector3d scaledThumbPos; scaledThumbPos = thumb->getLocalPos()*p_CommonData->displayScale;
+    chai3d::cMatrix3d scaledThumbRot; scaledThumbRot = thumb->getLocalRot();
+    scaledThumb->setLocalPos(scaledThumbPos);
+    scaledThumb->setLocalRot(scaledThumbRot);
+
+
     // update position of finger to stay on proxy point    
     chai3d::cVector3d thumbOffset(0,-0.01,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     fingerRotation1 = rotation1;
@@ -335,9 +348,13 @@ void haptics_thread::UpdateVRGraphics()
         }
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
+        // update scaled positions
+        UpdateScaledPositions();
     }    
     p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
+
+
 
     /*
     // THIS IS SLOPPY CODE STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
@@ -419,6 +436,17 @@ void haptics_thread::UpdateVRGraphics()
         double lastDispRotation = p_CommonData->indicatorRot;
         rotateTissueLineDisp(-lastDispRotation);
     }*/
+}
+
+void haptics_thread::UpdateScaledPositions()
+{
+    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->p_dynamicBox1->getLocalPos()*p_CommonData->displayScale;
+    chai3d::cVector3d scaledBox2Pos; scaledBox2Pos = p_CommonData->p_dynamicBox2->getLocalPos()*p_CommonData->displayScale;
+    chai3d::cVector3d scaledBox3Pos; scaledBox3Pos = p_CommonData->p_dynamicBox3->getLocalPos()*p_CommonData->displayScale;
+
+    p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
+    p_CommonData->p_dynamicScaledBox2->setLocalPos(scaledBox2Pos);
+    p_CommonData->p_dynamicScaledBox3->setLocalPos(scaledBox3Pos);
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -607,7 +635,7 @@ void haptics_thread::InitGeneralChaiStuff()
     light = new chai3d::cDirectionalLight(world);
     world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(2.0, -0.5, 1.0));  // define the direction of the light beam
+    light->setDir(chai3d::cVector3d(2.0, -0.8, .5));  // define the direction of the light beam
 
 }
 
@@ -698,6 +726,52 @@ void haptics_thread::InitFingerAndTool()
     thumb->m_material->m_specular.set(1.0, 1.0, 1.0);
     thumb->setUseMaterial(true);
     thumb->setHapticEnabled(false);
+
+    ////////////////////////////////////////////
+    // CREATE POSITION SCALED OBJECTS
+    /////////////////////////////////////////////
+    scaledFinger = new chai3d::cMultiMesh(); // create a virtual mesh
+    world->addChild(scaledFinger); // add object to world
+    scaledFinger->setShowFrame(false);
+    scaledFinger->setFrameSize(0.05);
+    scaledFinger->setLocalPos(0.0, 0.0, 0.0);
+
+    scaledThumb = new chai3d::cMultiMesh(); //create the scaledThumb
+    world->addChild(scaledThumb);
+    scaledThumb->setShowFrame(false);
+    scaledThumb->setFrameSize(0.05);
+    scaledThumb->setLocalPos(0,0,0);
+
+    if(cLoadFileOBJ(scaledFinger, "./Resources/FingerModel.obj")){
+        qDebug() << "Finger file loaded";
+    }
+    if(cLoadFileOBJ(scaledThumb, "./Resources/FingerModelThumb.obj")){
+        qDebug() << "thumb file loaded";
+    }
+
+    // set params for scaledFinger
+    scaledFinger->setShowEnabled(true);
+    scaledFinger->setUseVertexColors(true);
+    chai3d::cColorf scaledFingerColor;
+    scaledFingerColor.setBrownSandy();
+    scaledFinger->setVertexColor(scaledFingerColor);
+    scaledFinger->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    scaledFinger->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    scaledFinger->m_material->m_specular.set(1.0, 1.0, 1.0);
+    scaledFinger->setUseMaterial(true);
+    scaledFinger->setHapticEnabled(false);
+
+    // set params for scaledThumb
+    scaledThumb->setShowEnabled(true);
+    scaledThumb->setUseVertexColors(true);
+    chai3d::cColorf scaledThumbColor;
+    scaledThumbColor.setBrownSandy();
+    scaledThumb->setVertexColor(scaledThumbColor);
+    scaledThumb->m_material->m_ambient.set(0.1, 0.1, 0.1);
+    scaledThumb->m_material->m_diffuse.set(0.3, 0.3, 0.3);
+    scaledThumb->m_material->m_specular.set(1.0, 1.0, 1.0);
+    scaledThumb->setUseMaterial(true);
+    scaledThumb->setHapticEnabled(false);
 }
 
 void haptics_thread::InitEnvironments()
@@ -754,6 +828,12 @@ void haptics_thread::InitDynamicBodies()
     p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
     p_CommonData->p_dynamicBox4 = new chai3d::cMesh();
+
+    // create the scaled virtual objects
+    p_CommonData->p_dynamicScaledBox1 = new chai3d::cMesh();
+    p_CommonData->p_dynamicScaledBox2 = new chai3d::cMesh();
+    p_CommonData->p_dynamicScaledBox3 = new chai3d::cMesh();
+    p_CommonData->p_dynamicScaledBox4 = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
@@ -946,12 +1026,18 @@ void haptics_thread::RenderDynamicBodies()
         qDebug() << mass2;
         p_CommonData->ODEBody4->setMass(mass2);
     }
+
     // if just rendering dynamic environments without an experiment
     else {
         // create the visual boxes on the dynamicbox meshes
         cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
         cCreateBox(p_CommonData->p_dynamicBox2, boxSize2, boxSize2, boxSize2); // make mesh a box
         cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
+
+        // create the visual for the position scaled dynamic boxes
+        cCreateBox(p_CommonData->p_dynamicScaledBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicScaledBox2, boxSize2, boxSize2, boxSize2); // make mesh a box
+        cCreateBox(p_CommonData->p_dynamicScaledBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
 
         // setup collision detectorsfor the dynamic objects
         p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
@@ -1008,7 +1094,7 @@ void haptics_thread::RenderDynamicBodies()
 
         // set position of box
         p_CommonData->ODEBody1->setLocalPos(.05,  .1,  0);
-        p_CommonData->ODEBody2->setLocalPos( 1,   0,  0);
+        p_CommonData->ODEBody2->setLocalPos( 1,   0,  0); //out of view
         p_CommonData->ODEBody3->setLocalPos(.05, -.1,  0);
     }
 

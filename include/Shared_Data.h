@@ -4,10 +4,10 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define MAGTRACKER
+//#define MAGTRACKER
 //#define SENSORAY826
 //#define OCULUS
-#define QWT
+//#define QWT
 
 #include <qDebug>
 #include <QVector>
@@ -312,6 +312,18 @@ typedef struct
     chai3d::cMesh* p_dynamicBox2; // mesh for box 2
     chai3d::cMesh* p_dynamicBox3; // mesh for box 3
     chai3d::cMesh* p_dynamicBox4; // mesh for box 3
+
+    // meshes for display scaled objects
+    chai3d::cMesh* p_dynamicScaledBox1;
+    chai3d::cMesh* p_dynamicScaledBox2;
+    chai3d::cMesh* p_dynamicScaledBox3;
+    chai3d::cMesh* p_dynamicScaledBox4;
+
+    // flag for determining if display scaling is clutched
+    bool scaleClutched;
+
+    // storing how much we are display scaling
+    double displayScale;
 
     // flags for environment change and tissue transparency
     bool environmentChange;

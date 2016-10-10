@@ -613,8 +613,8 @@
    <widget class="QLabel" name="objectNo">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>710</y>
+      <x>540</x>
+      <y>660</y>
       <width>221</width>
       <height>91</height>
      </rect>
@@ -1945,8 +1945,8 @@
    <widget class="QPushButton" name="impulseForward">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>530</y>
+      <x>410</x>
+      <y>540</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -1958,8 +1958,8 @@
    <widget class="QPushButton" name="impulseBackward">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>590</y>
+      <x>410</x>
+      <y>600</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -1971,8 +1971,8 @@
    <widget class="QPushButton" name="impulseRight">
     <property name="geometry">
      <rect>
-      <x>320</x>
-      <y>560</y>
+      <x>450</x>
+      <y>570</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -1984,8 +1984,8 @@
    <widget class="QPushButton" name="impulseLeft">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>560</y>
+      <x>370</x>
+      <y>570</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -1997,8 +1997,8 @@
    <widget class="QPushButton" name="impulseUp">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>530</y>
+      <x>280</x>
+      <y>540</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -2010,8 +2010,8 @@
    <widget class="QPushButton" name="impulseDown">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>590</y>
+      <x>280</x>
+      <y>600</y>
       <width>51</width>
       <height>21</height>
      </rect>
@@ -2023,8 +2023,8 @@
    <widget class="QPushButton" name="impulseTorquey">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>670</y>
+      <x>350</x>
+      <y>680</y>
       <width>81</width>
       <height>21</height>
      </rect>
@@ -2036,8 +2036,8 @@
    <widget class="QPushButton" name="impulseTorquexNeg">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>640</y>
+      <x>440</x>
+      <y>650</y>
       <width>71</width>
       <height>21</height>
      </rect>
@@ -2049,8 +2049,8 @@
    <widget class="QPushButton" name="impulseTorquex">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>640</y>
+      <x>350</x>
+      <y>650</y>
       <width>81</width>
       <height>21</height>
      </rect>
@@ -2062,8 +2062,8 @@
    <widget class="QPushButton" name="impulseTorquez">
     <property name="geometry">
      <rect>
-      <x>220</x>
-      <y>700</y>
+      <x>350</x>
+      <y>710</y>
       <width>81</width>
       <height>21</height>
      </rect>
@@ -2075,8 +2075,8 @@
    <widget class="QPushButton" name="impulseOff">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>640</y>
+      <x>280</x>
+      <y>650</y>
       <width>51</width>
       <height>51</height>
      </rect>
@@ -2088,8 +2088,8 @@
    <widget class="QPushButton" name="scaleUp">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>560</y>
+      <x>160</x>
+      <y>600</y>
       <width>80</width>
       <height>21</height>
      </rect>
@@ -2101,8 +2101,8 @@
    <widget class="QPushButton" name="scaleDown">
     <property name="geometry">
      <rect>
-      <x>530</x>
-      <y>590</y>
+      <x>160</x>
+      <y>630</y>
       <width>80</width>
       <height>21</height>
      </rect>
@@ -2114,8 +2114,8 @@
    <widget class="QPushButton" name="impulseTorqueyNeg">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>670</y>
+      <x>440</x>
+      <y>680</y>
       <width>71</width>
       <height>21</height>
      </rect>
@@ -2127,8 +2127,8 @@
    <widget class="QPushButton" name="impulseTorquezNeg">
     <property name="geometry">
      <rect>
-      <x>310</x>
-      <y>700</y>
+      <x>440</x>
+      <y>710</y>
       <width>71</width>
       <height>21</height>
      </rect>
