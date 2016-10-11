@@ -77,7 +77,19 @@ void haptics_thread::initialize()
 
     p_CommonData->currentControlState = idleControl;
 
-    p_CommonData->displayScale = 0.5;
+    p_CommonData->fingerDisplayScale = 1;
+    p_CommonData->box1displayScale = 0.5;
+    p_CommonData->box3displayScale = 1.5;
+
+    p_CommonData->dispScaleCenter.set(0,0,0);
+
+    fingerOffset.set(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
+    thumbOffset.set(0,-0.010,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
+
+    // initial box positions
+    box1InitPos.set(.05,  .1,  0);
+    box2InitPos.set(1,   0,  0);
+    box3InitPos.set(.05, -.1,  0);
 }
 
 void haptics_thread::run()
@@ -224,11 +236,6 @@ void haptics_thread::UpdateVRGraphics()
     // compute global reference frames for each object
     world->computeGlobalPositions(true);
 
-    // update user scale factor (if not 1, need to reevaluate how and where we get data to store our position and rotation
-    // breaks dynamic objects
-    //m_tool0->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
-    //m_tool1->setWorkspaceScaleFactor(p_CommonData->workspaceScaleFactor);
-
     // update position and orientation of tool 0(and sphere that represents tool)
     m_tool0->updateFromDevice();
     position0 = m_tool0->m_hapticPoint->getGlobalPosGoal(); // get position and rotation of the delta mechanism (already transformed from magTracker)
@@ -242,7 +249,6 @@ void haptics_thread::UpdateVRGraphics()
     deviceRotation1 = rotation1;
 
     // update position of finger to stay on proxy point
-    chai3d::cVector3d fingerOffset(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     fingerRotation0 = rotation0;
     fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
@@ -252,19 +258,7 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere0->setLocalRot(rotation0);
     m_tool0->computeInteractionForces();
 
-    // update scaledFinger and scaledThumb position
-    chai3d::cVector3d scaledFingerPos; scaledFingerPos = finger->getLocalPos()*p_CommonData->displayScale;
-    chai3d::cMatrix3d scaledFingerRot; scaledFingerRot = finger->getLocalRot();
-    scaledFinger->setLocalPos(scaledFingerPos);
-    scaledFinger->setLocalRot(scaledFingerRot);
-    chai3d::cVector3d scaledThumbPos; scaledThumbPos = thumb->getLocalPos()*p_CommonData->displayScale;
-    chai3d::cMatrix3d scaledThumbRot; scaledThumbRot = thumb->getLocalRot();
-    scaledThumb->setLocalPos(scaledThumbPos);
-    scaledThumb->setLocalRot(scaledThumbRot);
-
-
-    // update position of finger to stay on proxy point    
-    chai3d::cVector3d thumbOffset(0,-0.01,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
+    // update position of finger to stay on proxy  point
     fingerRotation1 = rotation1;
     fingerRotation1.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation1.rotateAboutLocalAxisDeg(1,0,0,90);
@@ -274,7 +268,9 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
-    //qDebug() << position0.y() << position1.y();
+    UpdateScaledCursors();
+    UpdateScaledFingers();
+    p_CommonData->fingerDisplayScale = 1.0; //reset to 1, will get changed in dynsim if necessary
 
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
@@ -307,6 +303,9 @@ void haptics_thread::UpdateVRGraphics()
                 // look for the parent that will point to the ODE object itself.
                 chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
 
+                //if fingers touching box, make their scale match the box scale
+                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+
                 // cast to ODE object
                 cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
 
@@ -335,6 +334,9 @@ void haptics_thread::UpdateVRGraphics()
                 // look for the parent that will point to the ODE object itself.
                 chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
 
+                //if fingers touching box, make their scale match the box scale
+                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+
                 // cast to ODE object
                 cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
 
@@ -349,7 +351,7 @@ void haptics_thread::UpdateVRGraphics()
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
         // update scaled positions
-        UpdateScaledPositions();
+        UpdateScaledBoxes();
     }    
     p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
@@ -438,15 +440,39 @@ void haptics_thread::UpdateVRGraphics()
     }*/
 }
 
-void haptics_thread::UpdateScaledPositions()
+void haptics_thread::UpdateScaledCursors()
 {
-    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->p_dynamicBox1->getLocalPos()*p_CommonData->displayScale;
-    chai3d::cVector3d scaledBox2Pos; scaledBox2Pos = p_CommonData->p_dynamicBox2->getLocalPos()*p_CommonData->displayScale;
-    chai3d::cVector3d scaledBox3Pos; scaledBox3Pos = p_CommonData->p_dynamicBox3->getLocalPos()*p_CommonData->displayScale;
+    chai3d::cVector3d curCenter = (m_tool0->m_hapticPoint->getGlobalPosProxy() + m_tool1->m_hapticPoint->getGlobalPosProxy())/2.0;
+    chai3d::cVector3d centToFingCur = m_tool0->m_hapticPoint->getGlobalPosProxy() - curCenter;
+    chai3d::cVector3d centToThumbCur = m_tool1->m_hapticPoint->getGlobalPosProxy() - curCenter;
+
+    m_dispScaleCurSphere0->setLocalPos(p_CommonData->fingerDisplayScale*curCenter + centToFingCur);
+    m_dispScaleCurSphere1->setLocalPos(p_CommonData->fingerDisplayScale*curCenter + centToThumbCur);
+}
+
+void haptics_thread::UpdateScaledFingers()
+{
+    // update position of finger to stay on scaled cursor (which is scaled relative to proxy point)
+    scaledFinger->setLocalRot(fingerRotation0);
+    scaledFinger->setLocalPos(m_dispScaleCurSphere0->getLocalPos() + fingerRotation0*fingerOffset);
+
+
+    // update position of thumb to stay on scaled cursor (which is scaled relative to proxy point)
+    scaledThumb->setLocalRot(fingerRotation1);
+    scaledThumb->setLocalPos(m_dispScaleCurSphere1->getLocalPos() + fingerRotation1*thumbOffset);
+
+}
+
+void haptics_thread::UpdateScaledBoxes()
+{
+    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-box1InitPos)*p_CommonData->box1displayScale;
+    chai3d::cVector3d scaledBox3Pos; scaledBox3Pos = box3InitPos + (p_CommonData->ODEBody3->getLocalPos()-box3InitPos)*p_CommonData->box3displayScale;
 
     p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
-    p_CommonData->p_dynamicScaledBox2->setLocalPos(scaledBox2Pos);
     p_CommonData->p_dynamicScaledBox3->setLocalPos(scaledBox3Pos);
+
+    p_CommonData->p_dynamicScaledBox1->setLocalRot(p_CommonData->ODEBody1->getLocalRot());
+    p_CommonData->p_dynamicScaledBox3->setLocalRot(p_CommonData->ODEBody3->getLocalRot());
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -677,6 +703,19 @@ void haptics_thread::InitFingerAndTool()
     m_curSphere1->m_material->setBlueAqua();
     m_curSphere1->setShowFrame(true);
     m_curSphere1->setFrameSize(0.05);
+
+    // add display scaled visual representations
+    m_dispScaleCurSphere0 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_dispScaleCurSphere0);
+    m_dispScaleCurSphere0->m_material->setGrayDarkSlate();
+    m_dispScaleCurSphere0->setShowFrame(true);
+    m_dispScaleCurSphere0->setFrameSize(0.05);
+
+    m_dispScaleCurSphere1 = new chai3d::cShapeSphere(toolRadius);
+    world->addChild(m_dispScaleCurSphere1);
+    m_dispScaleCurSphere1->m_material->setBlueAqua();
+    m_dispScaleCurSphere1->setShowFrame(true);
+    m_dispScaleCurSphere1->setFrameSize(0.05);
 
 
     //--------------------------------------------------------------------------
@@ -1015,15 +1054,14 @@ void haptics_thread::RenderDynamicBodies()
 
         //put things where they go for start of experiment
         // Put the other blocks out of view
-        p_CommonData->ODEBody1->setLocalPos(1, -0.2, -0.2);
-        p_CommonData->ODEBody2->setLocalPos(1,  0,   -0.2);
-        p_CommonData->ODEBody3->setLocalPos(1,  0.2, -0.2);
+        p_CommonData->ODEBody1->setLocalPos(box1InitPos);
+        p_CommonData->ODEBody2->setLocalPos(box2InitPos);
+        p_CommonData->ODEBody3->setLocalPos(box3InitPos);
 
         // Put standard block on the table
         p_CommonData->ODEBody4->setLocalPos(0.025,0,-0.05);
         p_CommonData->ODEBody4->setLocalRot(zeroRot);
         p_CommonData->sizeWeightStandardMass = mass2;
-        qDebug() << mass2;
         p_CommonData->ODEBody4->setMass(mass2);
     }
 
@@ -1105,15 +1143,26 @@ void haptics_thread::RenderDynamicBodies()
     m_tool0->enableDynamicObjects(true);
     m_tool1->enableDynamicObjects(true);
 
+    //add objects to world
     world->addChild(ODEWorld);
     world->addChild(ground);
     world->addChild(m_tool0);
     world->addChild(m_tool1);
     world->addChild(finger);
-    world->addChild(thumb);
+    world->addChild(thumb);   
     world->addChild(globe);
-}
 
+    // add scaled bodies for altering display ratio
+    world->addChild(m_dispScaleCurSphere0);
+    world->addChild(m_dispScaleCurSphere1);
+    world->addChild(scaledFinger);
+    world->addChild(scaledThumb);
+    world->addChild(p_CommonData->p_dynamicScaledBox1);
+    world->addChild(p_CommonData->p_dynamicScaledBox3);
+
+    finger->setTransparencyLevel(0.5);
+    thumb->setTransparencyLevel(0.5);
+}
 
 void haptics_thread::RenderExpFriction()
 {
@@ -1129,7 +1178,6 @@ void haptics_thread::RenderExpFriction()
     world->addChild(m_tool1);
     world->addChild(finger);
 }
-
 
 void haptics_thread::RenderTwoFriction()
 {    

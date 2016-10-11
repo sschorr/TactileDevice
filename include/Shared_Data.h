@@ -4,7 +4,7 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define MAGTRACKER
+#define MAGTRACKER
 //#define SENSORAY826
 //#define OCULUS
 //#define QWT
@@ -320,10 +320,15 @@ typedef struct
     chai3d::cMesh* p_dynamicScaledBox4;
 
     // flag for determining if display scaling is clutched
-    bool scaleClutched;
+    bool firstContact;
+
+    // center position of current display scale warping
+    chai3d::cVector3d dispScaleCenter;
 
     // storing how much we are display scaling
-    double displayScale;
+    double box1displayScale;
+    double box3displayScale;
+    double fingerDisplayScale;
 
     // flags for environment change and tissue transparency
     bool environmentChange;

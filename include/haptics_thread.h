@@ -62,7 +62,9 @@ public:
     void InitDynamicBodies();
     void RenderDynamicBodies();
     void SetInitJointAngles();
-    void UpdateScaledPositions();
+    void UpdateScaledBoxes();
+    void UpdateScaledCursors();
+    void UpdateScaledFingers();
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
     void AddImpulseDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce);
@@ -98,6 +100,17 @@ public:
     chai3d::cMultiMesh* scaledFinger;
     chai3d::cMultiMesh* scaledThumb;
 
+    chai3d::cShapeSphere* m_dispScaleCurSphere0;
+    chai3d::cShapeSphere* m_dispScaleCurSphere1;
+
+    // offsets for haptic tool from finger models
+    chai3d::cVector3d fingerOffset;
+    chai3d::cVector3d thumbOffset;
+
+    // initial position of boxes (center of warping for display scaled boxes)
+    chai3d::cVector3d box1InitPos;
+    chai3d::cVector3d box2InitPos;
+    chai3d::cVector3d box3InitPos;
 
     //texture for globe
     chai3d::cTexture2dPtr textureSpace;
