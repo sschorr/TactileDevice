@@ -80,6 +80,7 @@ void MainWindow::Initialize()
     connect(this->ui->verticalSliderX1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderY1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->CDScale, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KdSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
@@ -408,6 +409,8 @@ void MainWindow::onGUIchanged()
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
+    p_CommonData->box1displayScale = ui->CDScale->value()*.01;
+
     p_CommonData->jointKp = KpSlider;
     p_CommonData->jointKd = KdSlider;
     p_CommonData->bandSinAmpDisp = bandwidthAmp;
@@ -609,7 +612,11 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_T)
     {
-        if (p_CommonData->m_flagTissueTransparent == true)
+        if (p_CommonData->currentEnvironmentState == dynamicBodies)
+        {
+
+        }
+        else if (p_CommonData->m_flagTissueTransparent == true)
         {
             p_CommonData->m_flagTissueTransparent = false;
             p_CommonData->p_tissueOne->setTransparencyLevel(1.0, true);
@@ -1344,3 +1351,5 @@ void MainWindow::on_impulseTorquezNeg_clicked()
     p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
+
+

@@ -320,7 +320,10 @@ typedef struct
     chai3d::cMesh* p_dynamicScaledBox4;
 
     // flag for determining if display scaling is clutched
-    bool firstContact;
+    bool fingerTouching;
+    bool thumbTouching;
+    bool fingerTouchingLast;
+    bool thumbTouchingLast;
 
     // center position of current display scale warping
     chai3d::cVector3d dispScaleCenter;

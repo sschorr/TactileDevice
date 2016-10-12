@@ -78,8 +78,8 @@ void haptics_thread::initialize()
     p_CommonData->currentControlState = idleControl;
 
     p_CommonData->fingerDisplayScale = 1;
-    p_CommonData->box1displayScale = 0.5;
-    p_CommonData->box3displayScale = 1.5;
+    p_CommonData->box1displayScale = 1;
+    p_CommonData->box3displayScale = 1;
 
     p_CommonData->dispScaleCenter.set(0,0,0);
 
@@ -87,9 +87,14 @@ void haptics_thread::initialize()
     thumbOffset.set(0,-0.010,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    box1InitPos.set(.05,  .1,  0);
-    box2InitPos.set(1,   0,  0);
-    box3InitPos.set(.05, -.1,  0);
+    box1InitPos.set(.05,  .1,  0.025);
+    box2InitPos.set(1,   0,  0.025);
+    box3InitPos.set(.05, -.1,  0.025);
+
+    p_CommonData->fingerTouching = false; //reset before we check
+    p_CommonData->thumbTouching = false;
+    p_CommonData->fingerTouchingLast = false;
+    p_CommonData->thumbTouchingLast = false;
 }
 
 void haptics_thread::run()
@@ -268,9 +273,12 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
-    UpdateScaledCursors();
-    UpdateScaledFingers();
-    p_CommonData->fingerDisplayScale = 1.0; //reset to 1, will get changed in dynsim if necessary
+    //check for applying scaling based on whether we were touching last time
+    p_CommonData->fingerTouchingLast = p_CommonData->fingerTouching;
+    p_CommonData->thumbTouchingLast = p_CommonData->thumbTouching;
+
+    p_CommonData->fingerTouching = false; //reset before we check
+    p_CommonData->thumbTouching = false;
 
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
@@ -303,8 +311,8 @@ void haptics_thread::UpdateVRGraphics()
                 // look for the parent that will point to the ODE object itself.
                 chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
 
-                //if fingers touching box, make their scale match the box scale
-                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+                //if finger touching box, note it
+                p_CommonData->fingerTouching = true;
 
                 // cast to ODE object
                 cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
@@ -334,8 +342,9 @@ void haptics_thread::UpdateVRGraphics()
                 // look for the parent that will point to the ODE object itself.
                 chai3d::cGenericObject* object = collisionEvent->m_object->getOwner()->getOwner();
 
-                //if fingers touching box, make their scale match the box scale
-                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+                //if thumb touching box, note it
+                p_CommonData->thumbTouching = true;
+
 
                 // cast to ODE object
                 cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
@@ -350,104 +359,40 @@ void haptics_thread::UpdateVRGraphics()
         }
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
+
+        // update display scaling if we just grabbed a box and need to scale and center
+        p_CommonData->fingerDisplayScale = 1.0; //reset to 1, will get changed in dynsim if necessary
+        if (p_CommonData->fingerTouching & p_CommonData->thumbTouching)
+        {
+            p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+            // need this to only run the first time they're both touching
+            if(!p_CommonData->fingerTouchingLast | !p_CommonData->thumbTouchingLast)
+            {
+                p_CommonData->dispScaleCenter = p_CommonData->p_dynamicScaledBox1->getLocalPos();
+                qDebug() << "reset center";
+            }
+
+        }
+
+        UpdateScaledCursors();
+        UpdateScaledFingers();
+
         // update scaled positions
         UpdateScaledBoxes();
     }    
     p_CommonData->sharedMutex.unlock();
-    lastTime = currTime;
-
-
-
-    /*
-    // THIS IS SLOPPY CODE STUFF TO HANDLE THE PALPATION VISIBILITY AFTER TRIALS
-    // mainwindow makes the line visible after palpationLine trial, this makes it opaque again and starts the next trial
-    if(p_CommonData->palpPostTrialClock.timeoutOccurred())
-    {
-        p_CommonData->palpPostTrialClock.stop();
-        p_CommonData->palpPostTrialClock.reset();
-
-        // increment trial no
-        p_CommonData->trialNo = p_CommonData->trialNo + 1;
-
-        QString type = (p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "type", NULL ));
-
-        qDebug() << type;
-
-        if (type == "training")
-        {
-            p_CommonData->currentExperimentState = palpationLineTrial;
-            // rotate line to new location
-            double lastRotation = p_CommonData->tissueRot;
-            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL ));
-
-            rotateTissueLine(-lastRotation);
-            rotateTissueLine(p_CommonData->tissueRot);
-            p_CommonData->p_indicator->setTransparencyLevel(0, true);
-            p_CommonData->recordFlag = true;
-        }
-
-        else if(type == "break")
-        {
-            p_CommonData->currentExperimentState = palpationLineBreak;
-            p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSeven->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueEight->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueNine->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTen->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueEleven->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTwelve->setTransparencyLevel(1, true);
-            p_CommonData->p_indicator->setTransparencyLevel(0, true);
-        }
-
-        else if(type == "trial")
-        {
-            p_CommonData->currentExperimentState = palpationLineTrial;
-            // rotate line to new location
-            double lastRotation = p_CommonData->tissueRot;
-            p_CommonData->tissueRot = atoi(p_CommonData->palpationLineProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo)).toStdString().c_str(), "Angles", NULL ));
-
-            rotateTissueLine(-lastRotation);
-            rotateTissueLine(p_CommonData->tissueRot);
-
-            p_CommonData->p_tissueOne->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTwo->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueThree->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFour->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueFive->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSix->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueSeven->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueEight->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueNine->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTen->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueEleven->setTransparencyLevel(1, true);
-            p_CommonData->p_tissueTwelve->setTransparencyLevel(1, true);
-            p_CommonData->p_indicator->setTransparencyLevel(0, true);
-        }
-
-        else if (type == "end")
-        {
-            p_CommonData->currentExperimentState = endExperiment;
-        }
-
-        // rotate tissue line indicator back to 0
-        double lastDispRotation = p_CommonData->indicatorRot;
-        rotateTissueLineDisp(-lastDispRotation);
-    }*/
+    lastTime = currTime;   
 }
 
 void haptics_thread::UpdateScaledCursors()
 {
     chai3d::cVector3d curCenter = (m_tool0->m_hapticPoint->getGlobalPosProxy() + m_tool1->m_hapticPoint->getGlobalPosProxy())/2.0;
+    chai3d::cVector3d scaledCurCenter = p_CommonData->fingerDisplayScale*(curCenter - p_CommonData->dispScaleCenter) + p_CommonData->dispScaleCenter;
     chai3d::cVector3d centToFingCur = m_tool0->m_hapticPoint->getGlobalPosProxy() - curCenter;
     chai3d::cVector3d centToThumbCur = m_tool1->m_hapticPoint->getGlobalPosProxy() - curCenter;
 
-    m_dispScaleCurSphere0->setLocalPos(p_CommonData->fingerDisplayScale*curCenter + centToFingCur);
-    m_dispScaleCurSphere1->setLocalPos(p_CommonData->fingerDisplayScale*curCenter + centToThumbCur);
+    m_dispScaleCurSphere0->setLocalPos(scaledCurCenter + centToFingCur);
+    m_dispScaleCurSphere1->setLocalPos(scaledCurCenter + centToThumbCur);
 }
 
 void haptics_thread::UpdateScaledFingers()
@@ -460,8 +405,7 @@ void haptics_thread::UpdateScaledFingers()
     // update position of thumb to stay on scaled cursor (which is scaled relative to proxy point)
     scaledThumb->setLocalRot(fingerRotation1);
     scaledThumb->setLocalPos(m_dispScaleCurSphere1->getLocalPos() + fingerRotation1*thumbOffset);
-
-}
+ }
 
 void haptics_thread::UpdateScaledBoxes()
 {
@@ -782,7 +726,7 @@ void haptics_thread::InitFingerAndTool()
     scaledThumb->setLocalPos(0,0,0);
 
     if(cLoadFileOBJ(scaledFinger, "./Resources/FingerModel.obj")){
-        qDebug() << "Finger file loaded";
+        qDebug() << "finger file loaded";
     }
     if(cLoadFileOBJ(scaledThumb, "./Resources/FingerModelThumb.obj")){
         qDebug() << "thumb file loaded";
@@ -1131,9 +1075,9 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody3->setMass(mass3);
 
         // set position of box
-        p_CommonData->ODEBody1->setLocalPos(.05,  .1,  0);
-        p_CommonData->ODEBody2->setLocalPos( 1,   0,  0); //out of view
-        p_CommonData->ODEBody3->setLocalPos(.05, -.1,  0);
+        p_CommonData->ODEBody1->setLocalPos(box1InitPos);
+        p_CommonData->ODEBody2->setLocalPos(box2InitPos); //out of view
+        p_CommonData->ODEBody3->setLocalPos(box3InitPos);
     }
 
     //set position of backgroundObject
@@ -1159,9 +1103,6 @@ void haptics_thread::RenderDynamicBodies()
     world->addChild(scaledThumb);
     world->addChild(p_CommonData->p_dynamicScaledBox1);
     world->addChild(p_CommonData->p_dynamicScaledBox3);
-
-    finger->setTransparencyLevel(0.5);
-    thumb->setTransparencyLevel(0.5);
 }
 
 void haptics_thread::RenderExpFriction()
