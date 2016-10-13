@@ -614,9 +614,9 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if (p_CommonData->currentEnvironmentState == dynamicBodies)
         {
-
+            p_CommonData->scaledDispTransp += 1;
         }
-        else if (p_CommonData->m_flagTissueTransparent == true)
+        else  if (p_CommonData->m_flagTissueTransparent == true)
         {
             p_CommonData->m_flagTissueTransparent = false;
             p_CommonData->p_tissueOne->setTransparencyLevel(1.0, true);

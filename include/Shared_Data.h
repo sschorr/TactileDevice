@@ -325,13 +325,17 @@ typedef struct
     bool fingerTouchingLast;
     bool thumbTouchingLast;
 
-    // center position of current display scale warping
-    chai3d::cVector3d dispScaleCenter;
+    // center position of current display scale warping for finger or box
+    chai3d::cVector3d boxScaleCenter;
+    chai3d::cVector3d fingerScalePoint;
+    chai3d::cVector3d clutchedOffset;
 
     // storing how much we are display scaling
     double box1displayScale;
     double box3displayScale;
     double fingerDisplayScale;
+
+    int scaledDispTransp;
 
     // flags for environment change and tissue transparency
     bool environmentChange;

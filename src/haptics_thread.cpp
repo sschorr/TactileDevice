@@ -81,20 +81,24 @@ void haptics_thread::initialize()
     p_CommonData->box1displayScale = 1;
     p_CommonData->box3displayScale = 1;
 
-    p_CommonData->dispScaleCenter.set(0,0,0);
+    p_CommonData->fingerScalePoint.set(0,0,0);
 
     fingerOffset.set(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
     thumbOffset.set(0,-0.010,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    box1InitPos.set(.05,  .1,  0.025);
+    box1InitPos.set(.05,  0,  0.025);
     box2InitPos.set(1,   0,  0.025);
-    box3InitPos.set(.05, -.1,  0.025);
+    box3InitPos.set(1, -.1,  0.025);
 
     p_CommonData->fingerTouching = false; //reset before we check
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
+    p_CommonData->scaledDispTransp = 0;
+    p_CommonData->clutchedOffset.set(0,0,0);
+    p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
+
 }
 
 void haptics_thread::run()
@@ -345,7 +349,6 @@ void haptics_thread::UpdateVRGraphics()
                 //if thumb touching box, note it
                 p_CommonData->thumbTouching = true;
 
-
                 // cast to ODE object
                 cODEGenericBody* ODEobject = dynamic_cast<cODEGenericBody*>(object);
 
@@ -357,39 +360,94 @@ void haptics_thread::UpdateVRGraphics()
                 }
             }
         }
+
         // update simulation
         ODEWorld->updateDynamics(timeInterval);
 
-        // update display scaling if we just grabbed a box and need to scale and center
-        p_CommonData->fingerDisplayScale = 1.0; //reset to 1, will get changed in dynsim if necessary
-        if (p_CommonData->fingerTouching & p_CommonData->thumbTouching)
+        // update display scaling and scaling center if we just grabbed a box or are pushing and need to scale and center
+        if (p_CommonData->fingerTouching | p_CommonData->thumbTouching)
         {
             p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
             // need this to only run the first time they're both touching
-            if(!p_CommonData->fingerTouchingLast | !p_CommonData->thumbTouchingLast)
+            if(!p_CommonData->fingerTouchingLast & !p_CommonData->thumbTouchingLast)
             {
-                p_CommonData->dispScaleCenter = p_CommonData->p_dynamicScaledBox1->getLocalPos();
-                qDebug() << "reset center";
+                p_CommonData->fingerScalePoint = curCenter;
+                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+                qDebug() << "grab center";
             }
-
         }
+
+        // update display scaling center if we just dropped a box
+        if (!p_CommonData->fingerTouching & !p_CommonData->thumbTouching)
+        {
+            if (p_CommonData->fingerTouchingLast | p_CommonData->thumbTouchingLast)
+            {
+                p_CommonData->clutchedOffset = (scaledCurCenter - curCenter);
+                qDebug() << scaledCurCenter.y() << curCenter.y();
+                p_CommonData->fingerDisplayScale = 1.0;
+
+            }
+        }
+
 
         UpdateScaledCursors();
         UpdateScaledFingers();
-
         // update scaled positions
         UpdateScaledBoxes();
     }    
     p_CommonData->sharedMutex.unlock();
-    lastTime = currTime;   
+    lastTime = currTime;
+
+    // set scaled stuff to show or not show
+    UpdateScaledTransparency();
+
+}
+
+void haptics_thread::UpdateScaledTransparency()
+{
+    // case invisible scaled display
+    if ((p_CommonData->scaledDispTransp % 3) == 0)
+    {
+        scaledFinger->setTransparencyLevel(0.0);
+        scaledThumb->setTransparencyLevel(0.0);
+        p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(0.0);
+
+        finger->setTransparencyLevel(1.0);
+        thumb->setTransparencyLevel(1.0);
+        p_CommonData->p_dynamicBox1->setTransparencyLevel(1.0);
+    }
+    if ((p_CommonData->scaledDispTransp % 3) == 1)
+    {
+        scaledFinger->setTransparencyLevel(1.0);
+        scaledThumb->setTransparencyLevel(1.0);
+        p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(1.0);
+
+        finger->setTransparencyLevel(0);
+        thumb->setTransparencyLevel(0);
+        p_CommonData->p_dynamicBox1->setTransparencyLevel(0);
+    }
+    if ((p_CommonData->scaledDispTransp % 3) == 2)
+    {
+        scaledFinger->setTransparencyLevel(0.5);
+        scaledThumb->setTransparencyLevel(0.5);
+        p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(0.5);
+
+        finger->setTransparencyLevel(1.0);
+        thumb->setTransparencyLevel(1.0);
+        p_CommonData->p_dynamicBox1->setTransparencyLevel(1.0);
+    }
+
+
+
 }
 
 void haptics_thread::UpdateScaledCursors()
 {
-    chai3d::cVector3d curCenter = (m_tool0->m_hapticPoint->getGlobalPosProxy() + m_tool1->m_hapticPoint->getGlobalPosProxy())/2.0;
-    chai3d::cVector3d scaledCurCenter = p_CommonData->fingerDisplayScale*(curCenter - p_CommonData->dispScaleCenter) + p_CommonData->dispScaleCenter;
-    chai3d::cVector3d centToFingCur = m_tool0->m_hapticPoint->getGlobalPosProxy() - curCenter;
-    chai3d::cVector3d centToThumbCur = m_tool1->m_hapticPoint->getGlobalPosProxy() - curCenter;
+    curCenter = (m_tool0->m_hapticPoint->getGlobalPosProxy() + m_tool1->m_hapticPoint->getGlobalPosProxy())/2.0;
+    centToFingCur = m_tool0->m_hapticPoint->getGlobalPosProxy() - curCenter;
+    centToThumbCur = m_tool1->m_hapticPoint->getGlobalPosProxy() - curCenter;
+
+    scaledCurCenter = p_CommonData->fingerDisplayScale*(curCenter - p_CommonData->fingerScalePoint) + p_CommonData->fingerScalePoint + p_CommonData->clutchedOffset;
 
     m_dispScaleCurSphere0->setLocalPos(scaledCurCenter + centToFingCur);
     m_dispScaleCurSphere1->setLocalPos(scaledCurCenter + centToThumbCur);
@@ -1103,6 +1161,9 @@ void haptics_thread::RenderDynamicBodies()
     world->addChild(scaledThumb);
     world->addChild(p_CommonData->p_dynamicScaledBox1);
     world->addChild(p_CommonData->p_dynamicScaledBox3);
+
+    p_CommonData->clutchedOffset.set(0,0,0);
+    p_CommonData->fingerScalePoint.set(0,0,0);
 }
 
 void haptics_thread::RenderExpFriction()

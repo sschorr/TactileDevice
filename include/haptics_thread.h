@@ -65,6 +65,8 @@ public:
     void UpdateScaledBoxes();
     void UpdateScaledCursors();
     void UpdateScaledFingers();
+    void UpdateScaledTransparency();
+
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
     void AddImpulseDisp(chai3d::cVector3d &indexForce, chai3d::cVector3d &thumbForce);
@@ -111,6 +113,12 @@ public:
     chai3d::cVector3d box1InitPos;
     chai3d::cVector3d box2InitPos;
     chai3d::cVector3d box3InitPos;
+
+    // vectors for scaling
+    chai3d::cVector3d curCenter;
+    chai3d::cVector3d scaledCurCenter;
+    chai3d::cVector3d centToFingCur;
+    chai3d::cVector3d centToThumbCur;
 
     //texture for globe
     chai3d::cTexture2dPtr textureSpace;
