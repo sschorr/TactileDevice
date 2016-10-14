@@ -2152,6 +2152,31 @@
     <property name="maximum">
      <number>150</number>
     </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
+   </widget>
+   <widget class="QSlider" name="weightSlider">
+    <property name="geometry">
+     <rect>
+      <x>930</x>
+      <y>540</y>
+      <width>16</width>
+      <height>160</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>50</number>
+    </property>
+    <property name="maximum">
+     <number>350</number>
+    </property>
+    <property name="value">
+     <number>200</number>
+    </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
     </property>

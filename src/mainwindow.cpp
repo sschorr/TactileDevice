@@ -81,6 +81,8 @@ void MainWindow::Initialize()
     connect(this->ui->verticalSliderY1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->CDScale, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+    connect(this->ui->weightSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
+
     connect(this->ui->KpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KdSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->bandwidthAmpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
@@ -410,6 +412,7 @@ void MainWindow::onGUIchanged()
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
     p_CommonData->box1displayScale = ui->CDScale->value()*.01;
+    p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
 
     p_CommonData->jointKp = KpSlider;
     p_CommonData->jointKd = KdSlider;

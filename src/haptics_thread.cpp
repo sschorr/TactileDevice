@@ -83,8 +83,8 @@ void haptics_thread::initialize()
 
     p_CommonData->fingerScalePoint.set(0,0,0);
 
-    fingerOffset.set(0,-0.006,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
-    thumbOffset.set(0,-0.010,0); // finger axis are not at fingerpad, so we want a translation outward on fingertip
+    fingerOffset.set(0,-0.006,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
+    thumbOffset.set(0,-0.009,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
     box1InitPos.set(.05,  0,  0.025);
@@ -506,7 +506,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     globalForceRecord1 << computedForce1.x(), computedForce1.y(), computedForce1.z();
 
     // filter param
-    double fc = 10.0;
+    double fc = 5.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
 
@@ -677,7 +677,7 @@ void haptics_thread::InitFingerAndTool()
     toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
-    m_tool0->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool0->setShowContactPoints(false, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool0->enableDynamicObjects(true);
     m_tool0->setWaitForSmallForce(true);
     m_tool0->start();
@@ -687,7 +687,7 @@ void haptics_thread::InitFingerAndTool()
     world->addChild(m_tool1); //insert the tool into the world
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
-    m_tool1->setShowContactPoints(true, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
+    m_tool1->setShowContactPoints(false, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
     m_tool1->enableDynamicObjects(true);
     m_tool1->setWaitForSmallForce(true);
     m_tool1->start();
@@ -710,13 +710,13 @@ void haptics_thread::InitFingerAndTool()
     m_dispScaleCurSphere0 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_dispScaleCurSphere0);
     m_dispScaleCurSphere0->m_material->setGrayDarkSlate();
-    m_dispScaleCurSphere0->setShowFrame(true);
+    m_dispScaleCurSphere0->setShowFrame(false);
     m_dispScaleCurSphere0->setFrameSize(0.05);
 
     m_dispScaleCurSphere1 = new chai3d::cShapeSphere(toolRadius);
     world->addChild(m_dispScaleCurSphere1);
     m_dispScaleCurSphere1->m_material->setBlueAqua();
-    m_dispScaleCurSphere1->setShowFrame(true);
+    m_dispScaleCurSphere1->setShowFrame(false);
     m_dispScaleCurSphere1->setFrameSize(0.05);
 
 
@@ -1128,7 +1128,7 @@ void haptics_thread::RenderDynamicBodies()
         p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, boxSize3);
 
         // set mass of box
-        p_CommonData->ODEBody1->setMass(mass1);
+        p_CommonData->ODEBody1->setMass(p_CommonData->sliderWeight);
         p_CommonData->ODEBody2->setMass(mass2);
         p_CommonData->ODEBody3->setMass(mass3);
 
@@ -1164,6 +1164,13 @@ void haptics_thread::RenderDynamicBodies()
 
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerScalePoint.set(0,0,0);
+
+    m_tool0->setTransparencyLevel(0);
+    m_tool1->setTransparencyLevel(0);
+    m_curSphere0->setTransparencyLevel(0);
+    m_curSphere1->setTransparencyLevel(0);
+    m_dispScaleCurSphere0->setTransparencyLevel(0);
+    m_dispScaleCurSphere1->setTransparencyLevel(0);
 }
 
 void haptics_thread::RenderExpFriction()

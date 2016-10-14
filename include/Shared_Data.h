@@ -5,7 +5,7 @@
 
 // defines indicating what physical hardware is present
 #define MAGTRACKER
-//#define SENSORAY826
+#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -334,6 +334,8 @@ typedef struct
     double box1displayScale;
     double box3displayScale;
     double fingerDisplayScale;
+
+    double sliderWeight;
 
     int scaledDispTransp;
 
