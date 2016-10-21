@@ -111,7 +111,7 @@ void haptics_thread::run()
             // stop clock while we perform haptic calcs
             rateClock.stop();
 
-            Eigen::Vector3d inputAxis(0,0,1); // input axis for sin control and circ control modes
+            Eigen::Vector3d inputAxis(0,1,0); // input axis for sin control and circ control modes
             switch(p_CommonData->currentControlState)
             {
             case initCalibControl:
@@ -189,11 +189,13 @@ void haptics_thread::run()
 
 void haptics_thread::UpdateVRGraphics()
 {
+#ifndef OCULUS
     // Update camera Pos
-    /*double xPos = p_CommonData->camRadius*cos(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
+    double xPos = p_CommonData->camRadius*cos(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
     double yPos = p_CommonData->camRadius*sin(p_CommonData->azimuth*PI/180.0)*sin(p_CommonData->polar*PI/180.0);
     double zPos = p_CommonData->camRadius*cos(p_CommonData->polar*PI/180.0);
-    p_CommonData->cameraPos.set(xPos, yPos, zPos);*/
+    p_CommonData->cameraPos.set(xPos, yPos, zPos);
+#endif
 
 #ifdef OCULUS
     p_CommonData->lookatPos.set(0, 0, p_CommonData->cameraPos.z());
@@ -654,10 +656,12 @@ void haptics_thread::InitGeneralChaiStuff()
     // anything in front/behind these clipping planes will not be rendered
     p_CommonData->p_camera->setClippingPlanes(0.01, 20.0);
 
+#ifndef OCULUS
     // the camera is updated to a position based on these params
-    //p_CommonData->azimuth = 0.0;
-    //p_CommonData->polar = 135.0; //higher number puts us higher in the air
-    //p_CommonData->camRadius = 0.45;
+    p_CommonData->azimuth = 0.0;
+    p_CommonData->polar = 135.0; //higher number puts us higher in the air
+    p_CommonData->camRadius = 0.45;
+#endif
 
     // create a light source and attach it to the camera
     light = new chai3d::cDirectionalLight(world);
@@ -1531,10 +1535,17 @@ void haptics_thread::RenderPalpation()
     // compute collision detection algorithm
     p_CommonData->p_tissueOne->createAABBCollisionDetector(toolRadius);
 
+
     // define a default stiffness for the object
     p_CommonData->p_tissueOne->setTransparencyLevel(0.4, true, true);
+
     p_CommonData->p_tissueOne->setStiffness(tissueNomStiffness, true);
     p_CommonData->p_tissueOne->setFriction(staticFriction, dynamicFriction, TRUE);
+
+//    p_CommonData->p_tissueOne->m_material->setStiffness(tissueNomStiffness);
+//    p_CommonData->p_tissueOne->m_material->setLateralStiffness(1.5*tissueNomStiffness);
+//    p_CommonData->p_tissueOne->m_material->setStaticFriction(staticFriction);
+//    p_CommonData->p_tissueOne->m_material->setDynamicFriction(dynamicFriction);
     //----------------------------------------------Create Tissue Two---------------------------------------------------
     // add object to world
     world->addChild(p_CommonData->p_tissueTwo);
