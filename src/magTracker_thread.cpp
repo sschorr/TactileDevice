@@ -94,8 +94,8 @@ void magTracker_thread::CheckTrackerPoses()
     for(int tracker = 0; tracker <=1; tracker = tracker + 1)
     {
         double posScale = 1000.0;
-        double depthOffset = 180;
-        double zOffset = 150;
+        double depthOffset = 160;
+        double heightOffset = 130;
 
         chai3d::cTransform returnTransform;
         chai3d::cVector3d returnVec;
@@ -109,7 +109,7 @@ void magTracker_thread::CheckTrackerPoses()
         // only report the data if everything is okay
         x = (record.x - depthOffset)/posScale;
         y = record.y/posScale;
-        z = (record.z - zOffset)/posScale;
+        z = (record.z - heightOffset)/posScale;
         returnVec.set(x, y, z);
 
         returnMatrix.set(record.s[0][0], record.s[0][1], record.s[0][2],

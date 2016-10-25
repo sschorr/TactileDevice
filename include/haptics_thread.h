@@ -66,6 +66,8 @@ public:
     void UpdateScaledCursors();
     void UpdateScaledFingers();
     void UpdateScaledTransparency();
+    void SetDynEnvironMassExp();
+    void SetExpEnvironDemo();
 
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);
@@ -104,6 +106,14 @@ public:
 
     chai3d::cShapeSphere* m_dispScaleCurSphere0;
     chai3d::cShapeSphere* m_dispScaleCurSphere1;
+
+    // dyn environment params
+    double boxSize1, boxSize2, boxSize3;
+    double mass1, mass2, mass3;
+    double friction1, friction2, friction3;
+    double dynFriction1, dynFriction2, dynFriction3;
+    double stiffness1, stiffness2, stiffness3;
+    double latStiffness1, latStiffness2, latStiffness3;
 
     // offsets for haptic tool from finger models
     chai3d::cVector3d fingerOffset;

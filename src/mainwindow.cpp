@@ -411,6 +411,7 @@ void MainWindow::onGUIchanged()
     double bandwidthAmp = this->ui->bandwidthAmpSlider->value()/20.0;
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
+    // set the display scale and the weight of the box
     p_CommonData->box1displayScale = ui->CDScale->value()*.01;
     p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
 
