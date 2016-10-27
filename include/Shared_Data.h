@@ -76,6 +76,7 @@ typedef enum
     idleExperiment,
     frictionTrial,
     sizeWeightTrial,
+    CDTrial,
     palpationTrial,
     palpationLineTrial,
     palpationLineWritingToFile,
@@ -100,12 +101,9 @@ typedef enum
     none,
     palpation,
     twoFriction,
-    hump,
-    hoopHump,
     experimentFriction,
     experimentPalpationLine,
     dynamicBodies,
-    paperEnvironment
 } environment_states;
 
 typedef enum
@@ -115,7 +113,8 @@ typedef enum
     friction,
     dimension,
     stiffness,
-    dynamicExperiment
+    dynamicExperiment,
+    dynamicCDExp
 } dynamicObject_states;
 
 
@@ -334,10 +333,34 @@ typedef struct
     double box1displayScale;
     double box3displayScale;
     double fingerDisplayScale;
-
     double sliderWeight;
-
     int scaledDispTransp;
+
+    // vars for tracking CD exp params
+    int isUpperCurve; // 1 upper, 0 lower
+    int isRef; // 1 ref, 0 compare
+    double upperCurveMass;
+    double lowerCurveMass;
+    int upperCurveReversals;
+    int lowerCurveReversals;
+    int CDSet;
+    int currChoice;
+    int maxReversals;
+
+    double upperCurveIncrement;
+    double lowerCurveIncrement;
+
+    int lastUpperCurveRefHeavier; // record whether the last choice for this curve was ref or compare, to know whether we had a "reversal"
+    int lastLowerCurveRefHeavier;
+
+    double refCD;
+    double compareCD;
+    double refMass; //compare mass set by upper and lower curves
+
+
+
+    double expCD;
+    double expMass;
 
     // flags for environment change and tissue transparency
     bool environmentChange;

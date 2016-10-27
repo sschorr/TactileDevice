@@ -40,6 +40,11 @@ void Experiment_Thread::run()
 
         case palpationLineBreak:
             break;
+
+        case CDTrial:
+            p_CommonData->recordFlag = true;
+            break;
+
         case sizeWeightTrial:
             p_CommonData->recordFlag = true;
             break;

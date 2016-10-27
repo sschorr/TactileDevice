@@ -119,6 +119,9 @@ void MainWindow::Initialize()
     p_CommonData->device0Initing = false;
     p_CommonData->device1Initing = false;
 
+    p_CommonData->maxReversals = 5;
+    p_CommonData->currChoice = 0;
+
 #ifdef QWT
     ///////////////
     // QWT INITS //
@@ -302,17 +305,26 @@ void MainWindow::UpdateGUIInfo()
     ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
     ui->lcdKp->display(p_CommonData->jointKp);
     ui->lcdKd->display(p_CommonData->jointKd);
+
+
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
+    ui->CD_Val->display(p_CommonData->expCD);
+    ui->Mass_Val->display(p_CommonData->expMass);
 
     //calibrate if startup process over
     if(p_CommonData->calibClock.timeoutOccurred())
     {
         p_CommonData->calibClock.stop();
         p_CommonData->calibClock.reset();
-
         on_CalibratePushButton_clicked();
     }
+
+    if(p_CommonData->isRef == 1)
+        ui->refCompare->setText("Ref");
+    else
+        ui->refCompare->setText("Comparison");
+
 
     switch(p_CommonData->currentExperimentState)
     {
@@ -412,7 +424,7 @@ void MainWindow::onGUIchanged()
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
     // set the display scale and the weight of the box
-    p_CommonData->box1displayScale = ui->CDScale->value()*.01;
+    p_CommonData->box1displayScale = 1.0/(ui->CDScale->value()*.01);
     p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
 
     p_CommonData->jointKp = KpSlider;
@@ -804,6 +816,10 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_Backspace)
     {
+        if(p_CommonData->currentExperimentState == CDTrial)
+        {
+
+        }
         if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
             if(p_CommonData->pairNo == 2)
@@ -817,8 +833,20 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         }
     }
 
+
+
     if (a_event->key() == Qt::Key_1)
     {
+        if(p_CommonData->currentExperimentState == CDTrial)
+        {
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->currChoice = 1;
+                ProgressCDExpParams();
+                on_dynamicEnvironment_clicked();
+            }
+        }
+
         if(p_CommonData->currentExperimentState == frictionTrial)
         {
             if(p_CommonData->pairNo == 2)
@@ -831,6 +859,16 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_2)
     {
+        if(p_CommonData->currentExperimentState == CDTrial)
+        {
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->currChoice = 2;
+                ProgressCDExpParams();
+                on_dynamicEnvironment_clicked();
+            }
+        }
+
         if(p_CommonData->currentExperimentState == frictionTrial)
         {
             if(p_CommonData->pairNo == 2)
@@ -843,6 +881,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
     if (a_event->key() == Qt::Key_Q)
     {
+        if(p_CommonData->currentExperimentState == CDTrial)
+        {
+            if(p_CommonData->pairNo == 1)
+            {
+                ProgressCDExpParams();
+            }
+        }
+
         if(p_CommonData->currentExperimentState == trialBreak)
         {
             // check if next trial is end
@@ -1070,12 +1116,171 @@ void MainWindow::on_startExperiment_2_clicked()
 {
     p_CommonData->environmentChange = true;
     p_CommonData->currentExperimentState = sizeWeightTrial;
-    p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicExperiment;
     p_CommonData->currentControlState = VRControlMode;
     p_CommonData->pairNo = 1;
     p_CommonData->dataRecorderVector.clear();
     ui->VRControl->setChecked(true);
+}
+
+void MainWindow::on_StartCD_clicked()
+{
+    p_CommonData->trialNo = p_CommonData->trialNo + 1;
+    p_CommonData->currentExperimentState = CDTrial;
+    p_CommonData->currentEnvironmentState = dynamicBodies;
+    p_CommonData->currentDynamicObjectState = dynamicCDExp;
+    p_CommonData->dataRecorderVector.clear();
+    ui->VRControl->setChecked(true);
+
+    // set params
+    p_CommonData->pairNo = 2;
+    p_CommonData->upperCurveIncrement = 0.020;
+    p_CommonData->lowerCurveIncrement = 0.020;
+    p_CommonData->upperCurveMass = .350;
+    p_CommonData->lowerCurveMass = .050;
+    p_CommonData->lowerCurveReversals = 0;
+    p_CommonData->upperCurveReversals = 0;
+    p_CommonData->currChoice = 0;
+    p_CommonData->lastUpperCurveRefHeavier = 1;
+    p_CommonData->lastLowerCurveRefHeavier = 0;
+    p_CommonData->refCD = 1;
+    p_CommonData->refMass = .200;
+    p_CommonData->compareCD = 0.5;
+
+    ProgressCDExpParams();
+
+    p_CommonData->environmentChange = true; // triggers new rendering
+}
+
+void MainWindow::ProgressCDExpParams()
+{
+    if(p_CommonData->pairNo == 1)
+    {
+        // when moving from 1 to 2 pair, need to switch ref and compare state
+        p_CommonData->isRef = !p_CommonData->isRef;
+
+        // set mass for pair 2based on whether comparison
+        if(p_CommonData->isRef)
+        {
+            p_CommonData->expCD = p_CommonData->refCD;
+            p_CommonData->expMass = p_CommonData->refMass;
+        }
+        else
+        {
+            if(p_CommonData->isUpperCurve)
+            {
+                p_CommonData->expCD = p_CommonData->compareCD;
+                p_CommonData->expMass = p_CommonData->upperCurveMass;
+            }
+            else
+            {
+                p_CommonData->expCD = p_CommonData->compareCD;
+                p_CommonData->expMass = p_CommonData->lowerCurveMass;
+            }
+        }
+
+        // go to pair 2
+        p_CommonData->pairNo = 2;
+    }
+    else if(p_CommonData->pairNo == 2)
+    {
+        //////////////////////////////
+        // handle answer from this set
+        //////////////////////////////
+        // subject indicates comparison is heavier, adjust comparison lower
+        if( ((p_CommonData->currChoice==1)&p_CommonData->isRef) | ((p_CommonData->currChoice==2) & !p_CommonData->isRef) )
+        {
+            if(p_CommonData->isUpperCurve)
+            {
+                p_CommonData->upperCurveMass = p_CommonData->upperCurveMass - p_CommonData->upperCurveIncrement;
+                // check for reversal and update increment
+                if(p_CommonData->lastUpperCurveRefHeavier)
+                {
+                    p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
+                }
+                p_CommonData->lastUpperCurveRefHeavier = 0;
+            }
+            else
+            {
+                p_CommonData->lowerCurveMass = p_CommonData->lowerCurveMass - p_CommonData->lowerCurveIncrement;
+                // check for reversal and update increment
+                if(p_CommonData->lastLowerCurveRefHeavier)
+                {
+                    p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
+                }
+                p_CommonData->lastLowerCurveRefHeavier = 0;
+            }
+        }
+        // subject indicates reference is heavier, adjust comparison higher
+        else if( ((p_CommonData->currChoice==1)&!p_CommonData->isRef) | ((p_CommonData->currChoice==2) & p_CommonData->isRef) )
+        {
+            if(p_CommonData->isUpperCurve)
+            {
+                p_CommonData->upperCurveMass = p_CommonData->upperCurveMass + p_CommonData->upperCurveIncrement;
+                // check for reversal and update increment
+                if(!p_CommonData->lastUpperCurveRefHeavier)
+                {
+                    p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
+                    if(p_CommonData->upperCurveReversals==1)
+                        p_CommonData->upperCurveIncrement = 0.010;
+                }
+                p_CommonData->lastUpperCurveRefHeavier = 1;
+            }
+            else
+            {
+                p_CommonData->lowerCurveMass = p_CommonData->lowerCurveMass + p_CommonData->lowerCurveIncrement;
+                // check for reversal and update increment
+                if(!p_CommonData->lastLowerCurveRefHeavier)
+                {
+                    p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
+                    if(p_CommonData->lowerCurveReversals==1)
+                        p_CommonData->lowerCurveIncrement = 0.010;
+                }
+                p_CommonData->lastLowerCurveRefHeavier = 1;
+            }
+        }
+
+        ////////////////////
+        // setup next trial
+        ////////////////////
+        // randomly select from upper or lower curve for next trial
+        p_CommonData->isUpperCurve = rand()%2;
+        // if done with upper, select lower
+        if(p_CommonData->upperCurveReversals == p_CommonData->maxReversals)
+            p_CommonData->isUpperCurve = 0;
+        // if done with lower, select upper
+        else if(p_CommonData->lowerCurveReversals == p_CommonData->maxReversals)
+            p_CommonData->isUpperCurve = 1;
+        // if done with both, we're done
+        if((p_CommonData->lowerCurveReversals == p_CommonData->maxReversals) & (p_CommonData->upperCurveReversals == p_CommonData->maxReversals))
+        {
+            // fill in with completed action
+        }
+
+        // now randomly select whether to do ref or comparison for first pair of next trial
+        p_CommonData->isRef = rand() % 2;
+
+        // set mass based on whether comparison
+        if(p_CommonData->isRef)
+        {
+            p_CommonData->expCD = p_CommonData->refCD;
+            p_CommonData->expMass = p_CommonData->refMass;
+        }
+        else
+        {
+            if(p_CommonData->isUpperCurve)
+            {
+                p_CommonData->expCD = p_CommonData->compareCD;
+                p_CommonData->expMass = p_CommonData->upperCurveMass;
+            }
+            else
+            {
+                p_CommonData->expCD = p_CommonData->compareCD;
+                p_CommonData->expMass = p_CommonData->lowerCurveMass;
+            }
+        }
+        p_CommonData->pairNo = 1;
+    }
 }
 
 void MainWindow::on_startExperiment_3_clicked()
@@ -1193,7 +1398,6 @@ void MainWindow::processEvents()
     }
 #endif
 }
-
 
 void MainWindow::on_AllDown0_clicked()
 {
@@ -1355,5 +1559,7 @@ void MainWindow::on_impulseTorquezNeg_clicked()
     p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
+
+
 
 

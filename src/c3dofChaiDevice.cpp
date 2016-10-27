@@ -441,6 +441,9 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     x = 0.06; y = .09*sin(.0001*counter);
     z = -0.15; // + .05*sin(.0001*counter);
 
+    // set to handle scaling params even if not using magnetic tracker
+    x1 = x; x2 = x; y1 = y; y2 = y; z1 = z; z2 = z;
+
     if (trackerNo == 1)
     {
         y = y + 0.02;
@@ -481,8 +484,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
     if (trackerNo == 1)
     {
-        //posOffsetinB.set(-.067, 0, .021); //Thumb dimensions
-        posOffsetinB.set(-.060, 0, .018); //index dimensions
+        posOffsetinB.set(-.067, 0, .021); //Thumb dimensions
+        //posOffsetinB.set(-.060, 0, .018); //index dimensions
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();

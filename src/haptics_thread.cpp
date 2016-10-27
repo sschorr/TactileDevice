@@ -167,7 +167,7 @@ void haptics_thread::run()
 
             // record only on every 10 haptic loops
             recordDataCounter++;
-            if(recordDataCounter == 10)
+            if(recordDataCounter == 20)
             {
                 recordDataCounter = 0;
                 if(p_CommonData->recordFlag == true)
@@ -995,6 +995,12 @@ void haptics_thread::RenderDynamicBodies()
         mass1 = 0.2; mass2 = 0.2; mass3 = 0.2;
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
+    case dynamicCDExp:
+        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
+        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
+        mass1 = 0.2; mass2 = 0.2; mass3 = 0.2;
+        stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
+        break;
     }
 
     //assign the params dependent on the others
@@ -1006,10 +1012,15 @@ void haptics_thread::RenderDynamicBodies()
         SetDynEnvironMassExp();
     }
 
+    else if (p_CommonData->currentDynamicObjectState == dynamicCDExp)
+    {
+        SetDynEnvironCDExp();
+    }
+
     // if just rendering dynamic environments without an experiment
     else
     {
-        SetExpEnvironDemo();
+        SetDynEnvironDemo();
     }
 
     //set position of backgroundObject
@@ -1047,6 +1058,60 @@ void haptics_thread::RenderDynamicBodies()
     m_dispScaleCurSphere1->setTransparencyLevel(0);
 }
 
+void haptics_thread::SetDynEnvironCDExp()
+{
+    // create the visual boxes on the dynamicbox meshes
+    cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+    cCreateBox(p_CommonData->p_dynamicBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
+
+    // create the visual for the position scaled dynamic boxes
+    cCreateBox(p_CommonData->p_dynamicScaledBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
+    cCreateBox(p_CommonData->p_dynamicScaledBox3, boxSize3, boxSize3, boxSize3); // make mesh a box
+
+    // setup collision detectorsfor the dynamic objects
+    p_CommonData->p_dynamicBox1->createAABBCollisionDetector(toolRadius);
+//    p_CommonData->p_dynamicBox3->createAABBCollisionDetector(toolRadius);
+
+    // define material properties for box 1
+    chai3d::cMaterial mat1;
+    mat1.setRedCrimson();
+    mat1.setStiffness(stiffness1);
+    mat1.setLateralStiffness(latStiffness1);
+    mat1.setDynamicFriction(dynFriction1);
+    mat1.setStaticFriction(friction1);
+    mat1.setUseHapticFriction(true);
+    p_CommonData->p_dynamicBox1->setMaterial(mat1);
+    p_CommonData->p_dynamicBox1->setUseMaterial(true);
+
+    // define material properties for box 3
+    chai3d::cMaterial mat3;
+    mat3.setGreenLawn();
+    mat3.setStiffness(stiffness3);
+    mat3.setLateralStiffness(latStiffness3);
+    mat3.setDynamicFriction(dynFriction3);
+    mat3.setStaticFriction(friction3);
+    mat3.setUseHapticFriction(true);
+    p_CommonData->p_dynamicBox3->setMaterial(mat3);
+    p_CommonData->p_dynamicBox3->setUseMaterial(true);
+
+    // add mesh to ODE object
+    p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
+    p_CommonData->ODEBody3->setImageModel(p_CommonData->p_dynamicBox3);
+
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEBody1->createDynamicBox(boxSize1, boxSize1, boxSize1);
+    p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, boxSize3);
+
+    // set mass of box
+    p_CommonData->ODEBody1->setMass(p_CommonData->expMass);
+    p_CommonData->ODEBody3->setMass(mass3);
+
+    // set position of box
+    p_CommonData->ODEBody1->setLocalPos(box1InitPos);
+    p_CommonData->ODEBody3->setLocalPos(box3InitPos);
+}
+
+// was for sizeWeight CHI exp
 void haptics_thread::SetDynEnvironMassExp()
 {
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
@@ -1111,7 +1176,8 @@ void haptics_thread::SetDynEnvironMassExp()
     p_CommonData->ODEBody4->setMass(mass2);
 }
 
-void haptics_thread::SetExpEnvironDemo()
+// was for general mass demo and subjective CHI exp
+void haptics_thread::SetDynEnvironDemo()
 {
     // create the visual boxes on the dynamicbox meshes
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
