@@ -886,6 +886,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             if(p_CommonData->pairNo == 1)
             {
                 ProgressCDExpParams();
+                on_dynamicEnvironment_clicked();
             }
         }
 
@@ -1281,6 +1282,7 @@ void MainWindow::ProgressCDExpParams()
         }
         p_CommonData->pairNo = 1;
     }
+    p_CommonData->fingerDisplayScale = 1.0;
 }
 
 void MainWindow::on_startExperiment_3_clicked()

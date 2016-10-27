@@ -391,8 +391,6 @@ void haptics_thread::UpdateVRGraphics()
 
             }
         }
-
-
     }    
     p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
