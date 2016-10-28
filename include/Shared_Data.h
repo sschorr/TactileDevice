@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define MAGTRACKER
-//#define SENSORAY826
+#define MAGTRACKER
+#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -123,7 +123,6 @@ typedef enum
 // define the data structure that contains data that we share between threads
 typedef struct
 {
-    //Chai3D variables
 
     // camera vars
     chai3d::cCamera* p_camera;

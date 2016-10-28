@@ -86,9 +86,8 @@ public:
     // Public Variables ============================================
     shared_data* p_CommonData; //create a pointer to a shared_data struct
 
-    // chai3D objects
-    chai3d::cWorld* world;    
-    chai3d::cDirectionalLight* light;
+    //Chai3D variables
+    chai3d::cSpotLight* light;
     chai3d::cToolCursor* m_tool0;
     chai3d::cToolCursor* m_tool1;
     chai3d::cShapeSphere* m_curSphere0;  // sphere to hover over tool and enable frames
@@ -131,6 +130,7 @@ public:
 
     double boxSize;
     double groundSize;
+    double groundThickness;
 
     // ODE Module variables
     cODEWorld* ODEWorld;

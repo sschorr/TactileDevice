@@ -29,7 +29,9 @@ void Widget_OpenGLDisplay::paintGL()
     if(p_CommonData)
     {
         //render world
+        p_CommonData->p_world->updateShadowMaps(false, false);
         p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
+
     }
 #endif
 }
