@@ -60,14 +60,16 @@ typedef struct
     Eigen::Vector3d VRInteractionForce1;
     Eigen::Vector3d VRInteractionForceGlobal1;
     chai3d::cVector3d magTrackerPos0;
-    chai3d::cVector3d magTrackerPos1;   
-    int pairNo;   
+    chai3d::cVector3d magTrackerPos1;    
     chai3d::cMatrix3d deviceRotation0;
     chai3d::cMatrix3d deviceRotation1;
+
     double boxMass;
-    double standardMass;
-    int boxNo;
-    double subjectValue;
+    double CDRatio;
+    int isRef;
+    int isReversal;
+    int pairNo;
+    int subjResponse;
 
 } DataRecordStruct;
 
@@ -331,7 +333,6 @@ typedef struct
 
     // storing how much we are display scaling
     double box1displayScale;
-    double box3displayScale;
     double fingerDisplayScale;
     double sliderWeight;
     int scaledDispTransp;
@@ -356,8 +357,6 @@ typedef struct
     double refCD;
     double compareCD;
     double refMass; //compare mass set by upper and lower curves
-
-
 
     double expCD;
     double expMass;

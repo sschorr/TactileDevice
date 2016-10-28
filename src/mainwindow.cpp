@@ -505,6 +505,16 @@ void MainWindow::on_setDirectory_clicked()
                                      &ok);
 }
 
+void MainWindow::on_setCDDirectory_clicked()
+{
+    p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
+                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/PalpationLine Exp/Subjects",
+                                        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    p_CommonData->fileName = QString::number(p_CommonData->box1displayScale);
+
+}
+
 void MainWindow::on_turnOff_clicked()
 {
     p_CommonData->currentControlState = idleControl;
@@ -539,7 +549,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                                                          "Weight:", QLineEdit::Normal, " ",
                                                          &ok);
                     p_CommonData->subjectResponseWeight = subjectEval.toFloat();
-                    p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
+                    p_CommonData->dataRecorder.subjResponse = p_CommonData->subjectResponseWeight;
                     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
 
                     p_CommonData->dataRecordMutex.lock();
@@ -1038,10 +1048,10 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].deviceRotation1(2,2) << "," << " "
 
         << localDataRecorderVector[i].boxMass << "," << " "
-        << localDataRecorderVector[i].standardMass << "," << " "
-        << localDataRecorderVector[i].boxNo << "," << " "
-        << localDataRecorderVector[i].subjectValue << "," << " "
+        << localDataRecorderVector[i].CDRatio << "," << " "
+        << localDataRecorderVector[i].isRef << "," << " "
         << localDataRecorderVector[i].pairNo << "," << " "
+        << localDataRecorderVector[i].subjResponse << "," << " "
 
         << std::endl;
     }
@@ -1145,11 +1155,12 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lastLowerCurveRefHeavier = 0;
     p_CommonData->refCD = 1;
     p_CommonData->refMass = .200;
-    p_CommonData->compareCD = 0.5;
+    p_CommonData->compareCD = p_CommonData->box1displayScale; // set to slider value at beginning of exp
 
     ProgressCDExpParams();
 
     p_CommonData->environmentChange = true; // triggers new rendering
+    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::ProgressCDExpParams()
@@ -1240,6 +1251,18 @@ void MainWindow::ProgressCDExpParams()
             }
         }
 
+        /////////////////////////////////////
+        // Write data from this trial to file
+        /////////////////////////////////////
+        p_CommonData->dataRecordMutex.lock();
+        p_CommonData->dataRecorder.subjResponse = p_CommonData->currChoice;
+        p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
+
+        localDataRecorderVector = p_CommonData->dataRecorderVector;
+        p_CommonData->dataRecorderVector.clear();
+        p_CommonData->dataRecordMutex.unlock();
+        WriteDataToFile();
+
         ////////////////////
         // setup next trial
         ////////////////////
@@ -1280,6 +1303,7 @@ void MainWindow::ProgressCDExpParams()
             }
         }
         p_CommonData->pairNo = 1;
+        p_CommonData->recordFlag = true;
     }
 }
 
@@ -1559,6 +1583,8 @@ void MainWindow::on_impulseTorquezNeg_clicked()
     p_CommonData->impulseTorqueClock.reset(); p_CommonData->impulseTorqueDelayClock.reset();
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
+
+
 
 
 

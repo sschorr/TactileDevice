@@ -79,7 +79,7 @@ void haptics_thread::initialize()
 
     p_CommonData->fingerDisplayScale = 1;
     p_CommonData->box1displayScale = 1;
-    p_CommonData->box3displayScale = 1;
+    p_CommonData->expCD = 1.0;
 
     p_CommonData->fingerScalePoint.set(0,0,0);
 
@@ -95,7 +95,7 @@ void haptics_thread::initialize()
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 0;
+    p_CommonData->scaledDispTransp = 2;
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
@@ -369,12 +369,12 @@ void haptics_thread::UpdateVRGraphics()
         // update display scaling and scaling center if we just grabbed a box or are pushing and need to scale and center
         if (p_CommonData->fingerTouching | p_CommonData->thumbTouching)
         {
-            p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+            p_CommonData->fingerDisplayScale = p_CommonData->expCD;
             // need this to only run the first time they're both touching
             if(!p_CommonData->fingerTouchingLast & !p_CommonData->thumbTouchingLast)
             {
                 p_CommonData->fingerScalePoint = curCenter;
-                p_CommonData->fingerDisplayScale = p_CommonData->box1displayScale;
+                p_CommonData->fingerDisplayScale = 1.0/p_CommonData->expCD;
                 qDebug() << "grab center";
             }
         }
@@ -470,14 +470,12 @@ void haptics_thread::UpdateScaledFingers()
 
 void haptics_thread::UpdateScaledBoxes()
 {
+    p_CommonData->box1displayScale = 1.0/p_CommonData->expCD;
     chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-box1InitPos)*p_CommonData->box1displayScale;
-    chai3d::cVector3d scaledBox3Pos; scaledBox3Pos = box3InitPos + (p_CommonData->ODEBody3->getLocalPos()-box3InitPos)*p_CommonData->box3displayScale;
 
     p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
-    p_CommonData->p_dynamicScaledBox3->setLocalPos(scaledBox3Pos);
 
     p_CommonData->p_dynamicScaledBox1->setLocalRot(p_CommonData->ODEBody1->getLocalRot());
-    p_CommonData->p_dynamicScaledBox3->setLocalRot(p_CommonData->ODEBody3->getLocalRot());
 }
 
 void haptics_thread::ComputeVRDesiredDevicePos()
@@ -617,11 +615,13 @@ void haptics_thread::RecordData()
 
     p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0*rotation0;
     p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
+
     p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
-    p_CommonData->dataRecorder.boxMass = p_CommonData->sizeWeightBoxMass;
-    p_CommonData->dataRecorder.standardMass = p_CommonData->sizeWeightStandardMass;
-    p_CommonData->dataRecorder.subjectValue = p_CommonData->subjectResponseWeight;
-    p_CommonData->dataRecorder.boxNo = p_CommonData->sizeWeightBox;
+
+    p_CommonData->dataRecorder.boxMass = p_CommonData->expCD;
+    p_CommonData->dataRecorder.CDRatio = p_CommonData->expMass;
+    p_CommonData->dataRecorder.isRef = p_CommonData->isRef;
+    p_CommonData->dataRecorder.subjResponse = 0;//fill in
     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
 
     p_CommonData->dataRecordMutex.unlock();
@@ -1056,6 +1056,14 @@ void haptics_thread::RenderDynamicBodies()
     m_curSphere1->setTransparencyLevel(0);
     m_dispScaleCurSphere0->setTransparencyLevel(0);
     m_dispScaleCurSphere1->setTransparencyLevel(0);
+
+    p_CommonData->fingerTouching = false; //reset before we check
+    p_CommonData->thumbTouching = false;
+    p_CommonData->fingerTouchingLast = false;
+    p_CommonData->thumbTouchingLast = false;
+    p_CommonData->scaledDispTransp = 2;
+    p_CommonData->clutchedOffset.set(0,0,0);
+    p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 }
 
 void haptics_thread::SetDynEnvironCDExp()
@@ -1109,6 +1117,7 @@ void haptics_thread::SetDynEnvironCDExp()
     // set position of box
     p_CommonData->ODEBody1->setLocalPos(box1InitPos);
     p_CommonData->ODEBody3->setLocalPos(box3InitPos);
+
 }
 
 // was for sizeWeight CHI exp

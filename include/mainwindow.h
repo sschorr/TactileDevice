@@ -165,6 +165,7 @@ private slots:
     void on_impulseTorquez_clicked();
     void on_StartCD_clicked();
     void ProgressCDExpParams();
+    void on_setCDDirectory_clicked();
 };
 
 #endif // MAINWINDOW_H
