@@ -4,7 +4,7 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define MAGTRACKER
+//#define MAGTRACKER
 //#define SENSORAY826
 //#define OCULUS
 //#define QWT
@@ -319,6 +319,11 @@ typedef struct
     chai3d::cMesh* p_dynamicScaledBox2;
     chai3d::cMesh* p_dynamicScaledBox3;
     chai3d::cMesh* p_dynamicScaledBox4;
+
+    // initial position of boxes (center of warping for display scaled boxes)
+    chai3d::cVector3d box1InitPos;
+    chai3d::cVector3d box2InitPos;
+    chai3d::cVector3d box3InitPos;
 
     // flag for determining if display scaling is clutched
     bool fingerTouching;

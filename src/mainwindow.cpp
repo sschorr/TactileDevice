@@ -309,7 +309,7 @@ void MainWindow::UpdateGUIInfo()
 
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
-    ui->CD_Val->display(p_CommonData->expCD);
+    ui->CD_Val->display(p_CommonData->compareCD);
     ui->Mass_Val->display(p_CommonData->expMass);
 
     //calibrate if startup process over
@@ -424,7 +424,7 @@ void MainWindow::onGUIchanged()
     double bandwidthFreq = this->ui->bandwidthFreqSlider->value()/3;
 
     // set the display scale and the weight of the box
-    p_CommonData->box1displayScale = 1.0/(ui->CDScale->value()*.01);
+    p_CommonData->compareCD = (ui->CDScale->value()*.01);
     p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
 
     p_CommonData->jointKp = KpSlider;
@@ -853,7 +853,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->currChoice = 1;
                 ProgressCDExpParams();
-                on_dynamicEnvironment_clicked();
+                ResetDynamicEnviron();
             }
         }
 
@@ -875,7 +875,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             {
                 p_CommonData->currChoice = 2;
                 ProgressCDExpParams();
-                on_dynamicEnvironment_clicked();
+                ResetDynamicEnviron();
             }
         }
 
@@ -896,7 +896,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             if(p_CommonData->pairNo == 1)
             {
                 ProgressCDExpParams();
-                on_dynamicEnvironment_clicked();
+                ResetDynamicEnviron();
             }
         }
 
@@ -1136,7 +1136,6 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
-    p_CommonData->trialNo = p_CommonData->trialNo + 1;
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
@@ -1304,9 +1303,31 @@ void MainWindow::ProgressCDExpParams()
             }
         }
         p_CommonData->pairNo = 1;
+        p_CommonData->trialNo = p_CommonData->trialNo + 1;
         p_CommonData->recordFlag = true;
     }
     p_CommonData->fingerDisplayScale = 1.0;
+}
+
+void MainWindow::ResetDynamicEnviron()
+{
+    p_CommonData->sharedMutex.lock();
+
+    p_CommonData->fingerTouching = false; //reset before we check
+    p_CommonData->thumbTouching = false;
+    p_CommonData->fingerTouchingLast = false;
+    p_CommonData->thumbTouchingLast = false;
+    p_CommonData->scaledDispTransp = 2;
+    p_CommonData->clutchedOffset.set(0,0,0);
+    p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
+
+    // set mass of box based on latest experiment params
+    p_CommonData->ODEBody1->setMass(p_CommonData->expMass);
+
+    // set position of box back to starting point
+    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+
+    p_CommonData->sharedMutex.unlock();
 }
 
 void MainWindow::on_startExperiment_3_clicked()

@@ -166,6 +166,8 @@ private slots:
     void on_StartCD_clicked();
     void ProgressCDExpParams();
     void on_setCDDirectory_clicked();
+    void ResetDynamicEnviron();
+
 };
 
 #endif // MAINWINDOW_H

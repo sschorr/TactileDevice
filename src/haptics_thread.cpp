@@ -87,9 +87,9 @@ void haptics_thread::initialize()
     thumbOffset.set(0,-0.009,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    box1InitPos.set(.05,  0,  0.025);
-    box2InitPos.set(1,   0,  0.025);
-    box3InitPos.set(1, -.1,  0.025);
+    p_CommonData->box1InitPos.set(.05,  0,  0.025);
+    p_CommonData->box2InitPos.set(1,   0,  0.025);
+    p_CommonData->box3InitPos.set(1, -.1,  0.025);
 
     p_CommonData->fingerTouching = false; //reset before we check
     p_CommonData->thumbTouching = false;
@@ -472,7 +472,7 @@ void haptics_thread::UpdateScaledFingers()
 void haptics_thread::UpdateScaledBoxes()
 {
     p_CommonData->box1displayScale = 1.0/p_CommonData->expCD;
-    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-box1InitPos)*p_CommonData->box1displayScale;
+    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-p_CommonData->box1InitPos)*p_CommonData->box1displayScale;
 
     p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
     p_CommonData->p_dynamicScaledBox1->setLocalRot(p_CommonData->ODEBody1->getLocalRot());
@@ -897,6 +897,8 @@ void haptics_thread::InitDynamicBodies()
 
 void haptics_thread::RenderDynamicBodies()
 {
+    p_CommonData->sharedMutex.lock();
+
     delete ODEWorld;
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
@@ -1046,7 +1048,6 @@ void haptics_thread::RenderDynamicBodies()
     world->addChild(scaledFinger);
     world->addChild(scaledThumb);
     world->addChild(p_CommonData->p_dynamicScaledBox1);
-    world->addChild(p_CommonData->p_dynamicScaledBox3);
 
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerScalePoint.set(0,0,0);
@@ -1058,13 +1059,7 @@ void haptics_thread::RenderDynamicBodies()
     m_dispScaleCurSphere0->setTransparencyLevel(0);
     m_dispScaleCurSphere1->setTransparencyLevel(0);
 
-    p_CommonData->fingerTouching = false; //reset before we check
-    p_CommonData->thumbTouching = false;
-    p_CommonData->fingerTouchingLast = false;
-    p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 2;
-    p_CommonData->clutchedOffset.set(0,0,0);
-    p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
+    p_CommonData->sharedMutex.unlock();
 }
 
 void haptics_thread::SetDynEnvironCDExp()
@@ -1099,7 +1094,7 @@ void haptics_thread::SetDynEnvironCDExp()
     p_CommonData->ODEBody1->setMass(p_CommonData->expMass);
 
     // set position of box
-    p_CommonData->ODEBody1->setLocalPos(box1InitPos);
+    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
 }
 
 // was for sizeWeight CHI exp
@@ -1148,7 +1143,7 @@ void haptics_thread::SetDynEnvironMassExp()
     p_CommonData->ODEBody3->createDynamicBox(boxSize3, boxSize3, 3*boxSize3);
     p_CommonData->ODEBody4->createDynamicBox(boxSize3, boxSize3, 2*boxSize3);
 
-     chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
+    chai3d::cMatrix3d zeroRot; zeroRot.set(0,0,0,0,0,0,0,0,0);
     p_CommonData->ODEBody1->setLocalRot(zeroRot);
     p_CommonData->ODEBody2->setLocalRot(zeroRot);
     p_CommonData->ODEBody3->setLocalRot(zeroRot);
@@ -1156,9 +1151,9 @@ void haptics_thread::SetDynEnvironMassExp()
 
     //put things where they go for start of experiment
     // Put the other blocks out of view
-    p_CommonData->ODEBody1->setLocalPos(box1InitPos);
-    p_CommonData->ODEBody2->setLocalPos(box2InitPos);
-    p_CommonData->ODEBody3->setLocalPos(box3InitPos);
+    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+    p_CommonData->ODEBody2->setLocalPos(p_CommonData->box2InitPos);
+    p_CommonData->ODEBody3->setLocalPos(p_CommonData->box3InitPos);
 
     // Put standard block on the table
     p_CommonData->ODEBody4->setLocalPos(0.025,0,-0.05);
@@ -1234,9 +1229,9 @@ void haptics_thread::SetDynEnvironDemo()
     p_CommonData->ODEBody3->setMass(mass3);
 
     // set position of box
-    p_CommonData->ODEBody1->setLocalPos(box1InitPos);
-    p_CommonData->ODEBody2->setLocalPos(box2InitPos); //out of view
-    p_CommonData->ODEBody3->setLocalPos(box3InitPos);
+    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+    p_CommonData->ODEBody2->setLocalPos(p_CommonData->box2InitPos); //out of view
+    p_CommonData->ODEBody3->setLocalPos(p_CommonData->box3InitPos);
 }
 
 

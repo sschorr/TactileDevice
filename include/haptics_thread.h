@@ -120,11 +120,6 @@ public:
     chai3d::cVector3d fingerOffset;
     chai3d::cVector3d thumbOffset;
 
-    // initial position of boxes (center of warping for display scaled boxes)
-    chai3d::cVector3d box1InitPos;
-    chai3d::cVector3d box2InitPos;
-    chai3d::cVector3d box3InitPos;
-
     // vectors for scaling
     chai3d::cVector3d curCenter;
     chai3d::cVector3d scaledCurCenter;
