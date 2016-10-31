@@ -1847,9 +1847,9 @@
    <widget class="QwtPlot" name="qwtPlot">
     <property name="geometry">
      <rect>
-      <x>380</x>
-      <y>500</y>
-      <width>331</width>
+      <x>390</x>
+      <y>510</y>
+      <width>231</width>
       <height>181</height>
      </rect>
     </property>
@@ -2187,11 +2187,11 @@
      <enum>Qt::Vertical</enum>
     </property>
    </widget>
-   <widget class="QLCDNumber" name="CD_Val">
+   <widget class="QLCDNumber" name="CD_Val_Cur">
     <property name="geometry">
      <rect>
       <x>710</x>
-      <y>700</y>
+      <y>730</y>
       <width>64</width>
       <height>23</height>
      </rect>
@@ -2213,8 +2213,8 @@
    <widget class="QLCDNumber" name="Mass_Val">
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>700</y>
+      <x>780</x>
+      <y>730</y>
       <width>64</width>
       <height>23</height>
      </rect>
@@ -2224,10 +2224,15 @@
     <property name="geometry">
      <rect>
       <x>870</x>
-      <y>690</y>
+      <y>710</y>
       <width>161</width>
       <height>41</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Ref or Comparison</string>
@@ -2247,6 +2252,64 @@
     </property>
     <property name="text">
      <string>Set CD Dir</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>710</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Current CD</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>670</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Compare CD</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="CD_Val_Compare">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>690</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>780</x>
+      <y>710</y>
+      <width>61</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mass</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
   </widget>

@@ -309,7 +309,8 @@ void MainWindow::UpdateGUIInfo()
 
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
-    ui->CD_Val->display(p_CommonData->compareCD);
+    ui->CD_Val_Compare->display(p_CommonData->compareCD);
+    ui->CD_Val_Cur->display(p_CommonData->expCD);
     ui->Mass_Val->display(p_CommonData->expMass);
 
     //calibrate if startup process over
@@ -1155,7 +1156,6 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lastLowerCurveRefHeavier = 0;
     p_CommonData->refCD = 1;
     p_CommonData->refMass = .200;
-    p_CommonData->compareCD = p_CommonData->box1displayScale; // set to slider value at beginning of exp
 
     ProgressCDExpParams();
 
