@@ -850,11 +850,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == CDTrial)
         {
-            if(p_CommonData->pairNo == 2)
+            if(CheckFingers())
             {
-                p_CommonData->currChoice = 1;
-                ProgressCDExpParams();
-                ResetDynamicEnviron();
+                if(p_CommonData->pairNo == 2)
+                {
+                    p_CommonData->currChoice = 1;
+                    ProgressCDExpParams();
+                    ResetDynamicEnviron();
+                }
             }
         }
 
@@ -872,11 +875,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == CDTrial)
         {
-            if(p_CommonData->pairNo == 2)
+            if(CheckFingers())
             {
-                p_CommonData->currChoice = 2;
-                ProgressCDExpParams();
-                ResetDynamicEnviron();
+                if(p_CommonData->pairNo == 2)
+                {
+                    p_CommonData->currChoice = 2;
+                    ProgressCDExpParams();
+                    ResetDynamicEnviron();
+                }
             }
         }
 
@@ -894,10 +900,13 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == CDTrial)
         {
-            if(p_CommonData->pairNo == 1)
+            if(CheckFingers())
             {
-                ProgressCDExpParams();
-                ResetDynamicEnviron();
+                if(p_CommonData->pairNo == 1)
+                {
+                    ProgressCDExpParams();
+                    ResetDynamicEnviron();
+                }
             }
         }
 
@@ -1317,7 +1326,7 @@ void MainWindow::ResetDynamicEnviron()
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 2;
+    p_CommonData->scaledDispTransp = 1;
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
@@ -1326,6 +1335,8 @@ void MainWindow::ResetDynamicEnviron()
 
     // set position of box back to starting point
     p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+    chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
+    p_CommonData->ODEBody1->setLocalRot(eyeMat);
 
     p_CommonData->sharedMutex.unlock();
 }

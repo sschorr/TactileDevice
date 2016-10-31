@@ -95,7 +95,7 @@ void haptics_thread::initialize()
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 2;
+    p_CommonData->scaledDispTransp = 1;
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
@@ -218,34 +218,34 @@ void haptics_thread::UpdateVRGraphics()
             break;
 
         case experimentFriction:
-            world->clearAllChildren();
+            p_CommonData->p_world->clearAllChildren();
             RenderExpFriction();
             break;
 
         case twoFriction:
-            world->clearAllChildren();
+            p_CommonData->p_world->clearAllChildren();
             RenderTwoFriction();
             break;
 
         case palpation:
-            world->clearAllChildren();
+            p_CommonData->p_world->clearAllChildren();
             RenderPalpation();
             break;
 
         case experimentPalpationLine:
-            world->clearAllChildren();
+            p_CommonData->p_world->clearAllChildren();
             RenderPalpation();
             break;
 
         case dynamicBodies:
-            world->clearAllChildren();
+            p_CommonData->p_world->clearAllChildren();
             RenderDynamicBodies();
             break;
         }
     }
 
     // compute global reference frames for each object
-    world->computeGlobalPositions(true);
+    p_CommonData->p_world->computeGlobalPositions(true);
 
     // update position and orientation of tool 0(and sphere that represents tool)
     m_tool0->updateFromDevice();
@@ -370,7 +370,6 @@ void haptics_thread::UpdateVRGraphics()
         // update display scaling and scaling center if we just grabbed a box or are pushing and need to scale and center
         if (p_CommonData->fingerTouching | p_CommonData->thumbTouching)
         {
-            p_CommonData->fingerDisplayScale = p_CommonData->expCD;
             // need this to only run the first time they're both touching
             if(!p_CommonData->fingerTouchingLast & !p_CommonData->thumbTouchingLast)
             {
@@ -391,8 +390,6 @@ void haptics_thread::UpdateVRGraphics()
 
             }
         }
-
-
     }    
     p_CommonData->sharedMutex.unlock();
     lastTime = currTime;
@@ -440,9 +437,6 @@ void haptics_thread::UpdateScaledTransparency()
         thumb->setTransparencyLevel(1.0);
         p_CommonData->p_dynamicBox1->setTransparencyLevel(1.0);
     }
-
-
-
 }
 
 void haptics_thread::UpdateScaledCursors()
@@ -452,7 +446,6 @@ void haptics_thread::UpdateScaledCursors()
     centToThumbCur = m_tool1->m_hapticPoint->getGlobalPosProxy() - curCenter;
 
     scaledCurCenter = p_CommonData->fingerDisplayScale*(curCenter - p_CommonData->fingerScalePoint) + p_CommonData->fingerScalePoint + p_CommonData->clutchedOffset;
-
     m_dispScaleCurSphere0->setLocalPos(scaledCurCenter + centToFingCur);
     m_dispScaleCurSphere1->setLocalPos(scaledCurCenter + centToThumbCur);
 }
@@ -472,6 +465,7 @@ void haptics_thread::UpdateScaledFingers()
 void haptics_thread::UpdateScaledBoxes()
 {
     p_CommonData->box1displayScale = 1.0/p_CommonData->expCD;
+
     chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-p_CommonData->box1InitPos)*p_CommonData->box1displayScale;
 
     p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
@@ -633,16 +627,15 @@ void haptics_thread::InitGeneralChaiStuff()
     // WORLD - CAMERA - LIGHTING
     //--------------------------------------------------------------------------
     // Create a new world
-    world = new chai3d::cWorld();
-    p_CommonData->p_world = world;
+    p_CommonData->p_world = new chai3d::cWorld();
 
     // create a camera and insert it into the virtual world
-    world->setBackgroundColor(0, 0, 0);
-    world->m_backgroundColor.setWhite();
+    p_CommonData->p_world->setBackgroundColor(0, 0, 0);
+    p_CommonData->p_world->m_backgroundColor.setWhite();
 
     // create a camera and insert it into the virtual world
-    p_CommonData->p_camera = new chai3d::cCamera(world);
-    world->addChild(p_CommonData->p_camera);
+    p_CommonData->p_camera = new chai3d::cCamera(p_CommonData->p_world);
+    p_CommonData->p_world->addChild(p_CommonData->p_camera);
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
@@ -665,11 +658,13 @@ void haptics_thread::InitGeneralChaiStuff()
 #endif
 
     // create a light source and attach it to the camera
-    light = new chai3d::cDirectionalLight(world);
-    world->addChild(light);   // insert light source inside world
+    light = new chai3d::cSpotLight(p_CommonData->p_world);
+    p_CommonData->p_world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(2.0, -0.8, .5));  // define the direction of the light beam
-
+    light->setDir(-.2, -0.2, .5);  // define the direction of the light beam
+    light->setLocalPos(.2, 0.2, -.5);
+    light->setCutOffAngleDeg(120);
+    light->setShadowMapEnabled(true);
 }
 
 void haptics_thread::InitFingerAndTool()
@@ -677,8 +672,8 @@ void haptics_thread::InitFingerAndTool()
     //--------------------------------------------------------------------------
     // HAPTIC DEVICES / TOOLS
     //--------------------------------------------------------------------------
-    m_tool0 = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool0); //insert the tool into the world
+    m_tool0 = new chai3d::cToolCursor(p_CommonData->p_world); // create a 3D tool
+    p_CommonData->p_world->addChild(m_tool0); //insert the tool into the world
     toolRadius = 0.002; // set tool radius
     m_tool0->setRadius(toolRadius);
     m_tool0->setHapticDevice(p_CommonData->chaiMagDevice0); // connect the haptic device to the tool
@@ -688,8 +683,8 @@ void haptics_thread::InitFingerAndTool()
     m_tool0->start();
 
     //uncomment this if we want to use 2 tools
-    m_tool1 = new chai3d::cToolCursor(world); // create a 3D tool
-    world->addChild(m_tool1); //insert the tool into the world
+    m_tool1 = new chai3d::cToolCursor(p_CommonData->p_world); // create a 3D tool
+    p_CommonData->p_world->addChild(m_tool1); //insert the tool into the world
     m_tool1->setRadius(toolRadius);
     m_tool1->setHapticDevice(p_CommonData->chaiMagDevice1); // connect the haptic device to the tool
     m_tool1->setShowContactPoints(false, false, chai3d::cColorf(0,0,0)); // show proxy and device position of finger-proxy algorithm
@@ -700,26 +695,26 @@ void haptics_thread::InitFingerAndTool()
     // Can use this to show frames on tool if so desired
     //create a sphere to represent the tool
     m_curSphere0 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere0);
+    p_CommonData->p_world->addChild(m_curSphere0);
     m_curSphere0->m_material->setGrayDarkSlate();
     m_curSphere0->setShowFrame(true);
     m_curSphere0->setFrameSize(0.05);
 
     m_curSphere1 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_curSphere1);
+    p_CommonData->p_world->addChild(m_curSphere1);
     m_curSphere1->m_material->setBlueAqua();
     m_curSphere1->setShowFrame(true);
     m_curSphere1->setFrameSize(0.05);
 
     // add display scaled visual representations
     m_dispScaleCurSphere0 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_dispScaleCurSphere0);
+    p_CommonData->p_world->addChild(m_dispScaleCurSphere0);
     m_dispScaleCurSphere0->m_material->setGrayDarkSlate();
     m_dispScaleCurSphere0->setShowFrame(false);
     m_dispScaleCurSphere0->setFrameSize(0.05);
 
     m_dispScaleCurSphere1 = new chai3d::cShapeSphere(toolRadius);
-    world->addChild(m_dispScaleCurSphere1);
+    p_CommonData->p_world->addChild(m_dispScaleCurSphere1);
     m_dispScaleCurSphere1->m_material->setBlueAqua();
     m_dispScaleCurSphere1->setShowFrame(false);
     m_dispScaleCurSphere1->setFrameSize(0.05);
@@ -730,13 +725,13 @@ void haptics_thread::InitFingerAndTool()
     //--------------------------------------------------------------------------
     // create a finger object
     finger = new chai3d::cMultiMesh(); // create a virtual mesh
-    world->addChild(finger); // add object to world
+    p_CommonData->p_world->addChild(finger); // add object to world
     finger->setShowFrame(false);
     finger->setFrameSize(0.05);
     finger->setLocalPos(0.0, 0.0, 0.0);
 
     thumb = new chai3d::cMultiMesh(); //create the thumb
-    world->addChild(thumb);
+    p_CommonData->p_world->addChild(thumb);
     thumb->setShowFrame(false);
     thumb->setFrameSize(0.05);
     thumb->setLocalPos(0,0,0);
@@ -777,13 +772,13 @@ void haptics_thread::InitFingerAndTool()
     // CREATE POSITION SCALED OBJECTS
     /////////////////////////////////////////////
     scaledFinger = new chai3d::cMultiMesh(); // create a virtual mesh
-    world->addChild(scaledFinger); // add object to world
+    p_CommonData->p_world->addChild(scaledFinger); // add object to world
     scaledFinger->setShowFrame(false);
     scaledFinger->setFrameSize(0.05);
     scaledFinger->setLocalPos(0.0, 0.0, 0.0);
 
     scaledThumb = new chai3d::cMultiMesh(); //create the scaledThumb
-    world->addChild(scaledThumb);
+    p_CommonData->p_world->addChild(scaledThumb);
     scaledThumb->setShowFrame(false);
     scaledThumb->setFrameSize(0.05);
     scaledThumb->setLocalPos(0,0,0);
@@ -937,7 +932,9 @@ void haptics_thread::RenderDynamicBodies()
 
     //create a plane
     groundSize = .3;
-    chai3d::cCreatePlane(ground, groundSize, 2*groundSize);
+    groundThickness = 0.01;
+    chai3d::cCreateBox(ground, groundSize, 2*groundSize, .01);
+
 
     //create globe
     chai3d::cCreateSphere(globe, 10, 30, 30);
@@ -951,8 +948,8 @@ void haptics_thread::RenderDynamicBodies()
     globe->setTexture(textureSpace, true); //apply texture to globe
     globe->setUseCulling(false, true);     // Since we don't need to see our polygons from both sides, we enable culling.
 
-    //position ground in world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05);
+    //position ground world where the invisible ODE plane is located (ODEGPlane1)
+    ground->setLocalPos(0,0,0.05 + groundThickness/2.0 );
 
     // define some material properties for ground
     chai3d::cMaterial matGround;
@@ -1034,20 +1031,20 @@ void haptics_thread::RenderDynamicBodies()
     m_tool1->enableDynamicObjects(true);
 
     //add objects to world
-    world->addChild(ODEWorld);
-    world->addChild(ground);
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
-    world->addChild(thumb);   
-    world->addChild(globe);
+    p_CommonData->p_world->addChild(ODEWorld);
+    p_CommonData->p_world->addChild(ground);
+    p_CommonData->p_world->addChild(m_tool0);
+    p_CommonData->p_world->addChild(m_tool1);
+    p_CommonData->p_world->addChild(finger);
+    p_CommonData->p_world->addChild(thumb);
+    p_CommonData->p_world->addChild(globe);
 
     // add scaled bodies for altering display ratio
-    world->addChild(m_dispScaleCurSphere0);
-    world->addChild(m_dispScaleCurSphere1);
-    world->addChild(scaledFinger);
-    world->addChild(scaledThumb);
-    world->addChild(p_CommonData->p_dynamicScaledBox1);
+    p_CommonData->p_world->addChild(m_dispScaleCurSphere0);
+    p_CommonData->p_world->addChild(m_dispScaleCurSphere1);
+    p_CommonData->p_world->addChild(scaledFinger);
+    p_CommonData->p_world->addChild(scaledThumb);
+    p_CommonData->p_world->addChild(p_CommonData->p_dynamicScaledBox1);
 
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerScalePoint.set(0,0,0);
@@ -1083,6 +1080,11 @@ void haptics_thread::SetDynEnvironCDExp()
     mat1.setUseHapticFriction(true);
     p_CommonData->p_dynamicBox1->setMaterial(mat1);
     p_CommonData->p_dynamicBox1->setUseMaterial(true);
+
+    // define material properties for box 1
+    chai3d::cMaterial mat2;
+    mat2.setBlueRoyal();
+    p_CommonData->p_dynamicScaledBox1->setMaterial(mat2);
 
     // add mesh to ODE object
     p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
@@ -1245,10 +1247,10 @@ void haptics_thread::RenderExpFriction()
     p_CommonData->p_expFrictionBox->m_material->setLateralStiffness(1580);
     p_CommonData->p_expFrictionBox->m_material->setStaticFriction(0.4);
     p_CommonData->p_expFrictionBox->m_material->setDynamicFriction(0.4);
-    world->addChild(p_CommonData->p_expFrictionBox);
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
+    p_CommonData->p_world->addChild(p_CommonData->p_expFrictionBox);
+    p_CommonData->p_world->addChild(m_tool0);
+    p_CommonData->p_world->addChild(m_tool1);
+    p_CommonData->p_world->addChild(finger);
 }
 
 void haptics_thread::RenderTwoFriction()
@@ -1270,11 +1272,11 @@ void haptics_thread::RenderTwoFriction()
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
     p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8*.9);
 
-    world->addChild(p_CommonData->p_frictionBox1);
-    world->addChild(p_CommonData->p_frictionBox2);
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
+    p_CommonData->p_world->addChild(p_CommonData->p_frictionBox1);
+    p_CommonData->p_world->addChild(p_CommonData->p_frictionBox2);
+    p_CommonData->p_world->addChild(m_tool0);
+    p_CommonData->p_world->addChild(m_tool1);
+    p_CommonData->p_world->addChild(finger);
 }
 
 void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
@@ -1570,9 +1572,9 @@ void haptics_thread::SetInitJointAngles()
 
 void haptics_thread::RenderPalpation()
 {
-    world->addChild(m_tool0);
-    world->addChild(m_tool1);
-    world->addChild(finger);
+    p_CommonData->p_world->addChild(m_tool0);
+    p_CommonData->p_world->addChild(m_tool1);
+    p_CommonData->p_world->addChild(finger);
 
     double tissueNomStiffness = 300;
     double staticFriction = 0.6;
@@ -1580,7 +1582,7 @@ void haptics_thread::RenderPalpation()
     double vertOffset = 0.03;
     //----------------------------------------------Create Tissue One---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueOne);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueOne);
 
     p_CommonData->p_tissueOne->setLocalPos(0,0,-.005+vertOffset);
 
@@ -1607,7 +1609,7 @@ void haptics_thread::RenderPalpation()
 //    p_CommonData->p_tissueOne->m_material->setDynamicFriction(dynamicFriction);
     //----------------------------------------------Create Tissue Two---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueTwo);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueTwo);
 
     p_CommonData->p_tissueTwo->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1625,7 +1627,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueTwo->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Three---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueThree);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueThree);
 
     p_CommonData->p_tissueThree->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1644,7 +1646,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Four---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueFour);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueFour);
 
     p_CommonData->p_tissueFour->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1663,7 +1665,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Five---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueFive);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueFive);
 
     p_CommonData->p_tissueFive->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1681,7 +1683,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueFive->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Six---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueSix);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueSix);
 
     p_CommonData->p_tissueSix->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1699,7 +1701,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueSix->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Seven---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueSeven);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueSeven);
 
     p_CommonData->p_tissueSeven->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1717,7 +1719,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueSeven->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Eight---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueEight);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueEight);
 
     p_CommonData->p_tissueEight->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1735,7 +1737,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueEight->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Nine---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueNine);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueNine);
 
     p_CommonData->p_tissueNine->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1753,7 +1755,7 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_tissueNine->setFriction(staticFriction, dynamicFriction, TRUE);
     //----------------------------------------------Create Tissue Ten---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueTen);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueTen);
 
     p_CommonData->p_tissueTen->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1772,7 +1774,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Eleven---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueEleven);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueEleven);
 
     p_CommonData->p_tissueEleven->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1791,7 +1793,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Twelve---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_tissueTwelve);
+    p_CommonData->p_world->addChild(p_CommonData->p_tissueTwelve);
 
     p_CommonData->p_tissueTwelve->setLocalPos(0,0,-.025+vertOffset);
 
@@ -1810,7 +1812,7 @@ void haptics_thread::RenderPalpation()
 
     //----------------------------------------------Create Tissue Indicator---------------------------------------------------
     // add object to world
-    world->addChild(p_CommonData->p_indicator);
+    p_CommonData->p_world->addChild(p_CommonData->p_indicator);
 
     p_CommonData->p_indicator->setLocalPos(0,0,-.026+vertOffset);
 
