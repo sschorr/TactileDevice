@@ -70,6 +70,7 @@ typedef struct
     int isReversal;
     int pairNo;
     int subjResponse;
+    int isUpperCurve;
 
 } DataRecordStruct;
 
@@ -356,6 +357,7 @@ typedef struct
     int CDSet;
     int currChoice;
     int maxReversals;
+    int isReversal;
 
     double upperCurveIncrement;
     double lowerCurveIncrement;

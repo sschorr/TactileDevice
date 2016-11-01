@@ -430,6 +430,8 @@ void MainWindow::onGUIchanged()
     // set the display scale and the weight of the box
     p_CommonData->compareCD = (ui->CDScale->value()*.01);
     p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
+    p_CommonData->fileName = QString::number(p_CommonData->compareCD);
+
 
     p_CommonData->jointKp = KpSlider;
     p_CommonData->jointKd = KdSlider;
@@ -512,10 +514,11 @@ void MainWindow::on_setDirectory_clicked()
 void MainWindow::on_setCDDirectory_clicked()
 {
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/PalpationLine Exp/Subjects",
+                                        "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/CD Exp",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
-    p_CommonData->fileName = QString::number(p_CommonData->box1displayScale);
+    p_CommonData->fileName = QString::number(p_CommonData->compareCD);
+    qDebug() << p_CommonData->fileName;
 
 }
 
@@ -975,12 +978,14 @@ void MainWindow::WriteDataToFile()
 {
     p_CommonData->recordFlag = false;    
 
-    char buffer[33];
-    itoa(p_CommonData->trialNo,buffer,10);
+    char trialBuffer[33];
+    itoa(p_CommonData->trialNo,trialBuffer,10);
+
+    QString trialName = "_trial_";
 
     //write data to file when we are done
     std::ofstream file;
-    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + buffer + ".txt");
+    file.open(p_CommonData->dir.toStdString() + "/" + p_CommonData->fileName.toStdString() + trialName.toStdString() + trialBuffer + ".txt");
     for (int i=0; i < localDataRecorderVector.size(); i++)
     {
         //[0] is distal finger, [1] is toward middle finger, [2] is away from finger pad
@@ -1061,11 +1066,13 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].deviceRotation1(2,1) << "," << " "
         << localDataRecorderVector[i].deviceRotation1(2,2) << "," << " "
 
-        << localDataRecorderVector[i].boxMass << "," << " "
         << localDataRecorderVector[i].CDRatio << "," << " "
+        << localDataRecorderVector[i].boxMass << "," << " "
         << localDataRecorderVector[i].isRef << "," << " "
         << localDataRecorderVector[i].pairNo << "," << " "
         << localDataRecorderVector[i].subjResponse << "," << " "
+        << localDataRecorderVector[i].isUpperCurve << "," << " "
+        << localDataRecorderVector[i].isReversal << "," << " "
 
         << std::endl;
     }
@@ -1168,6 +1175,7 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lastLowerCurveRefHeavier = 1;
     p_CommonData->refCD = 1;
     p_CommonData->refMass = .200;
+    p_CommonData->isReversal = 0;
 
     ProgressCDExpParams();
 
@@ -1178,6 +1186,7 @@ void MainWindow::on_StartCD_clicked()
 
 void MainWindow::ProgressCDExpParams()
 {
+    p_CommonData->recordFlag = false;
     p_CommonData->sharedMutex.lock();
     if(p_CommonData->pairNo == 1)
     {
@@ -1222,6 +1231,7 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastUpperCurveRefHeavier)
                 {
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
+                    p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastUpperCurveRefHeavier = 0;
             }
@@ -1232,6 +1242,7 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
+                    p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastLowerCurveRefHeavier = 0;
             }
@@ -1276,6 +1287,7 @@ void MainWindow::ProgressCDExpParams()
         /////////////////////////////////////
         p_CommonData->dataRecordMutex.lock();
         p_CommonData->dataRecorder.subjResponse = p_CommonData->currChoice;
+        p_CommonData->dataRecorder.isReversal = p_CommonData->isReversal;
         p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
 
         localDataRecorderVector = p_CommonData->dataRecorderVector;
@@ -1301,6 +1313,10 @@ void MainWindow::ProgressCDExpParams()
             p_CommonData->expDone = 1;
         }
 
+        // reset whether this is reversal
+        p_CommonData->isReversal = 0;
+        p_CommonData->dataRecorder.isReversal = 0;
+
         // now randomly select whether to do ref or comparison for first pair of next trial
         p_CommonData->isRef = rand() % 2;
 
@@ -1325,10 +1341,10 @@ void MainWindow::ProgressCDExpParams()
         }
         p_CommonData->pairNo = 1;
         p_CommonData->trialNo = p_CommonData->trialNo + 1;
-        p_CommonData->recordFlag = true;
     }
     p_CommonData->fingerDisplayScale = 1.0;
     p_CommonData->sharedMutex.unlock();
+    p_CommonData->recordFlag = true;
 }
 
 void MainWindow::ResetDynamicEnviron()

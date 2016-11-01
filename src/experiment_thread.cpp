@@ -42,7 +42,6 @@ void Experiment_Thread::run()
             break;
 
         case CDTrial:
-            p_CommonData->recordFlag = true;
             break;
 
         case sizeWeightTrial:

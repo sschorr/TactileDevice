@@ -623,11 +623,14 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
 
     p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
-
-    p_CommonData->dataRecorder.boxMass = p_CommonData->expCD;
-    p_CommonData->dataRecorder.CDRatio = p_CommonData->expMass;
+    p_CommonData->dataRecorder.boxMass = p_CommonData->expMass;
+    p_CommonData->dataRecorder.CDRatio = p_CommonData->expCD;
     p_CommonData->dataRecorder.isRef = p_CommonData->isRef;
-    p_CommonData->dataRecorder.subjResponse = 0;//fill in
+    p_CommonData->dataRecorder.subjResponse = 0;//fill in right before recording in window thread
+    p_CommonData->dataRecorder.isUpperCurve = p_CommonData->isUpperCurve;
+
+    //p_CommonData->dataRecorder.isReversal handled by mainwindow thread manually at end of each trial
+
     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
 
     p_CommonData->dataRecordMutex.unlock();
