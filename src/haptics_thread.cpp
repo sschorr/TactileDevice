@@ -87,9 +87,9 @@ void haptics_thread::initialize()
     thumbOffset.set(0,-0.009,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    p_CommonData->box1InitPos.set(.05,  0,  0.025);
-    p_CommonData->box2InitPos.set(1,   0,  0.025);
-    p_CommonData->box3InitPos.set(1, -.1,  0.025);
+    p_CommonData->box1InitPos.set(.05,  0,  0.0);
+    p_CommonData->box2InitPos.set(1,   0,  0.0);
+    p_CommonData->box3InitPos.set(1, -.1,  0.0);
 
     p_CommonData->fingerTouching = false; //reset before we check
     p_CommonData->thumbTouching = false;
@@ -215,6 +215,11 @@ void haptics_thread::UpdateVRGraphics()
         switch(p_CommonData->currentEnvironmentState)
         {
         case none:
+            p_CommonData->p_world->clearAllChildren();
+            p_CommonData->p_world->addChild(m_tool0);
+            p_CommonData->p_world->addChild(m_tool1);
+            p_CommonData->p_world->addChild(finger);
+            p_CommonData->p_world->addChild(thumb);
             break;
 
         case experimentFriction:
@@ -264,7 +269,7 @@ void haptics_thread::UpdateVRGraphics()
     fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
     finger->setLocalRot(fingerRotation0);
-    finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset);
+    finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset); //this offset isn't for computation of forces, just to align finger model
     m_curSphere0->setLocalPos(position0); // set the sphere visual representation to match
     m_curSphere0->setLocalRot(rotation0);
     m_tool0->computeInteractionForces();
@@ -402,6 +407,13 @@ void haptics_thread::UpdateVRGraphics()
     // set scaled stuff to show or not show
     UpdateScaledTransparency();
 
+    // Remove environment if experiments done
+    if(p_CommonData->expDone)
+    {
+        p_CommonData->environmentChange = true;
+        p_CommonData->currentEnvironmentState = none;
+        p_CommonData->expDone = false;
+    }
 }
 
 void haptics_thread::UpdateScaledTransparency()
@@ -813,13 +825,13 @@ void haptics_thread::InitFingerAndTool()
     scaledThumb->m_material->m_specular.set(1.0, 1.0, 1.0);
     scaledThumb->setUseMaterial(true);
     scaledThumb->setHapticEnabled(false);
+
 }
 
 void haptics_thread::InitEnvironments()
 {
     p_CommonData->p_frictionBox1 = new chai3d::cMesh();
     p_CommonData->p_frictionBox2 = new chai3d::cMesh();
-
     p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
     p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
     p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
@@ -846,7 +858,6 @@ void haptics_thread::InitEnvironments()
     p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
     p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
-
     p_CommonData->p_expFrictionBox = new chai3d::cMesh();
 }
 
@@ -888,13 +899,46 @@ void haptics_thread::InitDynamicBodies()
     //create background mesh
     globe = new chai3d::cMesh();
 
+    ////////////////////////////////////////////
+    // CREATE 1 and 2 MODELS FOR EXPERIMENT DISPLAY
+    /////////////////////////////////////////////
+    //init one and two meshes
+    p_CommonData->oneModel = new chai3d::cMultiMesh();
+    p_CommonData->twoModel = new chai3d::cMultiMesh();
+    p_CommonData->p_world->addChild(p_CommonData->oneModel); // add object to world
+    p_CommonData->p_world->addChild(p_CommonData->twoModel); // add object to world
+
+    // load an object file
+    if(cLoadFileOBJ(p_CommonData->oneModel, "./Resources/One.obj")){
+        qDebug() << "'One' loaded";
+    }
+    if(cLoadFileOBJ(p_CommonData->twoModel, "./Resources/Two.obj")){
+        qDebug() << "'Two' loaded";
+    }
+
+    p_CommonData->oneModel->setShowEnabled(true);
+    p_CommonData->oneModel->setUseVertexColors(true);
+    chai3d::cColorf oneColor;
+    oneColor.setRedCrimson();
+    p_CommonData->oneModel->setVertexColor(oneColor);
+
+    p_CommonData->twoModel->setShowEnabled(true);
+    p_CommonData->twoModel->setUseVertexColors(true);
+    chai3d::cColorf twoColor;
+    twoColor.setRedCrimson();
+    p_CommonData->twoModel->setVertexColor(twoColor);
+
+    p_CommonData->oneModel->rotateAboutLocalAxisDeg(chai3d::cVector3d(0,0,1), -90);
+    p_CommonData->twoModel->rotateAboutLocalAxisDeg(chai3d::cVector3d(0,0,1), -90);
+    p_CommonData->oneModel->rotateAboutLocalAxisDeg(chai3d::cVector3d(1,0,0), -90);
+    p_CommonData->twoModel->rotateAboutLocalAxisDeg(chai3d::cVector3d(1,0,0), -90);
+
 }
-
-void haptics_thread::RenderDynamicBodies()
+void haptics_thread::DeleteDynamicBodies()
 {
-    p_CommonData->sharedMutex.lock();
-
     delete ODEWorld;
+    delete p_CommonData->oneModel;
+    delete p_CommonData->twoModel;
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
     delete p_CommonData->ODEBody3;
@@ -908,7 +952,13 @@ void haptics_thread::RenderDynamicBodies()
     delete ODEGPlane1;
     delete ground;
     delete globe;
+}
 
+void haptics_thread::RenderDynamicBodies()
+{
+    p_CommonData->sharedMutex.lock();
+
+    DeleteDynamicBodies();
     InitDynamicBodies();
     ODEWorld->deleteAllChildren();
     //--------------------------------------------------------------------------
@@ -927,13 +977,13 @@ void haptics_thread::RenderDynamicBodies()
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-    ODEGPlane1->createStaticPlane(chai3d::cVector3d(1, 0.0, 0.05), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.025), chai3d::cVector3d(0.0, 0.0 ,-1.0));
 
     //create a plane
     groundSize = .3;
     groundThickness = 0.01;
-    chai3d::cCreateBox(ground, groundSize, 2*groundSize, .01);
+    chai3d::cCreateBox(ground, groundSize, 2*groundSize, groundThickness);
+    ground->setLocalPos(0,0,groundThickness*0.5);
 
 
     //create globe
@@ -1097,6 +1147,15 @@ void haptics_thread::SetDynEnvironCDExp()
 
     // set position of box
     p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+
+    //add one and two indicators
+    p_CommonData->p_world->addChild(p_CommonData->oneModel);
+    p_CommonData->p_world->addChild(p_CommonData->twoModel);
+
+    p_CommonData->oneModel->setLocalPos(0.07, 0.12, 0.04);
+    p_CommonData->twoModel->setLocalPos(0.07, -0.10, 0.04);
+    p_CommonData->oneModel->setTransparencyLevel(1.0);
+    p_CommonData->twoModel->setTransparencyLevel(0.0);
 }
 
 // was for sizeWeight CHI exp

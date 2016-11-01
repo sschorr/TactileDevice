@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define MAGTRACKER
-#define SENSORAY826
+//#define MAGTRACKER
+//#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -319,6 +319,9 @@ typedef struct
     chai3d::cMesh* p_dynamicScaledBox3;
     chai3d::cMesh* p_dynamicScaledBox4;
 
+    chai3d::cMultiMesh* oneModel;
+    chai3d::cMultiMesh* twoModel;
+
     // initial position of boxes (center of warping for display scaled boxes)
     chai3d::cVector3d box1InitPos;
     chai3d::cVector3d box2InitPos;
@@ -340,6 +343,8 @@ typedef struct
     double fingerDisplayScale;
     double sliderWeight;
     int scaledDispTransp;
+    int expDone;
+
 
     // vars for tracking CD exp params
     int isUpperCurve; // 1 upper, 0 lower

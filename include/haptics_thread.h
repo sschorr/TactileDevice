@@ -69,6 +69,7 @@ public:
     void SetDynEnvironMassExp();
     void SetDynEnvironDemo();
     void SetDynEnvironCDExp();
+    void DeleteDynamicBodies();
 
     void rotateTissueLineDisp(double angle);
     void rotateTissueLine(double angle);

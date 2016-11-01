@@ -119,8 +119,9 @@ void MainWindow::Initialize()
     p_CommonData->device0Initing = false;
     p_CommonData->device1Initing = false;
 
-    p_CommonData->maxReversals = 5;
+    p_CommonData->maxReversals = 4;
     p_CommonData->currChoice = 0;
+    p_CommonData->expDone = 0;
 
 #ifdef QWT
     ///////////////
@@ -312,6 +313,8 @@ void MainWindow::UpdateGUIInfo()
     ui->CD_Val_Compare->display(p_CommonData->compareCD);
     ui->CD_Val_Cur->display(p_CommonData->expCD);
     ui->Mass_Val->display(p_CommonData->expMass);
+    ui->upperReversals->display(p_CommonData->upperCurveReversals);
+    ui->lowerReversals->display(p_CommonData->lowerCurveReversals);
 
     //calibrate if startup process over
     if(p_CommonData->calibClock.timeoutOccurred())
@@ -1161,19 +1164,21 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lowerCurveReversals = 0;
     p_CommonData->upperCurveReversals = 0;
     p_CommonData->currChoice = 0;
-    p_CommonData->lastUpperCurveRefHeavier = 1;
-    p_CommonData->lastLowerCurveRefHeavier = 0;
+    p_CommonData->lastUpperCurveRefHeavier = 0;
+    p_CommonData->lastLowerCurveRefHeavier = 1;
     p_CommonData->refCD = 1;
     p_CommonData->refMass = .200;
 
     ProgressCDExpParams();
 
-    p_CommonData->environmentChange = true; // triggers new rendering
+
+    p_CommonData->environmentChange = true; // triggers new rendering    
     p_CommonData->recordFlag = true;
 }
 
 void MainWindow::ProgressCDExpParams()
 {
+    p_CommonData->sharedMutex.lock();
     if(p_CommonData->pairNo == 1)
     {
         // when moving from 1 to 2 pair, need to switch ref and compare state
@@ -1197,7 +1202,7 @@ void MainWindow::ProgressCDExpParams()
                 p_CommonData->expCD = p_CommonData->compareCD;
                 p_CommonData->expMass = p_CommonData->lowerCurveMass;
             }
-        }
+        }        
 
         // go to pair 2
         p_CommonData->pairNo = 2;
@@ -1231,6 +1236,7 @@ void MainWindow::ProgressCDExpParams()
                 p_CommonData->lastLowerCurveRefHeavier = 0;
             }
         }
+
         // subject indicates reference is heavier, adjust comparison higher
         else if( ((p_CommonData->currChoice==1)&!p_CommonData->isRef) | ((p_CommonData->currChoice==2) & p_CommonData->isRef) )
         {
@@ -1260,6 +1266,11 @@ void MainWindow::ProgressCDExpParams()
             }
         }
 
+        if(p_CommonData->upperCurveMass < .001)
+            p_CommonData->upperCurveMass = .001;
+        if(p_CommonData->lowerCurveMass < .001)
+            p_CommonData->lowerCurveMass = .001;
+
         /////////////////////////////////////
         // Write data from this trial to file
         /////////////////////////////////////
@@ -1276,6 +1287,7 @@ void MainWindow::ProgressCDExpParams()
         // setup next trial
         ////////////////////
         // randomly select from upper or lower curve for next trial
+        srand (time(NULL));
         p_CommonData->isUpperCurve = rand()%2;
         // if done with upper, select lower
         if(p_CommonData->upperCurveReversals == p_CommonData->maxReversals)
@@ -1283,10 +1295,10 @@ void MainWindow::ProgressCDExpParams()
         // if done with lower, select upper
         else if(p_CommonData->lowerCurveReversals == p_CommonData->maxReversals)
             p_CommonData->isUpperCurve = 1;
-        // if done with both, we're done
+        // if done with both, flag that we're done
         if((p_CommonData->lowerCurveReversals == p_CommonData->maxReversals) & (p_CommonData->upperCurveReversals == p_CommonData->maxReversals))
         {
-            // fill in with completed action
+            p_CommonData->expDone = 1;
         }
 
         // now randomly select whether to do ref or comparison for first pair of next trial
@@ -1316,6 +1328,7 @@ void MainWindow::ProgressCDExpParams()
         p_CommonData->recordFlag = true;
     }
     p_CommonData->fingerDisplayScale = 1.0;
+    p_CommonData->sharedMutex.unlock();
 }
 
 void MainWindow::ResetDynamicEnviron()
@@ -1337,7 +1350,16 @@ void MainWindow::ResetDynamicEnviron()
     p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
     chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
     p_CommonData->ODEBody1->setLocalRot(eyeMat);
-
+    if(p_CommonData->pairNo == 1)
+    {
+        p_CommonData->oneModel->setTransparencyLevel(1.0);
+        p_CommonData->twoModel->setTransparencyLevel(0.0);
+    }
+    else if(p_CommonData->pairNo == 2)
+    {
+        p_CommonData->oneModel->setTransparencyLevel(0.0);
+        p_CommonData->twoModel->setTransparencyLevel(1.0);
+    }
     p_CommonData->sharedMutex.unlock();
 }
 
