@@ -64,6 +64,9 @@ typedef struct
     chai3d::cMatrix3d deviceRotation0;
     chai3d::cMatrix3d deviceRotation1;
 
+    chai3d::cVector3d box1Pos;
+    chai3d::cVector3d scaledBox1Pos;
+
     double boxMass;
     double CDRatio;
     int isRef;

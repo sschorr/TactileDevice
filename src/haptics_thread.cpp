@@ -622,6 +622,9 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0*rotation0;
     p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
 
+    p_CommonData->dataRecorder.box1Pos = p_CommonData->p_dynamicBox1->getLocalPos;
+    p_CommonData->dataRecorder.scaledBox1Pos = p_CommonData->p_dynamicScaledBox1->getLocalPos();
+
     p_CommonData->dataRecorder.pairNo = p_CommonData->pairNo;
     p_CommonData->dataRecorder.boxMass = p_CommonData->expMass;
     p_CommonData->dataRecorder.CDRatio = p_CommonData->expCD;

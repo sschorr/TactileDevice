@@ -835,7 +835,40 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == CDTrial)
         {
+            p_CommonData->sharedMutex.lock();
 
+            p_CommonData->recordFlag = false;
+            p_CommonData->dataRecorderVector.clear();
+            ResetDynamicEnviron();
+            if(p_CommonData->pairNo == 2)
+            {
+                p_CommonData->pairNo = 1;
+                // when moving from 1 to 2 pair, need to switch ref and compare state
+                p_CommonData->isRef = !p_CommonData->isRef;
+
+                // set mass for pair 2based on whether comparison
+                if(p_CommonData->isRef)
+                {
+                    p_CommonData->expCD = p_CommonData->refCD;
+                    p_CommonData->expMass = p_CommonData->refMass;
+                }
+                else
+                {
+                    if(p_CommonData->isUpperCurve)
+                    {
+                        p_CommonData->expCD = p_CommonData->compareCD;
+                        p_CommonData->expMass = p_CommonData->upperCurveMass;
+                    }
+                    else
+                    {
+                        p_CommonData->expCD = p_CommonData->compareCD;
+                        p_CommonData->expMass = p_CommonData->lowerCurveMass;
+                    }
+                }
+            }
+
+            p_CommonData->recordFlag = true;
+            p_CommonData->sharedMutex.unlock();
         }
         if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
@@ -849,8 +882,6 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
     }
-
-
 
     if (a_event->key() == Qt::Key_1)
     {
@@ -1065,6 +1096,13 @@ void MainWindow::WriteDataToFile()
         << localDataRecorderVector[i].deviceRotation1(2,0) << "," << " "
         << localDataRecorderVector[i].deviceRotation1(2,1) << "," << " "
         << localDataRecorderVector[i].deviceRotation1(2,2) << "," << " "
+
+        << localDataRecorderVector[i].box1Pos.x() << "," << " "
+        << localDataRecorderVector[i].box1Pos.y() << "," << " "
+        << localDataRecorderVector[i].box1Pos.z() << "," << " "
+        << localDataRecorderVector[i].scaledBox1Pos.x() << "," << " "
+        << localDataRecorderVector[i].scaledBox1Pos.y() << "," << " "
+        << localDataRecorderVector[i].scaledBox1Pos.z() << "," << " "
 
         << localDataRecorderVector[i].CDRatio << "," << " "
         << localDataRecorderVector[i].boxMass << "," << " "

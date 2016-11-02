@@ -2132,7 +2132,7 @@
      <number>150</number>
     </property>
     <property name="singleStep">
-     <number>25</number>
+     <number>2</number>
     </property>
     <property name="pageStep">
      <number>25</number>
