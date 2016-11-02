@@ -119,7 +119,7 @@ void MainWindow::Initialize()
     p_CommonData->device0Initing = false;
     p_CommonData->device1Initing = false;
 
-    p_CommonData->maxReversals = 4;
+    p_CommonData->maxReversals = 6;
     p_CommonData->currChoice = 0;
     p_CommonData->expDone = 0;
 
@@ -1297,7 +1297,7 @@ void MainWindow::ProgressCDExpParams()
                 if(!p_CommonData->lastUpperCurveRefHeavier)
                 {
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
-                    if(p_CommonData->upperCurveReversals==1)
+                    if(p_CommonData->upperCurveReversals==2)
                         p_CommonData->upperCurveIncrement = 0.010;
                 }
                 p_CommonData->lastUpperCurveRefHeavier = 1;
