@@ -1199,6 +1199,7 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
     p_CommonData->dataRecorderVector.clear();
     ui->VRControl->setChecked(true);
+    onGUIchanged();
 
     // set params
     p_CommonData->pairNo = 2;
@@ -1212,14 +1213,14 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lastUpperCurveRefHeavier = 0;
     p_CommonData->lastLowerCurveRefHeavier = 1;
     p_CommonData->refCD = 1;
-    p_CommonData->refMass = .200;
+    p_CommonData->refMass = .150;
     p_CommonData->isReversal = 0;
 
     ProgressCDExpParams();
 
-
     p_CommonData->environmentChange = true; // triggers new rendering    
     p_CommonData->recordFlag = true;
+
 }
 
 void MainWindow::ProgressCDExpParams()

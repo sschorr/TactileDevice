@@ -95,7 +95,8 @@ void magTracker_thread::CheckTrackerPoses()
     {
         double posScale = 1000.0;
         double depthOffset = 160;
-        double heightOffset = 130;
+        double heightOffset = -40;
+        double horizontalOffset = -100;
 
         chai3d::cTransform returnTransform;
         chai3d::cVector3d returnVec;
@@ -108,7 +109,7 @@ void magTracker_thread::CheckTrackerPoses()
         // get the status of the last data record
         // only report the data if everything is okay
         x = (record.x - depthOffset)/posScale;
-        y = record.y/posScale;
+        y = (record.y - horizontalOffset)/posScale;
         z = (record.z - heightOffset)/posScale;
         returnVec.set(x, y, z);
 
