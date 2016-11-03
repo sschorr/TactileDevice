@@ -657,7 +657,7 @@ void haptics_thread::InitGeneralChaiStuff()
 
     // Position and orientate the camera
     // X is toward camera, pos y is to right, pos z is up
-    p_CommonData->cameraPos.set(0.3, 0.0, -.450);
+    p_CommonData->cameraPos.set(0.320, 0.0, -.350);
     p_CommonData->lookatPos.set(0.0, 0.0, 0.0);
     p_CommonData->upVector.set(0.0, 0.0, -1.0);
     p_CommonData->p_camera->set( p_CommonData->cameraPos,    //(0.25, 0, -.25),    // camera position (eye)

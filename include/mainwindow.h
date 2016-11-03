@@ -168,6 +168,7 @@ private slots:
     void on_setCDDirectory_clicked();
     void ResetDynamicEnviron();
 
+    void on_pushButton_2_clicked();
 };
 
 #endif // MAINWINDOW_H
