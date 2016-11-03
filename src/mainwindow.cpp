@@ -1200,6 +1200,7 @@ void MainWindow::on_StartCD_clicked()
     onGUIchanged();
 
     // set params
+    p_CommonData->trialNo = 0;
     p_CommonData->pairNo = 2;
     p_CommonData->upperCurveIncrement = 0.020;
     p_CommonData->lowerCurveIncrement = 0.020;
