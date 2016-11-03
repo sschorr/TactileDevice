@@ -835,11 +835,11 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
     {
         if(p_CommonData->currentExperimentState == CDTrial)
         {
-            p_CommonData->sharedMutex.lock();
-
             p_CommonData->recordFlag = false;
             p_CommonData->dataRecorderVector.clear();
             ResetDynamicEnviron();
+            p_CommonData->oneModel->setTransparencyLevel(1.0);
+            p_CommonData->twoModel->setTransparencyLevel(0.0);
             if(p_CommonData->pairNo == 2)
             {
                 p_CommonData->pairNo = 1;
@@ -866,11 +866,10 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
                     }
                 }
             }
-
             p_CommonData->recordFlag = true;
-            p_CommonData->sharedMutex.unlock();
         }
-        if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
+
+        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
         {
             if(p_CommonData->pairNo == 2)
             {
