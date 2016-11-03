@@ -1212,7 +1212,7 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->lastUpperCurveRefHeavier = 0;
     p_CommonData->lastLowerCurveRefHeavier = 1;
     p_CommonData->refCD = 1;
-    p_CommonData->refMass = .150;
+    p_CommonData->refMass = .20;
     p_CommonData->isReversal = 0;
 
     ProgressCDExpParams();
@@ -1700,8 +1700,7 @@ void MainWindow::on_impulseTorquezNeg_clicked()
     p_CommonData->impulseTorqueClock.start(true); p_CommonData->impulseTorqueDelayClock.start(true);
 }
 
-
-
-
-
-
+void MainWindow::on_pushButton_2_clicked()
+{
+    p_CommonData->expDone = 1;
+}

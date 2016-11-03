@@ -94,7 +94,7 @@ void magTracker_thread::CheckTrackerPoses()
     for(int tracker = 0; tracker <=1; tracker = tracker + 1)
     {
         double posScale = 1000.0;
-        double depthOffset = 160;
+        double depthOffset = 130;
         double heightOffset = -40;
         double horizontalOffset = -100;
 
