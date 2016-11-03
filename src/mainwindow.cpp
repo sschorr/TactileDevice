@@ -40,7 +40,6 @@ void MainWindow::Initialize()
         QThread::msleep(1000);
         SDL_Quit();
     }
-
     ovrSizei hmdResolution = oculusVR.getResolution();
     ovrSizei windowSize = { hmdResolution.w / 2, hmdResolution.h / 2 };
 
@@ -1269,6 +1268,8 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastUpperCurveRefHeavier)
                 {
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
+                    if(p_CommonData->upperCurveReversals==2)
+                        p_CommonData->upperCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastUpperCurveRefHeavier = 0;
@@ -1280,6 +1281,8 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
+                    if(p_CommonData->upperCurveReversals==2)
+                        p_CommonData->upperCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastLowerCurveRefHeavier = 0;
@@ -1298,6 +1301,7 @@ void MainWindow::ProgressCDExpParams()
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
                     if(p_CommonData->upperCurveReversals==2)
                         p_CommonData->upperCurveIncrement = 0.010;
+                    p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastUpperCurveRefHeavier = 1;
             }
@@ -1308,8 +1312,9 @@ void MainWindow::ProgressCDExpParams()
                 if(!p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
-                    if(p_CommonData->lowerCurveReversals==1)
+                    if(p_CommonData->lowerCurveReversals==2)
                         p_CommonData->lowerCurveIncrement = 0.010;
+                    p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastLowerCurveRefHeavier = 1;
             }
