@@ -87,7 +87,7 @@ void haptics_thread::initialize()
     thumbOffset.set(0,-0.009,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    p_CommonData->box1InitPos.set(.05,  0,  0.0);
+    p_CommonData->box1InitPos.set(.05,  0,  -0.005);
     p_CommonData->box2InitPos.set(1,   0,  0.0);
     p_CommonData->box3InitPos.set(1, -.1,  0.0);
 
@@ -541,7 +541,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
-    double forceToPosMultThumb = forceToPosMult*1.0;
+    double forceToPosMultThumb = forceToPosMult*1.2;
 
     // Pos movements in delta mechanism frame (index)
     chai3d::cVector3d desiredPosMovement0 = forceToPosMult*(filteredDeviceForce0 + indexImpulse + indexTorqueImpulse); //this is only for lateral if we override normal later
