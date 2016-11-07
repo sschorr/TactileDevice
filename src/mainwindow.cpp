@@ -1406,6 +1406,11 @@ void MainWindow::ResetDynamicEnviron()
     // set mass of box based on latest experiment params
     p_CommonData->ODEBody1->setMass(p_CommonData->expMass);
 
+    // wait until we're sure fingers aren't in the way
+    while(!CheckFingers())
+    {
+
+    }
     // set position of box back to starting point
     p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
     chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
