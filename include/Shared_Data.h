@@ -290,6 +290,9 @@ typedef struct
     chai3d::cMesh* p_frictionBox1; //mesh for left friction surface
     chai3d::cMesh* p_frictionBox2; //mesh for right friction surface
 
+    // testing textures
+    chai3d::cMultiMesh* p_textureBox;
+
     // haptics thread objects for friction experiment
     chai3d::cMesh* p_expFrictionBox;
 
