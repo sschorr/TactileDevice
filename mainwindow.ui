@@ -1130,7 +1130,7 @@
    <widget class="QPushButton" name="turnOff">
     <property name="geometry">
      <rect>
-      <x>1220</x>
+      <x>1180</x>
       <y>140</y>
       <width>75</width>
       <height>23</height>
@@ -1234,7 +1234,7 @@
    <widget class="QPushButton" name="CalibratePushButton">
     <property name="geometry">
      <rect>
-      <x>1220</x>
+      <x>1180</x>
       <y>80</y>
       <width>75</width>
       <height>23</height>
@@ -1247,7 +1247,7 @@
    <widget class="QPushButton" name="setNeutral">
     <property name="geometry">
      <rect>
-      <x>1220</x>
+      <x>1180</x>
       <y>50</y>
       <width>71</width>
       <height>21</height>
@@ -1612,7 +1612,7 @@
    <widget class="QPushButton" name="ZeroSliders">
     <property name="geometry">
      <rect>
-      <x>1220</x>
+      <x>1180</x>
       <y>110</y>
       <width>75</width>
       <height>23</height>
@@ -2370,6 +2370,19 @@
     </property>
     <property name="text">
      <string>Abort</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="AllDown01">
+    <property name="geometry">
+     <rect>
+      <x>840</x>
+      <y>10</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Init Both</string>
     </property>
    </widget>
   </widget>

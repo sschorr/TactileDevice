@@ -105,6 +105,8 @@ void MainWindow::Initialize()
     this->ui->bandwidthAmpSlider->setValue(70);
     this->ui->bandwidthFreqSlider->setValue(10);
 
+    this->ui->initJoints->setChecked(true);
+
     p_CommonData->indicatorRot = 0;
     p_CommonData->tissueRot = 0;
 
@@ -1547,7 +1549,7 @@ void MainWindow::processEvents()
 void MainWindow::on_AllDown0_clicked()
 {
     p_CommonData->calibClock.reset();
-    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(4.0);
     p_CommonData->calibClock.start();
     p_CommonData->device0Initing = true;
 }
@@ -1555,7 +1557,7 @@ void MainWindow::on_AllDown0_clicked()
 void MainWindow::on_AllDown1_clicked()
 {
     p_CommonData->calibClock.reset();
-    p_CommonData->calibClock.setTimeoutPeriodSeconds(5.0);
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(4.0);
     p_CommonData->calibClock.start();
     p_CommonData->device1Initing = true;
 }
@@ -1708,4 +1710,13 @@ void MainWindow::on_impulseTorquezNeg_clicked()
 void MainWindow::on_pushButton_2_clicked()
 {
     p_CommonData->expDone = 1;
+}
+
+void MainWindow::on_AllDown01_clicked()
+{
+    p_CommonData->calibClock.reset();
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(4.0);
+    p_CommonData->calibClock.start();
+    p_CommonData->device0Initing = true;
+    p_CommonData->device1Initing = true;
 }
