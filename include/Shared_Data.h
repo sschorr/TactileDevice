@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-//#define MAGTRACKER
-//#define SENSORAY826
+#define MAGTRACKER
+#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -288,6 +288,9 @@ typedef struct
     // haptics thread objects for friction environment
     chai3d::cMesh* p_frictionBox1; //mesh for left friction surface
     chai3d::cMesh* p_frictionBox2; //mesh for right friction surface
+
+    // testing textures
+    chai3d::cMultiMesh* p_textureBox;
 
     // haptics thread objects for friction experiment
     chai3d::cMesh* p_expFrictionBox;
