@@ -484,8 +484,13 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
 
     if (trackerNo == 1)
     {
-        posOffsetinB.set(-.067, 0, .021); //Thumb dimensions
-        //posOffsetinB.set(-.060, 0, .019); //index dimensions
+        // Old not slanted tracker thumb harness
+        //posOffsetinB.set(-.067, 0, .021); //large Thumb dimensions
+        //posOffsetinB.set(-.060, 0, .019); //index thumb dimensions
+
+        // Tilted harness
+        posOffsetinB.set(-.0736, 0 , .009); //large tilted thumb
+        //posOffsetinB.set(-.06413, 0, .009); //small (old index) tilted thumb
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
@@ -547,6 +552,7 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     // try setting rotation from mag tracker
     frame = poseCache.getLocalRot();
 #endif
+    double thumbTrackerTilt = 15;
 
     if (trackerNo == 0)
     {
@@ -554,7 +560,7 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     }
     if (trackerNo == 1)
     {
-        frame.rotateAboutLocalAxisDeg(0,1,0,9);
+        frame.rotateAboutLocalAxisDeg(0,1,0,9 - thumbTrackerTilt);
     }
 
 
