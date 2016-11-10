@@ -175,7 +175,9 @@ void MainWindow::UpdateGUIInfo()
 
         // render world
         ovrSizei size = oculusVR.getEyeTextureSize(eyeIndex);
+        p_CommonData->resetRenderMutex.lock();
         p_CommonData->p_camera->renderView(size.w, size.h, 0, C_STEREO_LEFT_EYE, false);
+        p_CommonData->resetRenderMutex.unlock();
 
         // finalize rendering
         oculusVR.onEyeRenderFinish(eyeIndex);
@@ -1194,6 +1196,8 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
+    p_CommonData->resetRenderMutex.lock();
+
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
@@ -1222,6 +1226,7 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->environmentChange = true; // triggers new rendering    
     p_CommonData->recordFlag = true;
 
+    p_CommonData->resetRenderMutex.unlock();
 }
 
 void MainWindow::ProgressCDExpParams()

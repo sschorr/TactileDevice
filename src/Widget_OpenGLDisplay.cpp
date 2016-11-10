@@ -28,9 +28,13 @@ void Widget_OpenGLDisplay::paintGL()
 #ifndef OCULUS
     if(p_CommonData)
     {
+        p_CommonData->resetRenderMutex.lock();
+
         //render world
         p_CommonData->p_world->updateShadowMaps(false, false);
         p_CommonData->p_camera->renderView(m_displayWidth, m_displayHeight);
+        p_CommonData->resetRenderMutex.unlock();
+
 
     }
 #endif
