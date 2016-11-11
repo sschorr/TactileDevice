@@ -1211,8 +1211,8 @@ void MainWindow::on_StartCD_clicked()
     // set params
     p_CommonData->trialNo = 0;
     p_CommonData->pairNo = 2;
-    p_CommonData->upperCurveIncrement = 0.020;
-    p_CommonData->lowerCurveIncrement = 0.020;
+    p_CommonData->upperCurveIncrement = 0.030;
+    p_CommonData->lowerCurveIncrement = 0.030;
     p_CommonData->upperCurveMass = .350;
     p_CommonData->lowerCurveMass = .050;
     p_CommonData->lowerCurveReversals = 0;
