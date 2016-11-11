@@ -1201,6 +1201,9 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
+    p_CommonData->dataRecordMutex.lock();
+    p_CommonData->dataRecorderVector.clear();
+    p_CommonData->dataRecordMutex.unlock();
     p_CommonData->dataRecorderVector.clear();
     ui->VRControl->setChecked(true);
     onGUIchanged();
