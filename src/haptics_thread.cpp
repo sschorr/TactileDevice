@@ -335,9 +335,8 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(interactionPoint->getLastComputedForce().length > 40)
-                        interactionPoint->m_lastComputedGlobalForce.set(0,0,0);
-                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                    if(!(interactionPoint->getLastComputedForce().length() > 40))
+                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
                 }
             }
@@ -368,9 +367,8 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(interactionPoint->getLastComputedForce().length > 40)
-                        interactionPoint->m_lastComputedGlobalForce.set(0,0,0);
-                    ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                    if(!(interactionPoint->getLastComputedForce().length() > 40))
+                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
                 }
             }
