@@ -393,7 +393,6 @@ void haptics_thread::UpdateVRGraphics()
             {
                 p_CommonData->clutchedOffset = (scaledCurCenter - curCenter);
                 p_CommonData->fingerDisplayScale = 1.0;
-
             }
         }
     }        
@@ -456,13 +455,13 @@ void haptics_thread::UpdateScaledTransparency()
     }
     if ((p_CommonData->scaledDispTransp % 3) == 2)
     {
-        scaledFinger->setTransparencyLevel(0.5);
-        scaledThumb->setTransparencyLevel(0.5);
+        scaledFinger->setTransparencyLevel(1);
+        scaledThumb->setTransparencyLevel(1);
         p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(1);
 
-        finger->setTransparencyLevel(1.0);
-        thumb->setTransparencyLevel(1.0);
-        p_CommonData->p_dynamicBox1->setTransparencyLevel(1.0);
+        finger->setTransparencyLevel(0.5);
+        thumb->setTransparencyLevel(0.5);
+        p_CommonData->p_dynamicBox1->setTransparencyLevel(1);
     }
 }
 
@@ -1125,6 +1124,10 @@ void haptics_thread::RenderDynamicBodies()
     p_CommonData->p_world->addChild(globe);
 
     // add scaled bodies for altering display ratio
+    m_dispScaleCurSphere0->setHapticEnabled(false);
+    m_dispScaleCurSphere1->setHapticEnabled(false);
+    scaledFinger->setHapticEnabled(false);
+    scaledThumb->setHapticEnabled(false);
     p_CommonData->p_world->addChild(m_dispScaleCurSphere0);
     p_CommonData->p_world->addChild(m_dispScaleCurSphere1);
     p_CommonData->p_world->addChild(scaledFinger);
