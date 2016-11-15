@@ -119,6 +119,8 @@ void MainWindow::Initialize()
     p_CommonData->flagLateral = true;
     p_CommonData->device0Initing = false;
     p_CommonData->device1Initing = false;
+    p_CommonData->resetBoxPosFlag = false;
+
 
     p_CommonData->maxReversals = 6;
     p_CommonData->currChoice = 0;
@@ -517,7 +519,7 @@ void MainWindow::on_setDirectory_clicked()
 void MainWindow::on_setCDDirectory_clicked()
 {
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
-                                        "C:/Users/Samuel/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/CD Exp",
+                                        "C:/Users/Sam/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/CD Exp",
                                         QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     p_CommonData->fileName = QString::number(p_CommonData->compareCD);
@@ -900,14 +902,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
 
-        if(p_CommonData->currentExperimentState == frictionTrial)
-        {
-            if(p_CommonData->pairNo == 2)
-            {
-                p_CommonData->subjectAnswer = 1;
-                ui->selection->setText("Higher Friction: 1 (blue)");
-            }
-        }
+//        if(p_CommonData->currentExperimentState == frictionTrial)
+//        {
+//            if(p_CommonData->pairNo == 2)
+//            {
+//                p_CommonData->subjectAnswer = 1;
+//                ui->selection->setText("Higher Friction: 1 (blue)");
+//            }
+//        }
     }
 
     if (a_event->key() == Qt::Key_2)
@@ -925,14 +927,14 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
 
-        if(p_CommonData->currentExperimentState == frictionTrial)
-        {
-            if(p_CommonData->pairNo == 2)
-            {
-                p_CommonData->subjectAnswer = 2;
-                ui->selection->setText("Higher Friction: 2 (red)");
-            }
-        }
+//        if(p_CommonData->currentExperimentState == frictionTrial)
+//        {
+//            if(p_CommonData->pairNo == 2)
+//            {
+//                p_CommonData->subjectAnswer = 2;
+//                ui->selection->setText("Higher Friction: 2 (red)");
+//            }
+//        }
     }
 
     if (a_event->key() == Qt::Key_Q)
@@ -949,44 +951,44 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             }
         }
 
-        if(p_CommonData->currentExperimentState == trialBreak)
-        {
-            // check if next trial is end
-            QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
-            if (nextTrialType == "end")
-            {
-                p_CommonData->currentExperimentState = endExperiment;
-                ui->directions->setText("Experiment Completed, please contact administrator");
-            }
-            else
-            {
-                p_CommonData->currentExperimentState = frictionTrial;
-                p_CommonData->pairNo = 1;
-                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                p_CommonData->subjectAnswer = 0;
-                ui->selection->setText("Higher Friction:");
-                double max = 0.01; double min = -0.01;
-                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-                p_CommonData->trialNo = p_CommonData->trialNo + 1;
-                p_CommonData->recordFlag = true;
-            }
-        }
+//        if(p_CommonData->currentExperimentState == trialBreak)
+//        {
+//            // check if next trial is end
+//            QString nextTrialType = p_CommonData->frictionProtocolFile.GetValue((QString("trial ") + QString::number(p_CommonData->trialNo + 1)).toStdString().c_str(), "type", NULL /*default*/);
+//            if (nextTrialType == "end")
+//            {
+//                p_CommonData->currentExperimentState = endExperiment;
+//                ui->directions->setText("Experiment Completed, please contact administrator");
+//            }
+//            else
+//            {
+//                p_CommonData->currentExperimentState = frictionTrial;
+//                p_CommonData->pairNo = 1;
+//                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+//                p_CommonData->subjectAnswer = 0;
+//                ui->selection->setText("Higher Friction:");
+//                double max = 0.01; double min = -0.01;
+//                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+//                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+//                p_CommonData->trialNo = p_CommonData->trialNo + 1;
+//                p_CommonData->recordFlag = true;
+//            }
+//        }
 
-        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
-        {
-            if( p_CommonData->currentExperimentState == frictionTrial)
-            {
-                if(p_CommonData->pairNo == 1)
-                {
-                    p_CommonData->pairNo = 2;
-                    p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
-                    double max = 0.01; double min = -0.01;
-                    double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                    p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-                }
-            }
-        }
+//        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
+//        {
+//            if( p_CommonData->currentExperimentState == frictionTrial)
+//            {
+//                if(p_CommonData->pairNo == 1)
+//                {
+//                    p_CommonData->pairNo = 2;
+//                    p_CommonData->p_expFrictionBox->m_material->setRedCrimson();
+//                    double max = 0.01; double min = -0.01;
+//                    double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+//                    p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+//                }
+//            }
+//        }
     }
 
     if (a_event->key() == Qt::Key_L)
@@ -1211,8 +1213,8 @@ void MainWindow::on_StartCD_clicked()
     // set params
     p_CommonData->trialNo = 0;
     p_CommonData->pairNo = 2;
-    p_CommonData->upperCurveIncrement = 0.030;
-    p_CommonData->lowerCurveIncrement = 0.030;
+    p_CommonData->upperCurveIncrement = 0.020;
+    p_CommonData->lowerCurveIncrement = 0.020;
     p_CommonData->upperCurveMass = .350;
     p_CommonData->lowerCurveMass = .050;
     p_CommonData->lowerCurveReversals = 0;
@@ -1292,8 +1294,8 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
-                    if(p_CommonData->upperCurveReversals==2)
-                        p_CommonData->upperCurveIncrement = 0.010;
+                    if(p_CommonData->lowerCurveReversals==2)
+                        p_CommonData->lowerCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
                 p_CommonData->lastLowerCurveRefHeavier = 0;
@@ -1343,7 +1345,6 @@ void MainWindow::ProgressCDExpParams()
         p_CommonData->dataRecorder.subjResponse = p_CommonData->currChoice;
         p_CommonData->dataRecorder.isReversal = p_CommonData->isReversal;
         p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
-
         localDataRecorderVector = p_CommonData->dataRecorderVector;
         p_CommonData->dataRecorderVector.clear();
         p_CommonData->dataRecordMutex.unlock();
@@ -1409,7 +1410,7 @@ void MainWindow::ResetDynamicEnviron()
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 1;
+    p_CommonData->scaledDispTransp = 2;
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
@@ -1421,10 +1422,10 @@ void MainWindow::ResetDynamicEnviron()
     {
 
     }
-    // set position of box back to starting point
-    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
-    chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
-    p_CommonData->ODEBody1->setLocalRot(eyeMat);
+
+    // set haptics thread to reset box after its already updated fingers
+    p_CommonData->resetBoxPosFlag = true;
+
     if(p_CommonData->pairNo == 1)
     {
         p_CommonData->oneModel->setTransparencyLevel(1.0);

@@ -57,7 +57,7 @@ void haptics_thread::initialize()
     lastFilteredDeviceForce0.set(0,0,0);
     lastFilteredDeviceForce1.set(0,0,0);
     p_CommonData->deviceComputedForce.set(0,0,0);
-    p_CommonData->deviceComputedForce.set(0,0,0);
+    p_CommonData->filteredDeviceComputedForce.set(0,0,0);
 
     //p_CommonData->workspaceScaleFactor = 1;
 
@@ -87,9 +87,11 @@ void haptics_thread::initialize()
     thumbOffset.set(0,-0.009,.003); // finger axis are not at fingerpad, so we want a translation outward on fingertip
 
     // initial box positions
-    p_CommonData->box1InitPos.set(.05,  0,  -0.005);
+    p_CommonData->box1InitPos.set(0,  0,  -0.030);
     p_CommonData->box2InitPos.set(1,   0,  0.0);
     p_CommonData->box3InitPos.set(1, -.1,  0.0);
+
+    p_CommonData->box1PostInitCenter.set(0,0,-0.025);
 
     p_CommonData->fingerTouching = false; //reset before we check
     p_CommonData->thumbTouching = false;
@@ -128,7 +130,9 @@ void haptics_thread::run()
                 break;
 
             case VRControlMode:
-                UpdateVRGraphics();
+                p_CommonData->sharedMutex.lock();
+                UpdateVRGraphics();                
+                p_CommonData->sharedMutex.unlock();
                 ComputeVRDesiredDevicePos();
                 p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 p_CommonData->wearableDelta1->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
@@ -254,7 +258,7 @@ void haptics_thread::UpdateVRGraphics()
 
     // update position and orientation of tool 0(and sphere that represents tool)
     m_tool0->updateFromDevice();
-    position0 = m_tool0->m_hapticPoint->getGlobalPosGoal(); // get position and rotation of the delta mechanism (already transformed from magTracker)
+    position0 = m_tool0->m_hapticPoint->getGlobalPosGoal(); // get position and rotation of the haptic point (and delta mechanism) (already transformed from magTracker)
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
     deviceRotation0 = rotation0; //the chai device already rotates the tracker return based on the finger harness
 
@@ -290,13 +294,12 @@ void haptics_thread::UpdateVRGraphics()
 
     p_CommonData->fingerTouching = false; //reset before we check
     p_CommonData->thumbTouching = false;
-    p_CommonData->box1displayScale = 1.0/(p_CommonData->expCD);
 
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
+    if(timeInterval > .001)
+        timeInterval = 0.001;
 
-    //LOCK SO THAT WE CAN MOVE DYNAMIC BODIES AROUND
-    p_CommonData->sharedMutex.lock();
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
     {
@@ -380,7 +383,6 @@ void haptics_thread::UpdateVRGraphics()
             {
                 p_CommonData->fingerScalePoint = curCenter;
                 p_CommonData->fingerDisplayScale = 1.0/p_CommonData->expCD;
-                qDebug() << "grab center";
             }
         }
 
@@ -390,19 +392,32 @@ void haptics_thread::UpdateVRGraphics()
             if (p_CommonData->fingerTouchingLast | p_CommonData->thumbTouchingLast)
             {
                 p_CommonData->clutchedOffset = (scaledCurCenter - curCenter);
-                qDebug() << scaledCurCenter.y() << curCenter.y();
                 p_CommonData->fingerDisplayScale = 1.0;
 
             }
         }
-    }    
-    p_CommonData->sharedMutex.unlock();
+    }        
     lastTime = currTime;
 
     // update scaled positions
     UpdateScaledCursors();
     UpdateScaledFingers();
     UpdateScaledBoxes();
+
+    // move the box, but after we've already reset the fingers
+    if(p_CommonData->resetBoxPosFlag)
+    {
+        // set position of box back to starting point
+        chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
+        p_CommonData->ODEBody1->disableDynamics();
+        ODEWorld->updateDynamics(.5);
+        p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+        p_CommonData->ODEBody1->setLocalRot(eyeMat);
+        ODEWorld->updateDynamics(.5);
+        p_CommonData->ODEBody1->enableDynamics();
+
+        p_CommonData->resetBoxPosFlag = false;
+    }
 
     // set scaled stuff to show or not show
     UpdateScaledTransparency();
@@ -443,7 +458,7 @@ void haptics_thread::UpdateScaledTransparency()
     {
         scaledFinger->setTransparencyLevel(0.5);
         scaledThumb->setTransparencyLevel(0.5);
-        p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(0.5);
+        p_CommonData->p_dynamicScaledBox1->setTransparencyLevel(1);
 
         finger->setTransparencyLevel(1.0);
         thumb->setTransparencyLevel(1.0);
@@ -468,7 +483,6 @@ void haptics_thread::UpdateScaledFingers()
     scaledFinger->setLocalRot(fingerRotation0);
     scaledFinger->setLocalPos(m_dispScaleCurSphere0->getLocalPos() + fingerRotation0*fingerOffset);
 
-
     // update position of thumb to stay on scaled cursor (which is scaled relative to proxy point)
     scaledThumb->setLocalRot(fingerRotation1);
     scaledThumb->setLocalPos(m_dispScaleCurSphere1->getLocalPos() + fingerRotation1*thumbOffset);
@@ -478,7 +492,7 @@ void haptics_thread::UpdateScaledBoxes()
 {
     p_CommonData->box1displayScale = 1.0/p_CommonData->expCD;
 
-    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->box1InitPos + (p_CommonData->ODEBody1->getLocalPos()-p_CommonData->box1InitPos)*p_CommonData->box1displayScale;
+    chai3d::cVector3d scaledBox1Pos; scaledBox1Pos = p_CommonData->box1PostInitCenter + (p_CommonData->ODEBody1->getLocalPos()-p_CommonData->box1PostInitCenter)*p_CommonData->box1displayScale;
 
     p_CommonData->p_dynamicScaledBox1->setLocalPos(scaledBox1Pos);
     p_CommonData->p_dynamicScaledBox1->setLocalRot(p_CommonData->ODEBody1->getLocalRot());
@@ -541,7 +555,10 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
-    double forceToPosMultThumb = forceToPosMult*1.2;
+    double forceToPosMultThumb = forceToPosMult;
+
+//    double forceToPosMult = 1.0/0.5; // based on lateral shearing stiffness of finger (from new Nakazawa paper, Srini paper supports similar for normal force) (0.5 N/mm)
+//    double forceToPosMultThumb = forceToPosMult;
 
     // Pos movements in delta mechanism frame (index)
     chai3d::cVector3d desiredPosMovement0 = forceToPosMult*(filteredDeviceForce0 + indexImpulse + indexTorqueImpulse); //this is only for lateral if we override normal later
@@ -878,27 +895,27 @@ void haptics_thread::InitDynamicBodies()
 
     // Create the ODE objects for the blocks and cup
     p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
-    p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
-    p_CommonData->ODEBody3 = new cODEGenericBody(ODEWorld);
-    p_CommonData->ODEBody4 = new cODEGenericBody(ODEWorld);
+//    p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
+//    p_CommonData->ODEBody3 = new cODEGenericBody(ODEWorld);
+//    p_CommonData->ODEBody4 = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
     p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
-    p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
-    p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
-    p_CommonData->p_dynamicBox4 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicBox4 = new chai3d::cMesh();
 
     // create the scaled virtual objects
     p_CommonData->p_dynamicScaledBox1 = new chai3d::cMesh();
-    p_CommonData->p_dynamicScaledBox2 = new chai3d::cMesh();
-    p_CommonData->p_dynamicScaledBox3 = new chai3d::cMesh();
-    p_CommonData->p_dynamicScaledBox4 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicScaledBox2 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicScaledBox3 = new chai3d::cMesh();
+//    p_CommonData->p_dynamicScaledBox4 = new chai3d::cMesh();
 
     //--------------------------------------------------------------------------
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
-    ODEGPlane1 = new cODEGenericBody(ODEWorld);
+//    ODEGPlane1 = new cODEGenericBody(ODEWorld);
 
     //create ground
     ground = new chai3d::cMesh();
@@ -956,18 +973,33 @@ void haptics_thread::DeleteDynamicBodies()
     delete p_CommonData->p_dynamicBox3;
     delete p_CommonData->p_dynamicBox4;
     delete ODEGPlane0;
-    delete ODEGPlane1;
     delete ground;
     delete globe;
+
+    p_CommonData->p_world->removeChild(p_CommonData->p_dynamicBox1);
+    p_CommonData->p_world->removeChild(p_CommonData->p_dynamicScaledBox1);
+    p_CommonData->p_world->removeChild(ODEWorld);
+    p_CommonData->p_world->removeChild(ground);
+    p_CommonData->p_world->removeChild(m_tool0);
+    p_CommonData->p_world->removeChild(m_tool1);
+    p_CommonData->p_world->removeChild(finger);
+    p_CommonData->p_world->removeChild(thumb);
+    p_CommonData->p_world->removeChild(globe);
+
+    // add scaled bodies for altering display ratio
+    p_CommonData->p_world->removeChild(m_dispScaleCurSphere0);
+    p_CommonData->p_world->removeChild(m_dispScaleCurSphere1);
+    p_CommonData->p_world->removeChild(scaledFinger);
+    p_CommonData->p_world->removeChild(scaledThumb);
+
 }
 
 void haptics_thread::RenderDynamicBodies()
 {
-    p_CommonData->sharedMutex.lock();
-
     DeleteDynamicBodies();
     InitDynamicBodies();
     ODEWorld->deleteAllChildren();
+
     //--------------------------------------------------------------------------
     // CREATING ODE World and Objects
     //--------------------------------------------------------------------------
@@ -981,17 +1013,16 @@ void haptics_thread::RenderDynamicBodies()
     ODEWorld->setAngularDamping(.02);
     ODEWorld->setLinearDamping(.005);
 
-    //--------------------------------------------------------------------------
-    // CREATING ODE INVISIBLE WALLS
-    //--------------------------------------------------------------------------
-    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0.025), chai3d::cVector3d(0.0, 0.0 ,-1.0));
-
     //create a plane
     groundSize = .3;
     groundThickness = 0.01;
+    //--------------------------------------------------------------------------
+    // CREATING ODE INVISIBLE WALLS
+    //--------------------------------------------------------------------------
+    ODEGPlane0->createStaticPlane(chai3d::cVector3d(0.0, 0.0, 0), chai3d::cVector3d(0.0, 0.0 ,-1.0));
+
     chai3d::cCreateBox(ground, groundSize, 2*groundSize, groundThickness);
     ground->setLocalPos(0,0,groundThickness*0.5);
-
 
     //create globe
     chai3d::cCreateSphere(globe, 10, 30, 30);
@@ -1004,9 +1035,6 @@ void haptics_thread::RenderDynamicBodies()
 
     globe->setTexture(textureSpace, true); //apply texture to globe
     globe->setUseCulling(false, true);     // Since we don't need to see our polygons from both sides, we enable culling.
-
-    //position ground world where the invisible ODE plane is located (ODEGPlane1)
-    ground->setLocalPos(0,0,0.05 + groundThickness/2.0 );
 
     // define some material properties for ground
     chai3d::cMaterial matGround;
@@ -1101,7 +1129,6 @@ void haptics_thread::RenderDynamicBodies()
     p_CommonData->p_world->addChild(m_dispScaleCurSphere1);
     p_CommonData->p_world->addChild(scaledFinger);
     p_CommonData->p_world->addChild(scaledThumb);
-    p_CommonData->p_world->addChild(p_CommonData->p_dynamicScaledBox1);
 
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerScalePoint.set(0,0,0);
@@ -1113,7 +1140,6 @@ void haptics_thread::RenderDynamicBodies()
     m_dispScaleCurSphere0->setTransparencyLevel(0);
     m_dispScaleCurSphere1->setTransparencyLevel(0);
 
-    p_CommonData->sharedMutex.unlock();
 }
 
 void haptics_thread::SetDynEnvironCDExp()
@@ -1142,6 +1168,8 @@ void haptics_thread::SetDynEnvironCDExp()
     chai3d::cMaterial mat2;
     mat2.setBlueRoyal();
     p_CommonData->p_dynamicScaledBox1->setMaterial(mat2);
+    p_CommonData->p_dynamicScaledBox1->setUseMaterial(true);
+    p_CommonData->p_dynamicScaledBox1->setHapticEnabled(false);
 
     // add mesh to ODE object
     p_CommonData->ODEBody1->setImageModel(p_CommonData->p_dynamicBox1);
@@ -1159,8 +1187,11 @@ void haptics_thread::SetDynEnvironCDExp()
     p_CommonData->p_world->addChild(p_CommonData->oneModel);
     p_CommonData->p_world->addChild(p_CommonData->twoModel);
 
-    p_CommonData->oneModel->setLocalPos(0.07, 0.12, 0.04);
-    p_CommonData->twoModel->setLocalPos(0.07, -0.10, 0.04);
+    p_CommonData->p_world->addChild(p_CommonData->p_dynamicBox1);
+    p_CommonData->p_world->addChild(p_CommonData->p_dynamicScaledBox1);
+
+    p_CommonData->oneModel->setLocalPos(0.07, 0.12, 0);
+    p_CommonData->twoModel->setLocalPos(0.07, -0.10, 0);
     p_CommonData->oneModel->setTransparencyLevel(1.0);
     p_CommonData->twoModel->setTransparencyLevel(0.0);
 }

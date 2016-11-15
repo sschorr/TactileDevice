@@ -335,6 +335,11 @@ typedef struct
     chai3d::cVector3d box2InitPos;
     chai3d::cVector3d box3InitPos;
 
+    chai3d::cVector3d box1PostInitCenter;
+
+    // flag for reseting box position during experiment
+    bool resetBoxPosFlag;
+
     // flag for determining if display scaling is clutched
     bool fingerTouching;
     bool thumbTouching;
