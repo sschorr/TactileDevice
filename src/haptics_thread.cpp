@@ -335,6 +335,8 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
+                    if(interactionPoint->getLastComputedForce().length > 40)
+                        interactionPoint->m_lastComputedGlobalForce.set(0,0,0);
                     ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
                 }
@@ -366,6 +368,8 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
+                    if(interactionPoint->getLastComputedForce().length > 40)
+                        interactionPoint->m_lastComputedGlobalForce.set(0,0,0);
                     ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
                 }
@@ -410,10 +414,8 @@ void haptics_thread::UpdateVRGraphics()
         // set position of box back to starting point
         chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
         p_CommonData->ODEBody1->disableDynamics();
-        ODEWorld->updateDynamics(.5);
         p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
-        ODEWorld->updateDynamics(.5);
         p_CommonData->ODEBody1->enableDynamics();
 
         p_CommonData->resetBoxPosFlag = false;
@@ -504,6 +506,11 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     computedForce0 = m_tool0->getDeviceGlobalForce();
     computedForce1 = m_tool1->getDeviceGlobalForce();
 
+    if(computedForce0.length() > 40)
+        computedForce0.set(0,0,0);
+    if(computedForce1.length() > 40)
+        computedForce1.set(0,0,0);
+
     // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
     rotation1.trans();
@@ -535,9 +542,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
     filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;    
 
-    // assign to the shared data structure to allow plotting from window thread
-    p_CommonData->deviceComputedForce = deviceComputedForce0;
-    p_CommonData->filteredDeviceComputedForce = filteredDeviceForce0;
+//    // assign to the shared data structure to allow plotting from window thread
+//    p_CommonData->deviceComputedForce = deviceComputedForce0;
+//    p_CommonData->filteredDeviceComputedForce = filteredDeviceForce0;
 
     // add impulses here so as not to affect filter
     AddImpulseDisp(indexImpulse, thumbImpulse);
@@ -548,10 +555,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     thumbImpulse = deviceRotation1*rotation1*thumbImpulse;
     indexTorqueImpulse = deviceRotation0*rotation0*indexTorqueImpulse;
     thumbTorqueImpulse = deviceRotation1*rotation1*thumbTorqueImpulse;
-
-    // assign to the shared data structure to allow plotting from window thread
-    p_CommonData->deviceComputedForce = indexTorqueImpulse;
-    p_CommonData->filteredDeviceComputedForce = thumbTorqueImpulse;
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
