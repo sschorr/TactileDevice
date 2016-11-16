@@ -710,13 +710,10 @@ void haptics_thread::InitGeneralChaiStuff()
 #endif
 
     // create a light source and attach it to the camera
-    light = new chai3d::cSpotLight(p_CommonData->p_world);
+    light = new chai3d::cDirectionalLight(p_CommonData->p_world);
     p_CommonData->p_world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(-.2, -0.2, .5);  // define the direction of the light beam
-    light->setLocalPos(.2, 0.2, -.5);
-    light->setCutOffAngleDeg(120);
-    light->setShadowMapEnabled(true);
+    light->setDir(chai3d::cVector3d(2.0, -0.5, 1.0));  // define the direction of the light beam
 }
 
 void haptics_thread::InitFingerAndTool()
