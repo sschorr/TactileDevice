@@ -337,7 +337,11 @@ void haptics_thread::UpdateVRGraphics()
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
                         ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                       collisionEvent->m_globalPos);
+                                                           collisionEvent->m_globalPos);
+                    else
+                    {
+                        p_CommonData->resetBoxPosFlag = true;
+                    }
                 }
             }
         }
@@ -369,7 +373,11 @@ void haptics_thread::UpdateVRGraphics()
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
                         ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
-                                                       collisionEvent->m_globalPos);
+                                                           collisionEvent->m_globalPos);
+                    else
+                    {
+                        p_CommonData->resetBoxPosFlag = true;
+                    }
                 }
             }
         }
@@ -410,10 +418,19 @@ void haptics_thread::UpdateVRGraphics()
     {
         // set position of box back to starting point
         chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
-        p_CommonData->ODEBody1->disableDynamics();
+        p_CommonData->ODEBody1->setLocalPos(0,0,-1);
+        p_CommonData->ODEBody1->setLocalRot(eyeMat);
+        ODEWorld->updateDynamics(timeInterval);
+
+        m_tool0->updateFromDevice();
+        m_tool0->computeInteractionForces();
+        m_tool1->updateFromDevice();
+        m_tool1->computeInteractionForces();
+        ODEWorld->updateDynamics(timeInterval);
+
         p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
-        p_CommonData->ODEBody1->enableDynamics();
+        ODEWorld->updateDynamics(timeInterval);
 
         p_CommonData->resetBoxPosFlag = false;
     }

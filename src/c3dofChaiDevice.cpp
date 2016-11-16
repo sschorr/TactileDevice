@@ -464,16 +464,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     x2 = otherPos.x(); y2 = otherPos.y(); z2 = otherPos.z();
 #endif
 
-    centerPoint.set((x1+x2)/2.0, (y1+y2)/2.0, (z1+z2)/2.0);
-
-    // scale by scale factor
-    xc = centerPoint.x()*scaleFactor; yc = centerPoint.y()*scaleFactor; zc = centerPoint.z()*scaleFactor;
-    scaledCenterPoint.set(xc, yc, zc);
-
-    x = xc+(x1-centerPoint.x()); y = yc+(y1-centerPoint.y()); z = zc+(z1-centerPoint.z());
-
     // store new position values
-    a_position.set(x, y, z);
+    a_position.set(x1, y1, z1);
 
     // transformation to go from mag tracker at back, to at finger tip (x red, y green, z blue)
     chai3d::cVector3d posOffsetinB;
@@ -489,8 +481,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
         //posOffsetinB.set(-.060, 0, .019); //index thumb dimensions
 
         // Tilted harness
-        //posOffsetinB.set(-.0736, 0 , .009); //large tilted thumb
-        posOffsetinB.set(-.06413, 0, .009); //small (old index) tilted thumb
+        posOffsetinB.set(-.068, 0 , .014); //large tilted thumb
+        //posOffsetinB.set(-.06413, 0, .014); //small (old index) tilted thumb
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();

@@ -1410,7 +1410,7 @@ void MainWindow::ResetDynamicEnviron()
     p_CommonData->thumbTouching = false;
     p_CommonData->fingerTouchingLast = false;
     p_CommonData->thumbTouchingLast = false;
-    p_CommonData->scaledDispTransp = 2;
+    p_CommonData->scaledDispTransp = 1;
     p_CommonData->clutchedOffset.set(0,0,0);
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
