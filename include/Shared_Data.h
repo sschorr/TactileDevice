@@ -34,9 +34,6 @@
 
 #define STIFFNESS_BASELINE 50
 #define STIFFNESS_INCREMENT 10
-#define STATIC_FRICTION 1
-#define DYNAMIC_FRICTION 1
-
 #define E_VALUE 2.718
 
 // define the data structure that holds recorded data

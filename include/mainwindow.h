@@ -59,6 +59,10 @@ public:
     // duplicate data record vector to limit thread locking
     std::vector<DataRecordStruct> localDataRecorderVector;
 
+    // clock for display rate
+    cPrecisionClock graphicsRateClock;
+    int graphicsRateCounter;
+    int graphicsRateEstimate;
 
     // qwtVars
     QwtPlotCurve *curve1;

@@ -88,7 +88,7 @@ public:
     shared_data* p_CommonData; //create a pointer to a shared_data struct
 
     //Chai3D variables
-    chai3d::cDirectionalLight* light;
+    chai3d::cSpotLight* light;
     chai3d::cToolCursor* m_tool0;
     chai3d::cToolCursor* m_tool1;
     chai3d::cShapeSphere* m_curSphere0;  // sphere to hover over tool and enable frames

@@ -23,6 +23,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::Initialize()
 {
+    graphicsRateClock.reset();
+    graphicsRateClock.setTimeoutPeriodSeconds(1.0);
+    graphicsRateClock.start(true);
+
 #ifdef OCULUS
     //--------------------------------------------------------------------------
     // SETUP OCULUS DISPLAY CONTEXT
@@ -149,7 +153,15 @@ void MainWindow::Initialize()
 
 void MainWindow::UpdateGUIInfo()
 {
-
+    graphicsRateCounter += 1;
+    if(graphicsRateClock.timeoutOccurred())
+    {
+        graphicsRateClock.stop();
+        graphicsRateEstimate = graphicsRateCounter;
+        graphicsRateCounter = 0;
+        graphicsRateClock.reset();
+        graphicsRateClock.start();
+    }
 #ifdef OCULUS
     // Handle Oculus events
     // handle key presses
@@ -206,8 +218,6 @@ void MainWindow::UpdateGUIInfo()
         localDesiredJointAngle1 = p_CommonData->desJointInits1;
     else
         localDesiredJointAngle1 = p_CommonData->wearableDelta1->CalcInverseKinJoint();
-
-    CheckFingers();
 
 #ifdef QWT
     ////////////////////////////////////////////////////
@@ -294,18 +304,16 @@ void MainWindow::UpdateGUIInfo()
     ui->VoltageLCD2_1->display((double)(localOutputVoltages1[1]));
     ui->VoltageLCD3_1->display((double)(localOutputVoltages1[2]));
 
-    //qDebug() << 1 << localOutputVoltages1[0] << 2 << localOutputVoltages1[1] << 3 << localOutputVoltages1[2];
-
     ui->DesX1->display(localDesiredPos1[0]);
     ui->DesY1->display(localDesiredPos1[1]);
     ui->DesZ1->display(localDesiredPos1[2]);
 
     ui->lcdNumberHapticRate->display(p_CommonData->hapticRateEstimate);
+    ui->lcdNumberGraphicsRate->display(graphicsRateEstimate);
     ui->lcdBandAmp->display(p_CommonData->bandSinAmpDisp);
     ui->lcdBandFreq->display(p_CommonData->bandSinFreqDisp);
     ui->lcdKp->display(p_CommonData->jointKp);
     ui->lcdKd->display(p_CommonData->jointKd);
-
 
     ui->trialNo->display(p_CommonData->trialNo);
     ui->pairNo->display(p_CommonData->pairNo);
@@ -327,50 +335,6 @@ void MainWindow::UpdateGUIInfo()
         ui->refCompare->setText("Ref");
     else
         ui->refCompare->setText("Comparison");
-
-
-    switch(p_CommonData->currentExperimentState)
-    {
-    case idleExperiment:
-        ///ui->directions->setText("No experiment currently running");
-        break;
-
-    case frictionTrial:
-        if(p_CommonData->pairNo == 1)
-        {
-            ui->directions->setText("Press 'Q' to toggle between surfaces \n'R' to lock in answer.");
-            ui->objectNo->setText("Current Surface: 1");
-        } else if(p_CommonData->pairNo == 2)
-        {
-            ui->directions->setText("Press 'Q' to toggle between surfaces \n'R' to lock in answer.");
-            ui->objectNo->setText("Current Surface: 2");
-        }
-        break;
-
-    case palpationTrial:
-        if (p_CommonData->trialNo < 30)
-        {
-            ui->directions->setText("Press 'R' to record answer and move to next trial");
-        }
-        break;
-
-    case palpationLineTrial:
-        ui->directions->setText("Press 'Z' or 'X' to rotate answer.  Press 'R' to lock in choice");
-        break;
-
-    case endExperiment:
-        ui->directions->setText("Experiment over, please contact administrator");
-        break;
-
-    case palpationLineBreak:
-        ui->directions->setText("Please take a break.  Press 'R' to continue");
-        break;
-
-    case trialBreak:
-        ui->directions->setText("Please take a break. \nPress 'Q' to continue.");
-        ui->selection->setText("Higher Friction:");
-        break;
-    }
 }
 void MainWindow::onGUIchanged()
 {
@@ -1198,7 +1162,6 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->dataRecordMutex.lock();
     p_CommonData->dataRecorderVector.clear();
     p_CommonData->dataRecordMutex.unlock();
-    p_CommonData->dataRecorderVector.clear();
     ui->VRControl->setChecked(true);
     onGUIchanged();
 

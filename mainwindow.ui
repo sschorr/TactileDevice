@@ -1430,7 +1430,7 @@
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>1340</x>
+      <x>1350</x>
       <y>10</y>
       <width>81</width>
       <height>16</height>
@@ -2383,6 +2383,32 @@
     </property>
     <property name="text">
      <string>Init Both</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumberGraphicsRate">
+    <property name="geometry">
+     <rect>
+      <x>1270</x>
+      <y>30</y>
+      <width>64</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="digitCount">
+     <number>7</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_31">
+    <property name="geometry">
+     <rect>
+      <x>1270</x>
+      <y>10</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Graphics Rate</string>
     </property>
    </widget>
   </widget>

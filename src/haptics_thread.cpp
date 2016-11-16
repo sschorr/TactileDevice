@@ -131,7 +131,7 @@ void haptics_thread::run()
 
             case VRControlMode:
                 p_CommonData->sharedMutex.lock();
-                UpdateVRGraphics();                
+                UpdateVRGraphics();
                 p_CommonData->sharedMutex.unlock();
                 ComputeVRDesiredDevicePos();
                 p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
@@ -145,7 +145,7 @@ void haptics_thread::run()
                 break;
 
             case sinControlMode:
-                UpdateVRGraphics();                
+                UpdateVRGraphics();
                 CommandSinPos(inputAxis);
                 p_CommonData->wearableDelta0->JointController(p_CommonData->jointKp, p_CommonData->jointKd);
                 break;
@@ -183,7 +183,7 @@ void haptics_thread::run()
             // restart rateClock
             rateClock.reset();
             rateClock.start();
-        }        
+        }
     }
 
     // If we are terminating, delete the haptic device to set outputs to 0
@@ -405,7 +405,7 @@ void haptics_thread::UpdateVRGraphics()
                 p_CommonData->fingerDisplayScale = 1.0;
             }
         }
-    }        
+    }
     lastTime = currTime;
 
     // update scaled positions
@@ -554,7 +554,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     // get filtered force
     filteredDeviceForce0 = alpha*deviceComputedForce0 + (1-alpha)*lastFilteredDeviceForce0;
-    filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;    
+    filteredDeviceForce1 = alpha*deviceComputedForce1 + (1-alpha)*lastFilteredDeviceForce1;
 
 //    // assign to the shared data structure to allow plotting from window thread
 //    p_CommonData->deviceComputedForce = deviceComputedForce0;
@@ -594,7 +594,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         desiredPosMovement0.y(0);
         desiredPosMovement1.x(0);
         desiredPosMovement1.y(0);
-    }    
+    }
 
     // don't allow the tactor to move away from finger when computing VR interaction
     double vertPosMovement0 = desiredPosMovement0.z();
@@ -710,10 +710,12 @@ void haptics_thread::InitGeneralChaiStuff()
 #endif
 
     // create a light source and attach it to the camera
-    light = new chai3d::cDirectionalLight(p_CommonData->p_world);
+    light = new chai3d::cSpotLight(p_CommonData->p_world);
     p_CommonData->p_world->addChild(light);   // insert light source inside world
     light->setEnabled(true);                   // enable light source
-    light->setDir(chai3d::cVector3d(2.0, -0.5, 1.0));  // define the direction of the light beam
+    light->setDir(-.2, -0.2, .5);  // define the direction of the light beam
+    light->setLocalPos(.2, 0.2, -.5);
+    light->setCutOffAngleDeg(120);
 }
 
 void haptics_thread::InitFingerAndTool()
@@ -867,36 +869,36 @@ void haptics_thread::InitFingerAndTool()
 
 void haptics_thread::InitEnvironments()
 {
-    p_CommonData->p_frictionBox1 = new chai3d::cMesh();
-    p_CommonData->p_frictionBox2 = new chai3d::cMesh();
-    p_CommonData->p_textureBox = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueEight = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueNine = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueTen = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueEleven = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueTwelve = new chai3d::cMultiMesh();
-    p_CommonData->p_indicator = new chai3d::cMultiMesh();
-    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
-    p_CommonData->p_expFrictionBox = new chai3d::cMesh();
+//    p_CommonData->p_frictionBox1 = new chai3d::cMesh();
+//    p_CommonData->p_frictionBox2 = new chai3d::cMesh();
+//    p_CommonData->p_textureBox = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueEight = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueNine = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueTen = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueEleven = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueTwelve = new chai3d::cMultiMesh();
+//    p_CommonData->p_indicator = new chai3d::cMultiMesh();
+//    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
+//    p_CommonData->p_expFrictionBox = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
@@ -1369,7 +1371,7 @@ void haptics_thread::RenderExpFriction()
 }
 
 void haptics_thread::RenderTwoFriction()
-{    
+{
     cCreateBox(p_CommonData->p_frictionBox1, .08, .08, .01); // make mesh a box
     cCreateBox(p_CommonData->p_frictionBox2, .08, .08, .01); // make mesh a box
     p_CommonData->p_frictionBox1->createAABBCollisionDetector(toolRadius);
@@ -1442,7 +1444,7 @@ void haptics_thread::CommandSinPos(Eigen::Vector3d inputMotionAxis)
     if (currTime < stillTime)
     {
         p_CommonData->wearableDelta0->SetDesiredPos(p_CommonData->wearableDelta0->neutralPos);
-    }    
+    }
 
     // case that we want to be ramping and then oscillating
     else if (currTime < ((20.0*1.0/p_CommonData->bandSinFreq) + stillTime))
