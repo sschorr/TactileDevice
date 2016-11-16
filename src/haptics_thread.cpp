@@ -1684,9 +1684,9 @@ void haptics_thread::SetInitJointAngles()
         // handle device 0
         if (p_CommonData->device0Initing == true)
         {
-            curr1 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-            curr2 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
-            curr3 = 45*PI/180 - 57*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr1 = 45*PI/180 - 50*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr2 = 45*PI/180 - 50*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr3 = 45*PI/180 - 50*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
         } else
         {
             curr1 = 45*PI/180;
@@ -1698,7 +1698,7 @@ void haptics_thread::SetInitJointAngles()
         // handle device 1
         if (p_CommonData->device1Initing == true)
         {
-            curr4 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
+            curr4 = 45*PI/180 - 43*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
             curr5 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
             curr6 = 45*PI/180 - 45*p_CommonData->calibClock.getCurrentTimeSeconds()/moveTime*1*PI/180;
         } else
