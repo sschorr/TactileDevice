@@ -63,10 +63,6 @@ void MainWindow::Initialize()
 
     // Set our current state
     p_CommonData->currentControlState = idleControl;
-    p_CommonData->currentDynamicObjectState = standard;
-
-    // Initialize shared memory for OpenGL widget
-    //ui->displayWidget->p_CommonData = p_CommonData;
 
 #ifndef OCULUS
     windowGLDisplay->p_CommonData = p_CommonData;
@@ -143,7 +139,7 @@ void MainWindow::Initialize()
 
 #endif
 
-    GraphicsTimer.setInterval(1/updateHz*1000);
+    GraphicsTimer.setInterval(1);
     GraphicsTimer.start();
     connect(&GraphicsTimer, SIGNAL(timeout()), this, SLOT(UpdateGUIInfo()));
     UpdateGUIInfo();
@@ -177,9 +173,7 @@ void MainWindow::UpdateGUIInfo()
 
         // render world
         ovrSizei size = oculusVR.getEyeTextureSize(eyeIndex);
-        p_CommonData->resetRenderMutex.lock();
         p_CommonData->p_camera->renderView(size.w, size.h, 0, C_STEREO_LEFT_EYE, false);
-        p_CommonData->resetRenderMutex.unlock();
 
         // finalize rendering
         oculusVR.onEyeRenderFinish(eyeIndex);
@@ -1198,8 +1192,6 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
-    p_CommonData->resetRenderMutex.lock();
-
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
@@ -1230,8 +1222,6 @@ void MainWindow::on_StartCD_clicked()
 
     p_CommonData->environmentChange = true; // triggers new rendering    
     p_CommonData->recordFlag = true;
-
-    p_CommonData->resetRenderMutex.unlock();
 }
 
 void MainWindow::ProgressCDExpParams()
