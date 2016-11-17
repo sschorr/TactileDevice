@@ -413,7 +413,7 @@ void haptics_thread::UpdateVRGraphics()
     UpdateScaledFingers();
     UpdateScaledBoxes();
 
-    // move the box, but after we've already reset the fingers
+    // if fingers reset in box, fix it and reset the environment again
     if(p_CommonData->resetBoxPosFlag)
     {
         // set position of box back to starting point
@@ -431,6 +431,14 @@ void haptics_thread::UpdateVRGraphics()
         p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
         ODEWorld->updateDynamics(timeInterval);
+
+        p_CommonData->fingerTouching = false; //reset before we check
+        p_CommonData->thumbTouching = false;
+        p_CommonData->fingerTouchingLast = false;
+        p_CommonData->thumbTouchingLast = false;
+        p_CommonData->scaledDispTransp = 1;
+        p_CommonData->clutchedOffset.set(0,0,0);
+        p_CommonData->fingerDisplayScale = 1.0;
 
         p_CommonData->resetBoxPosFlag = false;
     }
@@ -869,36 +877,36 @@ void haptics_thread::InitFingerAndTool()
 
 void haptics_thread::InitEnvironments()
 {
-//    p_CommonData->p_frictionBox1 = new chai3d::cMesh();
-//    p_CommonData->p_frictionBox2 = new chai3d::cMesh();
-//    p_CommonData->p_textureBox = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueEight = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueNine = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueTen = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueEleven = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueTwelve = new chai3d::cMultiMesh();
-//    p_CommonData->p_indicator = new chai3d::cMultiMesh();
-//    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
-//    p_CommonData->p_expFrictionBox = new chai3d::cMesh();
+    p_CommonData->p_frictionBox1 = new chai3d::cMesh();
+    p_CommonData->p_frictionBox2 = new chai3d::cMesh();
+    p_CommonData->p_textureBox = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueOne = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTwo = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueThree = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueFour = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueFive = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueSix = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueSeven = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueEight = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueNine = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTen = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueEleven = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueTwelve = new chai3d::cMultiMesh();
+    p_CommonData->p_indicator = new chai3d::cMultiMesh();
+    p_CommonData->p_tissueOne->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTwo->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueThree->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueFour->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueFive->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueSix->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueSeven->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueEight->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueNine->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTen->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueEleven->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_tissueTwelve->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_indicator->rotateAboutLocalAxisDeg(1,0,0,180);
+    p_CommonData->p_expFrictionBox = new chai3d::cMesh();
 }
 
 void haptics_thread::InitDynamicBodies()
