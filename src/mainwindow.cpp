@@ -1170,8 +1170,8 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->pairNo = 2;
     p_CommonData->upperCurveIncrement = 0.020;
     p_CommonData->lowerCurveIncrement = 0.020;
-    p_CommonData->upperCurveMass = .350;
-    p_CommonData->lowerCurveMass = .050;
+    p_CommonData->upperCurveMass = .325;
+    p_CommonData->lowerCurveMass = .075;
     p_CommonData->lowerCurveReversals = 0;
     p_CommonData->upperCurveReversals = 0;
     p_CommonData->currChoice = 0;

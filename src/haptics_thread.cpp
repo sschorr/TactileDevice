@@ -580,7 +580,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     //convert device "force" to a mapped position
     double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
-    double forceToPosMultThumb = forceToPosMult;
+    double forceToPosMultThumb = forceToPosMult*1.2;
 
 //    double forceToPosMult = 1.0/0.5; // based on lateral shearing stiffness of finger (from new Nakazawa paper, Srini paper supports similar for normal force) (0.5 N/mm)
 //    double forceToPosMultThumb = forceToPosMult;
