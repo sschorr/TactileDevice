@@ -336,7 +336,7 @@ void haptics_thread::UpdateVRGraphics()
                 if (ODEobject != NULL)
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
-                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                        ODEobject->addExternalForceAtPoint(-.3 * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
                     {
@@ -372,7 +372,7 @@ void haptics_thread::UpdateVRGraphics()
                 if (ODEobject != NULL)
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
-                        ODEobject->addExternalForceAtPoint(-0.3 * interactionPoint->getLastComputedForce(),
+                        ODEobject->addExternalForceAtPoint(-.3 * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
                     {
@@ -556,7 +556,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     globalForceRecord1 << computedForce1.x(), computedForce1.y(), computedForce1.z();
 
     // filter param
-    double fc = 5.0;
+    double fc = 7.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
 
