@@ -260,13 +260,11 @@ void haptics_thread::UpdateVRGraphics()
     m_tool0->updateFromDevice();
     position0 = m_tool0->m_hapticPoint->getGlobalPosGoal(); // get position and rotation of the haptic point (and delta mechanism) (already transformed from magTracker)
     p_CommonData->chaiMagDevice0->getRotation(rotation0);
-    deviceRotation0 = rotation0; //the chai device already rotates the tracker return based on the finger harness
 
     // update position and orientation of tool 1
     m_tool1->updateFromDevice();
     position1 = m_tool1->m_hapticPoint->getGlobalPosGoal();
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
-    deviceRotation1 = rotation1;
 
     // update position of finger to stay on proxy point
     fingerRotation0 = rotation0;
@@ -292,9 +290,11 @@ void haptics_thread::UpdateVRGraphics()
     p_CommonData->fingerTouchingLast = p_CommonData->fingerTouching;
     p_CommonData->thumbTouchingLast = p_CommonData->thumbTouching;
 
-    p_CommonData->fingerTouching = false; //reset before we check
+    // set fingers to non initially touching
+    p_CommonData->fingerTouching = false;
     p_CommonData->thumbTouching = false;
 
+    // find loop time interval
     currTime = p_CommonData->overallClock.getCurrentTimeSeconds();
     timeInterval = currTime - lastTime;
     if(timeInterval > .001)
@@ -336,7 +336,7 @@ void haptics_thread::UpdateVRGraphics()
                 if (ODEobject != NULL)
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
-                        ODEobject->addExternalForceAtPoint(-.3 * interactionPoint->getLastComputedForce(),
+                        ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
                     {
@@ -372,7 +372,7 @@ void haptics_thread::UpdateVRGraphics()
                 if (ODEobject != NULL)
                 {
                     if(!(interactionPoint->getLastComputedForce().length() > 40))
-                        ODEobject->addExternalForceAtPoint(-.3 * interactionPoint->getLastComputedForce(),
+                        ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
                     {
@@ -533,21 +533,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     if(computedForce1.length() > 40)
         computedForce1.set(0,0,0);
 
-    // rotation of delta mechanism in world frame (originally from mag tracker, but already rotated the small bend angle of finger)
+    // rotation of delta mechanism in world frame from cursor updates(originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
     rotation1.trans();
 
-    // create another rotation (this essentially just flips the tail in/out of mag tracker
-    deviceRotation0.identity();
-    deviceRotation0.rotateAboutLocalAxisDeg(0,0,1,180);
-    deviceRotation0.trans();
-    deviceRotation1.identity();
-    deviceRotation1.rotateAboutLocalAxisDeg(0,0,1,180);
-    deviceRotation1.trans();
-
     // this are the forces in the device frames
-    deviceComputedForce0 = deviceRotation0*rotation0*computedForce0; // rotation between force in world and delta frames
-    deviceComputedForce1 = deviceRotation1*rotation1*computedForce1; // rotation between force in world and delta frames
+    deviceComputedForce0 = rotation0*computedForce0; // rotation between force in world and delta frames
+    deviceComputedForce1 = rotation1*computedForce1; // rotation between force in world and delta frames
 
     // write down the most recent device and world forces for recording
     deviceForceRecord0 << deviceComputedForce0.x(),deviceComputedForce0.y(),deviceComputedForce0.z();
@@ -661,8 +653,8 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.motorTorque1 = p_CommonData->wearableDelta1->motorTorques;
     p_CommonData->dataRecorder.magTrackerPos1 = position1;
 
-    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0*rotation0;
-    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1*rotation1;
+    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0;
+    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1;
 
     p_CommonData->dataRecorder.box1Pos = p_CommonData->ODEBody1->getLocalPos();
     p_CommonData->dataRecorder.scaledBox1Pos = p_CommonData->p_dynamicScaledBox1->getLocalPos();
@@ -919,12 +911,14 @@ void haptics_thread::InitDynamicBodies()
 
     // Create the ODE objects for the blocks and cup
     p_CommonData->ODEBody1 = new cODEGenericBody(ODEWorld);
+    p_CommonData->ODEAdjustBody = new cODEGenericBody(ODEWorld);
 //    p_CommonData->ODEBody2 = new cODEGenericBody(ODEWorld);
 //    p_CommonData->ODEBody3 = new cODEGenericBody(ODEWorld);
 //    p_CommonData->ODEBody4 = new cODEGenericBody(ODEWorld);
 
     // create a virtual mesh that will be used for the geometry representation of the dynamic body
     p_CommonData->p_dynamicBox1 = new chai3d::cMesh();
+    p_CommonData->adjustBox = new chai3d::cMesh();
 //    p_CommonData->p_dynamicBox2 = new chai3d::cMesh();
 //    p_CommonData->p_dynamicBox3 = new chai3d::cMesh();
 //    p_CommonData->p_dynamicBox4 = new chai3d::cMesh();
@@ -939,7 +933,6 @@ void haptics_thread::InitDynamicBodies()
     // CREATING ODE INVISIBLE WALLS
     //--------------------------------------------------------------------------
     ODEGPlane0 = new cODEGenericBody(ODEWorld);
-//    ODEGPlane1 = new cODEGenericBody(ODEWorld);
 
     //create ground
     ground = new chai3d::cMesh();
@@ -955,6 +948,8 @@ void haptics_thread::InitDynamicBodies()
     p_CommonData->twoModel = new chai3d::cMultiMesh();
     p_CommonData->p_world->addChild(p_CommonData->oneModel); // add object to world
     p_CommonData->p_world->addChild(p_CommonData->twoModel); // add object to world
+    p_CommonData->oneModel->setShowEnabled(false);
+    p_CommonData->twoModel->setShowEnabled(false);
 
     // load an object file
     if(cLoadFileOBJ(p_CommonData->oneModel, "./Resources/One.obj")){
@@ -964,13 +959,11 @@ void haptics_thread::InitDynamicBodies()
         qDebug() << "'Two' loaded";
     }
 
-    p_CommonData->oneModel->setShowEnabled(true);
     p_CommonData->oneModel->setUseVertexColors(true);
     chai3d::cColorf oneColor;
     oneColor.setRedCrimson();
     p_CommonData->oneModel->setVertexColor(oneColor);
 
-    p_CommonData->twoModel->setShowEnabled(true);
     p_CommonData->twoModel->setUseVertexColors(true);
     chai3d::cColorf twoColor;
     twoColor.setRedCrimson();
@@ -987,10 +980,12 @@ void haptics_thread::DeleteDynamicBodies()
     delete ODEWorld;
     delete p_CommonData->oneModel;
     delete p_CommonData->twoModel;
+    delete p_CommonData->ODEAdjustBody;
     delete p_CommonData->ODEBody1;
     delete p_CommonData->ODEBody2;
     delete p_CommonData->ODEBody3;
     delete p_CommonData->ODEBody4;
+    delete p_CommonData->adjustBox;
     delete p_CommonData->p_dynamicBox1;
     delete p_CommonData->p_dynamicScaledBox1;
     delete p_CommonData->p_dynamicBox2;
@@ -1021,7 +1016,7 @@ void haptics_thread::DeleteDynamicBodies()
 void haptics_thread::RenderDynamicBodies()
 {
     DeleteDynamicBodies();
-    InitDynamicBodies();
+    InitDynamicBodies();    
     ODEWorld->deleteAllChildren();
 
     //--------------------------------------------------------------------------
@@ -1127,9 +1122,9 @@ void haptics_thread::RenderDynamicBodies()
     }
 
     // if just rendering dynamic environments without an experiment
-    else
+    else if (p_CommonData->currentDynamicObjectState == standard)
     {
-        SetDynEnvironDemo();
+        SetDynEnvironAdjust();
     }
 
     //set position of backgroundObject
@@ -1147,6 +1142,8 @@ void haptics_thread::RenderDynamicBodies()
     p_CommonData->p_world->addChild(finger);
     p_CommonData->p_world->addChild(thumb);
     p_CommonData->p_world->addChild(globe);
+    p_CommonData->p_world->addChild(m_curSphere0);
+    p_CommonData->p_world->addChild(m_curSphere1);
 
     // add scaled bodies for altering display ratio
     m_dispScaleCurSphere0->setHapticEnabled(false);
@@ -1172,6 +1169,10 @@ void haptics_thread::RenderDynamicBodies()
 
 void haptics_thread::SetDynEnvironCDExp()
 {
+    // set part 1/2 indicators to be able to show
+    p_CommonData->oneModel->setShowEnabled(true);
+    p_CommonData->twoModel->setShowEnabled(true);
+
     // create the visual boxes on the dynamicbox meshes
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box
 
@@ -1289,8 +1290,44 @@ void haptics_thread::SetDynEnvironMassExp()
     p_CommonData->ODEBody4->setMass(mass2);
 }
 
+// general mass demo with adjustable parameters
+void haptics_thread::SetDynEnvironAdjust()
+{
+    // create the visual boxes on the dynamicbox meshes
+    cCreateBox(p_CommonData->adjustBox, boxSize1, boxSize1, boxSize1); // make mesh a box
+
+    // setup collision detectorsfor the dynamic objects
+    p_CommonData->adjustBox->createAABBCollisionDetector(toolRadius);
+    p_CommonData->adjustBox->setShowFrame(true);
+
+    // define material properties for box 1
+    chai3d::cMaterial mat1;
+    mat1.setRedCrimson();
+    mat1.setStiffness(p_CommonData->adjustedStiffness);
+    mat1.setLateralStiffness(p_CommonData->adjustedStiffness*1.5);
+    mat1.setDynamicFriction(p_CommonData->adjustedDynamicFriction);
+    mat1.setStaticFriction(p_CommonData->adjustedStaticFriction);
+    mat1.setUseHapticFriction(true);
+    p_CommonData->adjustBox->setMaterial(mat1);
+    p_CommonData->adjustBox->setUseMaterial(true);
+
+    // add mesh to ODE object
+    p_CommonData->ODEAdjustBody->setImageModel(p_CommonData->adjustBox);
+
+    // create a dynamic model of the ODE object
+    p_CommonData->ODEAdjustBody->createDynamicBox(boxSize1, boxSize1, boxSize1);
+
+    // set mass of box
+    p_CommonData->ODEAdjustBody->setMass(p_CommonData->adjustedMass);
+
+    // set position of box
+    p_CommonData->ODEAdjustBody->setLocalPos(p_CommonData->box1InitPos);
+
+    p_CommonData->p_world->addChild(p_CommonData->adjustBox);
+}
+
 // was for general mass demo and subjective CHI exp
-void haptics_thread::SetDynEnvironDemo()
+void haptics_thread::SetDynEnvironSubjective()
 {
     // create the visual boxes on the dynamicbox meshes
     cCreateBox(p_CommonData->p_dynamicBox1, boxSize1, boxSize1, boxSize1); // make mesh a box

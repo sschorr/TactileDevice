@@ -174,6 +174,7 @@ private slots:
 
     void on_pushButton_2_clicked();
     void on_AllDown01_clicked();
+    void on_adjustParamsButton_clicked();
 };
 
 #endif // MAINWINDOW_H

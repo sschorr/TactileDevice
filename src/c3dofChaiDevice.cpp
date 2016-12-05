@@ -534,11 +534,14 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
 
     // variables that describe the rotation matrix
     double r00, r01, r02, r10, r11, r12, r20, r21, r22;
-    cMatrix3d frame;
+    cMatrix3d frame; cMatrix3d deviceRotation;
     // *** INSERT YOUR CODE HERE, MODIFY CODE BELLOW ACCORDINGLY ***
     // if the device does not provide any rotation capabilities
     // set the rotation matrix equal to the identity matrix.
     frame.identity();
+    deviceRotation.identity();
+    deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
+    deviceRotation.trans();
 
 #ifdef MAGTRACKER
     // try setting rotation from mag tracker
@@ -548,13 +551,15 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
 
     if (trackerNo == 0)
     {
-        frame.rotateAboutLocalAxisDeg(0,1,0,9); //edit hereif change angle of finger
+        frame.rotateAboutLocalAxisDeg(0,1,0,9); //edit hereif change angle of finger        
+
     }
     if (trackerNo == 1)
     {
         frame.rotateAboutLocalAxisDeg(0,1,0,9 - thumbTrackerTilt);
     }
 
+    frame = deviceRotation*frame; //flips the tracker around (dongle back rather than dongle front)
 
     // store new rotation matrix
     a_rotation = frame;

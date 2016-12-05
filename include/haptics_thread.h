@@ -67,8 +67,10 @@ public:
     void UpdateScaledFingers();
     void UpdateScaledTransparency();
     void SetDynEnvironMassExp();
-    void SetDynEnvironDemo();
+    void SetDynEnvironSubjective();
     void SetDynEnvironCDExp();
+    void SetDynEnvironAdjust();
+
     void DeleteDynamicBodies();
 
     void rotateTissueLineDisp(double angle);

@@ -4,8 +4,8 @@
 #define SHARED_DATA_H
 
 // defines indicating what physical hardware is present
-#define MAGTRACKER
-#define SENSORAY826
+//#define MAGTRACKER
+//#define SENSORAY826
 //#define OCULUS
 //#define QWT
 
@@ -306,6 +306,19 @@ typedef struct
     double tissueRot;
     double indicatorRot;
 
+    // haptics thread dynamic object for demoing adjustability
+    cODEGenericBody* ODEAdjustBody; // dynamic object for adjust box
+    chai3d::cMesh* adjustBox; // mesh for adjust box
+
+    // parameters for the adjusted dynamic box demo
+    double adjustedMass;
+    double adjustedDynamicFriction;
+    double adjustedStaticFriction;
+    double adjustedStiffness;
+    double adjustedDynamicForceReduction;
+    double adjustedForceToPosMult;
+
+
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody1; //ODE body for box 1
     cODEGenericBody* ODEBody2; //ODE body for box 2
@@ -334,7 +347,7 @@ typedef struct
 
     chai3d::cVector3d box1PostInitCenter;
 
-    // flag for reseting box position during experiment
+    // flag for reseting box position during experiment if the standard reset causes issue
     bool resetBoxPosFlag;
 
     // flag for determining if display scaling is clutched

@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow()
-{    
+{
     p_CommonData->hapticsThreadActive = false;
     delete ui;
 }
@@ -80,7 +80,6 @@ void MainWindow::Initialize()
     connect(this->ui->verticalSliderY1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->verticalSliderZ1, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->CDScale, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
-    connect(this->ui->weightSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
 
     connect(this->ui->KpSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
     connect(this->ui->KdSlider, SIGNAL(valueChanged(int)), this, SLOT(onGUIchanged()));
@@ -323,6 +322,13 @@ void MainWindow::UpdateGUIInfo()
     ui->upperReversals->display(p_CommonData->upperCurveReversals);
     ui->lowerReversals->display(p_CommonData->lowerCurveReversals);
 
+    // adjustable block params
+    ui->adjustMass->display(ui->massSlider->value()*0.001);
+    ui->adjustStiffness->display(ui->stiffnessSlider->value());
+    ui->adjustFriction->display(ui->frictionSlider->value());
+    ui->adjustForceToPos->display(ui->forceToPosSlider->value()*0.01);
+    ui->adjustDynForce->display(ui->dynForceRedSlider->value()*0.01);
+
     //calibrate if startup process over
     if(p_CommonData->calibClock.timeoutOccurred())
     {
@@ -392,7 +398,6 @@ void MainWindow::onGUIchanged()
 
     // set the display scale and the weight of the box
     p_CommonData->compareCD = (ui->CDScale->value()*.01);
-    p_CommonData->sliderWeight = ui->weightSlider->value()*.001;
     p_CommonData->fileName = QString::number(p_CommonData->compareCD);
 
 
@@ -464,7 +469,7 @@ void MainWindow::on_startCircle_clicked()
 }
 
 void MainWindow::on_setDirectory_clicked()
-{    
+{
     bool ok;
     p_CommonData->dir = QFileDialog::getExistingDirectory(0, "Select Directory for file",
                                         "C:/Users/Charm_Stars/Desktop/Dropbox (Stanford CHARM Lab)/Sam Schorr Research Folder/New Tactile Feedback Device/Protocol Creation/Experiments/PalpationLine Exp/Subjects",
@@ -549,7 +554,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
             // trial block manipulation
             else if(p_CommonData->currentExperimentState == sizeWeightTrial || p_CommonData->currentExperimentState == trialBreak)
-            {                                
+            {
                 // if going into showing standard (going to pair 1)
                 if(p_CommonData->pairNo == 2)
                 {
@@ -969,7 +974,7 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
 
 void MainWindow::WriteDataToFile()
 {
-    p_CommonData->recordFlag = false;    
+    p_CommonData->recordFlag = false;
 
     char trialBuffer[33];
     itoa(p_CommonData->trialNo,trialBuffer,10);
@@ -1094,7 +1099,9 @@ void MainWindow::on_frictionButton_clicked()
 
 void MainWindow::on_dynamicEnvironment_clicked()
 {
+    on_adjustParamsButton_clicked();
     p_CommonData->environmentChange = true;
+    p_CommonData->currentDynamicObjectState = standard;
     p_CommonData->currentEnvironmentState = dynamicBodies;
 }
 
@@ -1156,6 +1163,8 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
+    on_adjustParamsButton_clicked();
+
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;
@@ -1183,7 +1192,7 @@ void MainWindow::on_StartCD_clicked()
 
     ProgressCDExpParams();
 
-    p_CommonData->environmentChange = true; // triggers new rendering    
+    p_CommonData->environmentChange = true; // triggers new rendering
     p_CommonData->recordFlag = true;
 }
 
@@ -1214,7 +1223,7 @@ void MainWindow::ProgressCDExpParams()
                 p_CommonData->expCD = p_CommonData->compareCD;
                 p_CommonData->expMass = p_CommonData->lowerCurveMass;
             }
-        }        
+        }
 
         // go to pair 2
         p_CommonData->pairNo = 2;
@@ -1681,4 +1690,14 @@ void MainWindow::on_AllDown01_clicked()
     p_CommonData->calibClock.start();
     p_CommonData->device0Initing = true;
     p_CommonData->device1Initing = true;
+}
+
+void MainWindow::on_adjustParamsButton_clicked()
+{
+    p_CommonData->adjustedMass = ui->massSlider->value()*0.001;
+    p_CommonData->adjustedStiffness = ui->stiffnessSlider->value();
+    p_CommonData->adjustedStaticFriction = ui->frictionSlider->value();
+    p_CommonData->adjustedDynamicFriction = ui->frictionSlider->value()*0.9;
+    p_CommonData->adjustedForceToPosMult = ui->forceToPosSlider->value()*0.01;
+    p_CommonData->adjustedDynamicForceReduction = ui->dynForceRedSlider->value()*0.01;
 }
