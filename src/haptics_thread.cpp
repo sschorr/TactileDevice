@@ -266,10 +266,17 @@ void haptics_thread::UpdateVRGraphics()
     position1 = m_tool1->m_hapticPoint->getGlobalPosGoal();
     p_CommonData->chaiMagDevice1->getRotation(rotation1);
 
+    // account for flip of tracker end (tail out back rather than going forward)
+    chai3d::cMatrix3d zFlip;
+    zFlip.identity();
+    zFlip.rotateAboutLocalAxisDeg(0,0,1,180);
+    zFlip.trans();
+
     // update position of finger to stay on proxy point
     fingerRotation0 = rotation0;
     fingerRotation0.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation0.rotateAboutLocalAxisDeg(1,0,0,90);
+    fingerRotation0 = zFlip*fingerRotation0;
     finger->setLocalRot(fingerRotation0);
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset); //this offset isn't for computation of forces, just to align finger model
     m_curSphere0->setLocalPos(position0); // set the sphere visual representation to match
@@ -280,6 +287,7 @@ void haptics_thread::UpdateVRGraphics()
     fingerRotation1 = rotation1;
     fingerRotation1.rotateAboutLocalAxisDeg(0,0,1,90);
     fingerRotation1.rotateAboutLocalAxisDeg(1,0,0,90);
+    fingerRotation1 = zFlip*fingerRotation1;
     thumb->setLocalRot(fingerRotation1);
     thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
     m_curSphere1->setLocalPos(position1);
@@ -536,6 +544,14 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     // rotation of delta mechanism in world frame from cursor updates(originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans();
     rotation1.trans();
+
+    // create another rotation (this essentially just flips the tail in/out of mag tracker
+//    chai3d::cMatrix3d deviceRotation;
+//    deviceRotation.identity();
+//    deviceRotation.rotateAboutLocalAxisDeg(0,0,1,180);
+//    deviceRotation.trans();
+//    deviceRotation0 = deviceRotation*rotation0;
+//    deviceRotation1 = deviceRotation*rotation1;
 
     // this are the forces in the device frames
     deviceComputedForce0 = rotation0*computedForce0; // rotation between force in world and delta frames
