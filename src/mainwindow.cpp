@@ -325,7 +325,7 @@ void MainWindow::UpdateGUIInfo()
     // adjustable block params
     ui->adjustMass->display(ui->massSlider->value()*0.001);
     ui->adjustStiffness->display(ui->stiffnessSlider->value());
-    ui->adjustFriction->display(ui->frictionSlider->value());
+    ui->adjustFriction->display(ui->frictionSlider->value()*.01);
     ui->adjustForceToPos->display(ui->forceToPosSlider->value()*0.01);
     ui->adjustDynForce->display(ui->dynForceRedSlider->value()*0.01);
 
@@ -1696,8 +1696,8 @@ void MainWindow::on_adjustParamsButton_clicked()
 {
     p_CommonData->adjustedMass = ui->massSlider->value()*0.001;
     p_CommonData->adjustedStiffness = ui->stiffnessSlider->value();
-    p_CommonData->adjustedStaticFriction = ui->frictionSlider->value();
-    p_CommonData->adjustedDynamicFriction = ui->frictionSlider->value()*0.9;
+    p_CommonData->adjustedStaticFriction = ui->frictionSlider->value()*.01;
+    p_CommonData->adjustedDynamicFriction = ui->frictionSlider->value()*0.01*0.9;
     p_CommonData->adjustedForceToPosMult = ui->forceToPosSlider->value()*0.01;
     p_CommonData->adjustedDynamicForceReduction = ui->dynForceRedSlider->value()*0.01;
 }
