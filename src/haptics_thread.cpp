@@ -273,7 +273,7 @@ void haptics_thread::UpdateVRGraphics()
     finger->setLocalRot(fingerRotation0);
     finger->setLocalPos(m_tool0->m_hapticPoint->getGlobalPosProxy() + fingerRotation0*fingerOffset); //this offset isn't for computation of forces, just to align finger model
     m_curSphere0->setLocalPos(position0); // set the sphere visual representation to match
-    rotation0.rotateAboutLocalAxisDeg(0,0,1,180);
+    rotation0.rotateAboutLocalAxisDeg(0,0,1,180); // this is the rotation matrix deviceToWorld
     m_curSphere0->setLocalRot(rotation0);
     m_tool0->computeInteractionForces();
 
@@ -285,7 +285,7 @@ void haptics_thread::UpdateVRGraphics()
     thumb->setLocalRot(fingerRotation1);
     thumb->setLocalPos(m_tool1->m_hapticPoint->getGlobalPosProxy() + fingerRotation1*thumbOffset);
     m_curSphere1->setLocalPos(position1);
-    rotation1.rotateAboutLocalAxisDeg(0,0,1,180);
+    rotation1.rotateAboutLocalAxisDeg(0,0,1,180); // this is the rotation matrix deviceToWorld
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
@@ -537,12 +537,44 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         computedForce1.set(0,0,0);
 
     // rotation of delta mechanism in world frame from cursor updates(originally from mag tracker, but already rotated the small bend angle of finger)
-    rotation0.trans();
+    rotation0.trans(); //from deviceToWorld to worldToDevice
     rotation1.trans();
 
     // this are the forces in the device frames
     deviceComputedForce0 = rotation0*computedForce0; // rotation between force in world and delta frames
     deviceComputedForce1 = rotation1*computedForce1; // rotation between force in world and delta frames
+
+    // get current rotation of adjust box
+    chai3d::cMatrix3d boxRot_boxToWorld = p_CommonData->ODEAdjustBody->getLocalRot();
+    chai3d::cMatrix3d boxRot_worldToBox; boxRot_boxToWorld.transr(boxRot_worldToBox);
+    chai3d::cMatrix3d rotation0_deviceToWorld; rotation0.transr(rotation0_deviceToWorld); // find rotation of index delta device in world coordinates
+
+
+    // compute angle between box back normal and index normal
+    chai3d::cVector3d boxIndexSideNorm(-1,0,0); // index side vector normal to surface
+    chai3d::cVector3d fingerpadNorm(0,0,1); // vector normal to surface of fingerpad
+
+    chai3d::cVector3d boxIndexSideNormGlobal = boxRot_boxToWorld*boxIndexSideNorm; // index side normal to surface expressed in world coords
+    chai3d::cVector3d fingerpadNormGlobal = rotation0_deviceToWorld*fingerpadNorm; // fingerpad normal vector expressed in world coords
+
+    chai3d::cVector3d crossAxis; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis);
+    double dotProduct = boxIndexSideNormGlobal.dot(fingerpadNormGlobal);
+    double magBoxIndexSideNormGlobal = boxIndexSideNormGlobal.length();
+    double magFingerpadNormGlobal = fingerpadNormGlobal.length();
+
+    double angle = acos(dotProduct/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal));
+
+    chai3d::cVector3d forceInBoxCoord = boxRot_worldToBox*computedForce0;
+    chai3d::cMatrix3d angleRotationMatrix; double ux=crossAxis.x(); double uy=crossAxis.y(); double uz=crossAxis.z();
+    angleRotationMatrix.set(cos(angle)+pow(ux,2)*1-cos(angle), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
+                            uy*ux*(1-cos(angle))+uz*sin(angle), cos(angle)+pow(uy,2)*(1-cos(angle)), uy*uz*(1-cos(angle))-ux*sin(angle),
+                            uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle)));
+    chai3d::cVector3d forceToIndex = angleRotationMatrix*forceInBoxCoord;
+
+    qDebug() << forceToIndex.x() << forceToIndex.y() << forceToIndex.z();
+
+
+
 
     // write down the most recent device and world forces for recording
     deviceForceRecord0 << deviceComputedForce0.x(),deviceComputedForce0.y(),deviceComputedForce0.z();
