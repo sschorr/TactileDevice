@@ -438,8 +438,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     double x1, y1, z1, x2, y2, z2, xc, yc, zc, x, y, z;
     static double counter = 0;
     counter = counter ++;
-    x = -.09*sin(.0001*counter); y = 0; //.09*sin(.0001*counter);
-    z = -0.025; // + .05*sin(.0001*counter);
+    x = 0.05; y = 0; //.09*sin(.0001*counter);
+    z = -.07-.04*sin(.0002*counter);
 
     // set to handle scaling params even if not using magnetic tracker
     x1 = x; x2 = x; y1 = y; y2 = y; z1 = z; z2 = z;

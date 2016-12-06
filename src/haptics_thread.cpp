@@ -558,22 +558,24 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     chai3d::cVector3d crossAxis; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis); //cross axis is global frames
     crossAxis.normalize();
+
+    // find dot product of box norm and finger norm expressed in global coords (for finding angle)
     double dotProduct = boxIndexSideNormGlobal.dot(fingerpadNormGlobal);
     double magBoxIndexSideNormGlobal = boxIndexSideNormGlobal.length();
     double magFingerpadNormGlobal = fingerpadNormGlobal.length();
 
     double angle = acos(dotProduct/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal));
 
-    chai3d::cVector3d forceInBoxCoord = boxRot_worldToBox*computedForce0;
     chai3d::cMatrix3d angleRotationMatrix; double ux=crossAxis.x(); double uy=crossAxis.y(); double uz=crossAxis.z();
-    angleRotationMatrix.set(cos(angle)+pow(ux,2)*1-cos(angle), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
-                            uy*ux*(1-cos(angle))+uz*sin(angle), cos(angle)+pow(uy,2)*(1-cos(angle)), uy*uz*(1-cos(angle))-ux*sin(angle),
-                            uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle)));
-    chai3d::cVector3d forceToIndex = angleRotationMatrix*forceInBoxCoord;
+    angleRotationMatrix.set( cos(angle)+pow(ux,2)*1-cos(angle), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
+                             uy*ux*(1-cos(angle))+uz*sin(angle), cos(angle)+pow(uy,2)*(1-cos(angle)), uy*uz*(1-cos(angle))-ux*sin(angle),
+                             uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle))   );
+
+    chai3d::cVector3d forceToIndex = angleRotationMatrix*computedForce0;
 
     if(rateDisplayCounter == 0)
     {
-        qDebug() << "forceInBoxCoord: " << forceInBoxCoord.x() << forceInBoxCoord.y() << forceInBoxCoord.z();
+        qDebug() << "forceInGlobalCoord: " << computedForce0.x() << computedForce0.y() << computedForce0.z();
         qDebug() << "crossAxis: " << crossAxis.x() << crossAxis.y() << crossAxis.z();
         qDebug() << "angleRot: " << angle*180/3.14;
         qDebug() << "forceToIndex: " << forceToIndex.x() << forceToIndex.y() << forceToIndex.z();
