@@ -2169,7 +2169,7 @@
      <number>100</number>
     </property>
     <property name="value">
-     <number>500</number>
+     <number>600</number>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>

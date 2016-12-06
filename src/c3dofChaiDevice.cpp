@@ -556,6 +556,9 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
         frame.rotateAboutLocalAxisDeg(0,1,0,9 - thumbTrackerTilt);
     }
 
+#ifndef MAGTRACKER
+    frame.rotateAboutGlobalAxisDeg(0,0,1,-90);
+#endif
     // store new rotation matrix
     a_rotation = frame;
 

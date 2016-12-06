@@ -550,8 +550,8 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     chai3d::cMatrix3d rotation0_deviceToWorld; rotation0.transr(rotation0_deviceToWorld); // find rotation of index delta device in world coordinates
 
     // compute angle between box back normal and index normal
-    chai3d::cVector3d boxIndexSideNorm(-1,0,0); // index side vector normal to surface
-    chai3d::cVector3d fingerpadNorm(0,0,1); // vector normal to surface of fingerpad
+    chai3d::cVector3d boxIndexSideNorm(-1,0,0); // index side vector normal to surface (in box frame)
+    chai3d::cVector3d fingerpadNorm(0,0,1); // vector normal to surface of fingerpad (in finger frame)
 
     chai3d::cVector3d boxIndexSideNormGlobal = boxRot_boxToWorld*boxIndexSideNorm; // index side normal to surface expressed in world coords
     chai3d::cVector3d fingerpadNormGlobal = rotation0_deviceToWorld*fingerpadNorm; // fingerpad normal vector expressed in world coords
@@ -564,21 +564,23 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     double magBoxIndexSideNormGlobal = boxIndexSideNormGlobal.length();
     double magFingerpadNormGlobal = fingerpadNormGlobal.length();
 
-    double angle = acos(dotProduct/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal));
+    double angle = acos(dotProduct/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal)); angle = -angle;
 
     chai3d::cMatrix3d angleRotationMatrix; double ux=crossAxis.x(); double uy=crossAxis.y(); double uz=crossAxis.z();
-    angleRotationMatrix.set( cos(angle)+pow(ux,2)*1-cos(angle), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
+    angleRotationMatrix.set( cos(angle)+pow(ux,2)*(1-cos(angle)), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
                              uy*ux*(1-cos(angle))+uz*sin(angle), cos(angle)+pow(uy,2)*(1-cos(angle)), uy*uz*(1-cos(angle))-ux*sin(angle),
                              uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle))   );
 
-    chai3d::cVector3d forceToIndex = angleRotationMatrix*computedForce0;
+    chai3d::cVector3d forceToIndexGlobal = angleRotationMatrix*computedForce0; // rotate global force by angle about crossAxis
+    chai3d::cVector3d forceToIndexLocal = rotation0*forceToIndexGlobal; // express that in the device frame
 
     if(rateDisplayCounter == 0)
     {
         qDebug() << "forceInGlobalCoord: " << computedForce0.x() << computedForce0.y() << computedForce0.z();
         qDebug() << "crossAxis: " << crossAxis.x() << crossAxis.y() << crossAxis.z();
         qDebug() << "angleRot: " << angle*180/3.14;
-        qDebug() << "forceToIndex: " << forceToIndex.x() << forceToIndex.y() << forceToIndex.z();
+        qDebug() << "forceToIndexGlobal: " << forceToIndexGlobal.x() << forceToIndexGlobal.y() << forceToIndexGlobal.z();
+        qDebug() << "forceToIndexLocal: " << forceToIndexLocal.x() << forceToIndexLocal.y() << forceToIndexLocal.z();
     }
 
     // write down the most recent device and world forces for recording
