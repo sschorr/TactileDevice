@@ -557,7 +557,13 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
     }
 
 #ifndef MAGTRACKER
-    frame.rotateAboutGlobalAxisDeg(0,0,1,-90);
+    //frame.rotateAboutGlobalAxisDeg(0,0,1,-90);
+    frame.rotateAboutGlobalAxisDeg(0,1,0,90);
+    frame.rotateAboutGlobalAxisDeg(1,0,0,-90);
+    frame.rotateAboutGlobalAxisDeg(0,1,0,-45);
+
+
+
 #endif
     // store new rotation matrix
     a_rotation = frame;

@@ -238,6 +238,8 @@ typedef struct
     // for reading in the experiment feedback condition
     int tactileFeedback;
 
+    bool jakeRender;
+
     // answer to which was stiffer
     int subjectAnswer;
 

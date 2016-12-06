@@ -2666,13 +2666,13 @@
      <string>Adjust Params</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="JakeRenderCheckBox">
     <property name="geometry">
      <rect>
-      <x>1270</x>
-      <y>153</y>
+      <x>1271</x>
+      <y>148</y>
       <width>81</width>
-      <height>10</height>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">

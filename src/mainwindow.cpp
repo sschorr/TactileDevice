@@ -329,6 +329,12 @@ void MainWindow::UpdateGUIInfo()
     ui->adjustForceToPos->display(ui->forceToPosSlider->value()*0.01);
     ui->adjustDynForce->display(ui->dynForceRedSlider->value()*0.01);
 
+    // Change to jake render if checked
+    if(ui->JakeRenderCheckBox->isChecked())
+        p_CommonData->jakeRender = true;
+    else
+        p_CommonData->jakeRender = false;
+
     //calibrate if startup process over
     if(p_CommonData->calibClock.timeoutOccurred())
     {
