@@ -1103,6 +1103,8 @@ void MainWindow::on_dynamicEnvironment_clicked()
     p_CommonData->environmentChange = true;
     p_CommonData->currentDynamicObjectState = standard;
     p_CommonData->currentEnvironmentState = dynamicBodies;
+    ui->VRControl->setChecked(true);
+    onGUIchanged();
 }
 
 void MainWindow::on_loadProtocol_clicked()
@@ -1163,7 +1165,6 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
-    on_adjustParamsButton_clicked();
 
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;

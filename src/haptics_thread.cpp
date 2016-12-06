@@ -549,7 +549,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     chai3d::cMatrix3d boxRot_worldToBox; boxRot_boxToWorld.transr(boxRot_worldToBox);
     chai3d::cMatrix3d rotation0_deviceToWorld; rotation0.transr(rotation0_deviceToWorld); // find rotation of index delta device in world coordinates
 
-
     // compute angle between box back normal and index normal
     chai3d::cVector3d boxIndexSideNorm(-1,0,0); // index side vector normal to surface
     chai3d::cVector3d fingerpadNorm(0,0,1); // vector normal to surface of fingerpad
@@ -557,7 +556,8 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     chai3d::cVector3d boxIndexSideNormGlobal = boxRot_boxToWorld*boxIndexSideNorm; // index side normal to surface expressed in world coords
     chai3d::cVector3d fingerpadNormGlobal = rotation0_deviceToWorld*fingerpadNorm; // fingerpad normal vector expressed in world coords
 
-    chai3d::cVector3d crossAxis; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis);
+    chai3d::cVector3d crossAxis; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis); //cross axis is global frames
+    crossAxis.normalize();
     double dotProduct = boxIndexSideNormGlobal.dot(fingerpadNormGlobal);
     double magBoxIndexSideNormGlobal = boxIndexSideNormGlobal.length();
     double magFingerpadNormGlobal = fingerpadNormGlobal.length();
@@ -571,10 +571,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
                             uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle)));
     chai3d::cVector3d forceToIndex = angleRotationMatrix*forceInBoxCoord;
 
-    qDebug() << forceToIndex.x() << forceToIndex.y() << forceToIndex.z();
-
-
-
+    if(rateDisplayCounter == 0)
+    {
+        qDebug() << "forceInBoxCoord: " << forceInBoxCoord.x() << forceInBoxCoord.y() << forceInBoxCoord.z();
+        qDebug() << "crossAxis: " << crossAxis.x() << crossAxis.y() << crossAxis.z();
+        qDebug() << "angleRot: " << angle*180/3.14;
+        qDebug() << "forceToIndex: " << forceToIndex.x() << forceToIndex.y() << forceToIndex.z();
+    }
 
     // write down the most recent device and world forces for recording
     deviceForceRecord0 << deviceComputedForce0.x(),deviceComputedForce0.y(),deviceComputedForce0.z();
