@@ -232,7 +232,7 @@ Eigen::Vector3d c3DOFDevice::GetCartesianPos()
     {
         double z = (-b + sqrt(discriminant))/ (2*a);
         double x = a1*z + b1;
-        double y = a2*z + b2;
+        double y = -(a2*z + b2);
         pos << x, y, z;
     }
     return pos;
