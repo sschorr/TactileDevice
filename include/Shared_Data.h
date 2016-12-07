@@ -320,6 +320,7 @@ typedef struct
     double adjustedDynamicForceReduction;
     double adjustedForceToPosMult;
 
+    bool showCursorFrames;
 
     // haptics thread objects for Dynamic (ODE) environments
     cODEGenericBody* ODEBody1; //ODE body for box 1
@@ -378,6 +379,8 @@ typedef struct
     double lowerCurveMass;
     int upperCurveReversals;
     int lowerCurveReversals;
+    int reversalReductionUpper;
+    int reversalReductionLower;
     int CDSet;
     int currChoice;
     int maxReversals;

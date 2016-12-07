@@ -120,11 +120,6 @@ void MainWindow::Initialize()
     p_CommonData->device1Initing = false;
     p_CommonData->resetBoxPosFlag = false;
 
-
-    p_CommonData->maxReversals = 6;
-    p_CommonData->currChoice = 0;
-    p_CommonData->expDone = 0;
-
 #ifdef QWT
     ///////////////
     // QWT INITS //
@@ -511,6 +506,11 @@ void MainWindow::on_turnOff_clicked()
 
 void MainWindow::keyPressEvent(QKeyEvent *a_event)
 {
+    if (a_event->key() == Qt::Key_F)
+    {
+        p_CommonData->showCursorFrames = !p_CommonData->showCursorFrames;
+    }
+
     // used for progressing through size-weight illusion experiment trials
     if (a_event->key() == Qt::Key_Control)
     {
@@ -1110,6 +1110,7 @@ void MainWindow::on_dynamicEnvironment_clicked()
     p_CommonData->currentDynamicObjectState = standard;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     ui->VRControl->setChecked(true);
+    ui->JakeRenderCheckBox->setChecked(true);
     onGUIchanged();
 }
 
@@ -1179,9 +1180,11 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->dataRecorderVector.clear();
     p_CommonData->dataRecordMutex.unlock();
     ui->VRControl->setChecked(true);
+    ui->JakeRenderCheckBox->setChecked(true);
     onGUIchanged();
 
     // set params
+    p_CommonData->adjustedForceToPosMult = 2.0;
     p_CommonData->trialNo = 0;
     p_CommonData->pairNo = 2;
     p_CommonData->upperCurveIncrement = 0.020;
@@ -1196,9 +1199,13 @@ void MainWindow::on_StartCD_clicked()
     p_CommonData->refCD = 1;
     p_CommonData->refMass = .20;
     p_CommonData->isReversal = 0;
+    p_CommonData->reversalReductionUpper = 4;
+    p_CommonData->reversalReductionLower = 4;
+    p_CommonData->maxReversals = 8;
+    p_CommonData->currChoice = 0;
+    p_CommonData->expDone = 0;
 
     ProgressCDExpParams();
-
     p_CommonData->environmentChange = true; // triggers new rendering
     p_CommonData->recordFlag = true;
 }
@@ -1250,7 +1257,7 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastUpperCurveRefHeavier)
                 {
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
-                    if(p_CommonData->upperCurveReversals==2)
+                    if(p_CommonData->upperCurveReversals==p_CommonData->reversalReductionUpper)
                         p_CommonData->upperCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
@@ -1263,7 +1270,7 @@ void MainWindow::ProgressCDExpParams()
                 if(p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
-                    if(p_CommonData->lowerCurveReversals==2)
+                    if(p_CommonData->lowerCurveReversals==p_CommonData->reversalReductionLower)
                         p_CommonData->lowerCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
@@ -1281,7 +1288,7 @@ void MainWindow::ProgressCDExpParams()
                 if(!p_CommonData->lastUpperCurveRefHeavier)
                 {
                     p_CommonData->upperCurveReversals = p_CommonData->upperCurveReversals + 1;
-                    if(p_CommonData->upperCurveReversals==2)
+                    if(p_CommonData->upperCurveReversals==p_CommonData->reversalReductionUpper)
                         p_CommonData->upperCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }
@@ -1294,7 +1301,7 @@ void MainWindow::ProgressCDExpParams()
                 if(!p_CommonData->lastLowerCurveRefHeavier)
                 {
                     p_CommonData->lowerCurveReversals = p_CommonData->lowerCurveReversals + 1;
-                    if(p_CommonData->lowerCurveReversals==2)
+                    if(p_CommonData->lowerCurveReversals==p_CommonData->reversalReductionLower)
                         p_CommonData->lowerCurveIncrement = 0.010;
                     p_CommonData->isReversal = 1;
                 }

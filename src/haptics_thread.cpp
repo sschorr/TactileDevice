@@ -289,6 +289,20 @@ void haptics_thread::UpdateVRGraphics()
     m_curSphere1->setLocalRot(rotation1);
     m_tool1->computeInteractionForces();
 
+    // update frames to show or not
+    if (p_CommonData->showCursorFrames)
+    {
+        m_curSphere0->setShowFrame(true);
+        m_curSphere1->setShowFrame(true);
+        p_CommonData->adjustBox->setShowFrame(true);
+    }
+    else
+    {
+        m_curSphere0->setShowFrame(false);
+        m_curSphere1->setShowFrame(false);
+        p_CommonData->adjustBox->setShowFrame(false);
+    }
+
     //check for applying scaling based on whether we were touching last time
     p_CommonData->fingerTouchingLast = p_CommonData->fingerTouching;
     p_CommonData->thumbTouchingLast = p_CommonData->thumbTouching;
@@ -546,8 +560,13 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 
     if(p_CommonData->jakeRender)
     {
+        chai3d::cMatrix3d boxRot_boxToWorld;
+        if(p_CommonData->currentDynamicObjectState == dynamicCDExp)
+            boxRot_boxToWorld = p_CommonData->ODEBody1->getLocalRot();
+        else if(p_CommonData->currentDynamicObjectState == standard)
+            boxRot_boxToWorld = p_CommonData->ODEAdjustBody->getLocalRot();
+
         // get current rotation of adjust box
-        chai3d::cMatrix3d boxRot_boxToWorld = p_CommonData->ODEAdjustBody->getLocalRot();
         chai3d::cMatrix3d boxRot_worldToBox; boxRot_boxToWorld.transr(boxRot_worldToBox);
         chai3d::cMatrix3d rotation0_deviceToWorld; rotation0.transr(rotation0_deviceToWorld); // find rotation of index delta device in world coordinates
 
@@ -1150,10 +1169,10 @@ void haptics_thread::RenderDynamicBodies()
         stiffness1 = 500; stiffness2 = 500; stiffness3 = 500;
         break;
     case dynamicCDExp:
-        boxSize1 = 0.05; boxSize2 = 0.05; boxSize3 = 0.05;
-        friction1 = 2.0; friction2 = 2.0; friction3 = 2.0;
-        mass1 = 0.2; mass2 = 0.2; mass3 = 0.2;
-        stiffness1 = 450; stiffness2 = 450; stiffness3 = 450;
+        boxSize1 = 0.05;
+        friction1 = 2.0;
+        mass1 = 0.2;
+        stiffness1 = 200;
         break;
     }
 
@@ -1214,7 +1233,6 @@ void haptics_thread::RenderDynamicBodies()
     m_curSphere1->setTransparencyLevel(0);
     m_dispScaleCurSphere0->setTransparencyLevel(0);
     m_dispScaleCurSphere1->setTransparencyLevel(0);
-
 }
 
 void haptics_thread::SetDynEnvironCDExp()

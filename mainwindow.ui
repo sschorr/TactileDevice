@@ -2160,16 +2160,16 @@
      <number>0</number>
     </property>
     <property name="maximum">
-     <number>1500</number>
+     <number>1000</number>
     </property>
     <property name="singleStep">
-     <number>100</number>
+     <number>50</number>
     </property>
     <property name="pageStep">
-     <number>100</number>
+     <number>50</number>
     </property>
     <property name="value">
-     <number>600</number>
+     <number>200</number>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
@@ -2427,10 +2427,10 @@
      </rect>
     </property>
     <property name="minimum">
-     <number>200</number>
+     <number>50</number>
     </property>
     <property name="maximum">
-     <number>600</number>
+     <number>500</number>
     </property>
     <property name="singleStep">
      <number>50</number>
@@ -2439,7 +2439,7 @@
      <number>50</number>
     </property>
     <property name="value">
-     <number>450</number>
+     <number>200</number>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>
@@ -2508,7 +2508,7 @@
      <number>10</number>
     </property>
     <property name="value">
-     <number>63</number>
+     <number>200</number>
     </property>
     <property name="orientation">
      <enum>Qt::Vertical</enum>

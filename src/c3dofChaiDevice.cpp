@@ -438,7 +438,7 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
     double x1, y1, z1, x2, y2, z2, xc, yc, zc, x, y, z;
     static double counter = 0;
     counter = counter ++;
-    x = 0.05; y = 0; //.09*sin(.0001*counter);
+    x = -0.05; y = 0; //.09*sin(.0001*counter);
     z = -.07-.04*sin(.0002*counter);
 
     // set to handle scaling params even if not using magnetic tracker
@@ -481,8 +481,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
         //posOffsetinB.set(-.060, 0, .019); //index thumb dimensions
 
         // Tilted harness
-        //posOffsetinB.set(-.068, 0 , .014); //large tilted thumb
-        posOffsetinB.set(-.06413, 0, .014); //small (old index) tilted thumb
+        posOffsetinB.set(-.068, 0 , .014); //large tilted thumb
+        //posOffsetinB.set(-.06413, 0, .014); //small (old index) tilted thumb
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
@@ -558,13 +558,11 @@ bool c3dofChaiDevice::getRotation(cMatrix3d& a_rotation)
 
 #ifndef MAGTRACKER
     //frame.rotateAboutGlobalAxisDeg(0,0,1,-90);
-    frame.rotateAboutGlobalAxisDeg(0,1,0,90);
-    frame.rotateAboutGlobalAxisDeg(1,0,0,-90);
-    frame.rotateAboutGlobalAxisDeg(0,1,0,-45);
-
-
-
+//    frame.rotateAboutGlobalAxisDeg(0,1,0,90);
+//    frame.rotateAboutGlobalAxisDeg(1,0,0,-90);
+//    frame.rotateAboutGlobalAxisDeg(0,1,0,-45);
 #endif
+
     // store new rotation matrix
     a_rotation = frame;
 
