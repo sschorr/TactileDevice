@@ -569,45 +569,63 @@ void haptics_thread::ComputeVRDesiredDevicePos()
         // get current rotation of adjust box
         chai3d::cMatrix3d boxRot_worldToBox; boxRot_boxToWorld.transr(boxRot_worldToBox);
         chai3d::cMatrix3d rotation0_deviceToWorld; rotation0.transr(rotation0_deviceToWorld); // find rotation of index delta device in world coordinates
+        chai3d::cMatrix3d rotation1_deviceToWorld; rotation1.transr(rotation1_deviceToWorld); // find rotation of thumb delta device in world coordinates
 
         // compute angle between box back normal and index normal
         chai3d::cVector3d boxIndexSideNorm(-1,0,0); // index side vector normal to surface (in box frame)
+        chai3d::cVector3d boxThumbSideNorm(1,0,0); // thumb side vector normalto surface(in box frame)
         chai3d::cVector3d fingerpadNorm(0,0,-1); // vector normal to surface of fingerpad (in finger frame)
+        chai3d::cVector3d thumbpadNorm(0,0,-1); // vector normal to surface of fingerpad (in thumb frame)
 
         chai3d::cVector3d boxIndexSideNormGlobal = boxRot_boxToWorld*boxIndexSideNorm; // index side normal to surface expressed in world coords
+        chai3d::cVector3d boxThumbSideNormGlobal = boxRot_boxToWorld*boxThumbSideNorm; // thumb side normal to surface expressed in world coords
         chai3d::cVector3d fingerpadNormGlobal = rotation0_deviceToWorld*fingerpadNorm; // fingerpad normal vector expressed in world coords
+        chai3d::cVector3d thumbpadNormGlobal = rotation1_deviceToWorld*thumbpadNorm; // thumbpad normal vector expressed in world coords
 
-        chai3d::cVector3d crossAxis; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis); //cross axis is global frames
-        crossAxis.normalize();
+        chai3d::cVector3d crossAxis0; boxIndexSideNormGlobal.crossr(fingerpadNormGlobal, crossAxis0); //cross axis is global frames
+        chai3d::cVector3d crossAxis1; boxThumbSideNormGlobal.crossr(thumbpadNormGlobal, crossAxis1);// cross axis in global frames
+        crossAxis0.normalize(); crossAxis1.normalize();
 
         // find dot product of box norm and finger norm expressed in global coords (for finding angle)
-        double dotProduct = boxIndexSideNormGlobal.dot(fingerpadNormGlobal);
+        double dotProduct0 = boxIndexSideNormGlobal.dot(fingerpadNormGlobal);
         double magBoxIndexSideNormGlobal = boxIndexSideNormGlobal.length();
         double magFingerpadNormGlobal = fingerpadNormGlobal.length();
+        double angle0 = acos(dotProduct0/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal));
 
-        double angle = acos(dotProduct/(magBoxIndexSideNormGlobal*magFingerpadNormGlobal)); angle = angle;
-        //    if(crossAxis.y() < 0)
-        //        angle = angle+180;
+        double dotProduct1 = boxThumbSideNormGlobal.dot(thumbpadNormGlobal);
+        double magBoxThumbSideNormGlobal = boxThumbSideNormGlobal.length();
+        double magThumbpadNormGlobal = thumbpadNormGlobal.length();
+        double angle1 = acos(dotProduct1/(magBoxThumbSideNormGlobal*magThumbpadNormGlobal));
 
-        chai3d::cMatrix3d angleRotationMatrix; double ux=crossAxis.x(); double uy=crossAxis.y(); double uz=crossAxis.z();
-        angleRotationMatrix.set( cos(angle)+pow(ux,2)*(1-cos(angle)), ux*uy*(1-cos(angle))-uz*sin(angle), ux*uz*(1-cos(angle))+uy*sin(angle),
-                                 uy*ux*(1-cos(angle))+uz*sin(angle), cos(angle)+pow(uy,2)*(1-cos(angle)), uy*uz*(1-cos(angle))-ux*sin(angle),
-                                 uz*ux*(1-cos(angle))-uy*sin(angle), uz*uy*(1-cos(angle))+ux*sin(angle), cos(angle)+pow(uz,2)*(1-cos(angle))   );
 
-        chai3d::cVector3d forceToIndexGlobal = angleRotationMatrix*computedForce0; // rotate global force by angle about crossAxis
+        chai3d::cMatrix3d angleRotationMatrix0; double ux=crossAxis0.x(); double uy=crossAxis0.y(); double uz=crossAxis0.z();
+        angleRotationMatrix0.set( cos(angle0)+pow(ux,2)*(1-cos(angle0)), ux*uy*(1-cos(angle0))-uz*sin(angle0), ux*uz*(1-cos(angle0))+uy*sin(angle0),
+                                  uy*ux*(1-cos(angle0))+uz*sin(angle0), cos(angle0)+pow(uy,2)*(1-cos(angle0)), uy*uz*(1-cos(angle0))-ux*sin(angle0),
+                                  uz*ux*(1-cos(angle0))-uy*sin(angle0), uz*uy*(1-cos(angle0))+ux*sin(angle0), cos(angle0)+pow(uz,2)*(1-cos(angle0)) );
+
+        chai3d::cVector3d forceToIndexGlobal = angleRotationMatrix0*computedForce0; // rotate global force by angle about crossAxis
         chai3d::cVector3d forceToIndexLocal = rotation0*forceToIndexGlobal; // express that in the device frame
+
+        chai3d::cMatrix3d angleRotationMatrix1; ux=crossAxis1.x(); uy=crossAxis1.y(); uz=crossAxis1.z();
+        angleRotationMatrix1.set( cos(angle1)+pow(ux,2)*(1-cos(angle1)), ux*uy*(1-cos(angle1))-uz*sin(angle1), ux*uz*(1-cos(angle1))+uy*sin(angle1),
+                                  uy*ux*(1-cos(angle1))+uz*sin(angle1), cos(angle1)+pow(uy,2)*(1-cos(angle1)), uy*uz*(1-cos(angle1))-ux*sin(angle1),
+                                  uz*ux*(1-cos(angle1))-uy*sin(angle1), uz*uy*(1-cos(angle1))+ux*sin(angle1), cos(angle1)+pow(uz,2)*(1-cos(angle1)) );
+
+        chai3d::cVector3d forceToThumbGlobal = angleRotationMatrix1*computedForce1; // rotate global force by angle about crossAxis
+        chai3d::cVector3d forceToThumbLocal = rotation1*forceToThumbGlobal; // express that in the device frame
 
 
         deviceComputedForce0 = forceToIndexLocal;
+        deviceComputedForce1 = forceToThumbLocal;
 
-        if(rateDisplayCounter == 0)
-        {
-            qDebug() << "forceInGlobalCoord: " << computedForce0.x() << computedForce0.y() << computedForce0.z();
-            qDebug() << "crossAxis: " << crossAxis.x() << crossAxis.y() << crossAxis.z();
-            qDebug() << "angleRot: " << angle*180/3.14;
-            qDebug() << "forceToIndexGlobal: " << forceToIndexGlobal.x() << forceToIndexGlobal.y() << forceToIndexGlobal.z();
-            qDebug() << "forceToIndexLocal: " << forceToIndexLocal.x() << forceToIndexLocal.y() << forceToIndexLocal.z();
-        }
+//        if(rateDisplayCounter == 0)
+//        {
+//            qDebug() << "forceInGlobalCoord: " << computedForce0.x() << computedForce0.y() << computedForce0.z();
+//            qDebug() << "crossAxis: " << crossAxis.x() << crossAxis.y() << crossAxis.z();
+//            qDebug() << "angleRot: " << angle*180/3.14;
+//            qDebug() << "forceToIndexGlobal: " << forceToIndexGlobal.x() << forceToIndexGlobal.y() << forceToIndexGlobal.z();
+//            qDebug() << "forceToIndexLocal: " << forceToIndexLocal.x() << forceToIndexLocal.y() << forceToIndexLocal.z();
+//        }
     }
 
     // write down the most recent device and world forces for recording
@@ -640,11 +658,8 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     thumbTorqueImpulse = deviceRotation1*rotation1*thumbTorqueImpulse;
 
     //convert device "force" to a mapped position
-    double forceToPosMult = 1.0/1.588; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
-    double forceToPosMultThumb = forceToPosMult*1.2;
-
-//    double forceToPosMult = 1.0/0.5; // based on lateral shearing stiffness of finger (from new Nakazawa paper, Srini paper supports similar for normal force) (0.5 N/mm)
-//    double forceToPosMultThumb = forceToPosMult;
+    double forceToPosMult = p_CommonData->adjustedForceToPosMult; // based on lateral stiffness of finger (averaged directions from Gleeson paper) (1.588 N/mm)
+    double forceToPosMultThumb = forceToPosMult;
 
     // Pos movements in delta mechanism frame (index)
     chai3d::cVector3d desiredPosMovement0 = forceToPosMult*(filteredDeviceForce0 + indexImpulse + indexTorqueImpulse); //this is only for lateral if we override normal later
