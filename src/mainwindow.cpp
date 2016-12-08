@@ -112,6 +112,8 @@ void MainWindow::Initialize()
     p_CommonData->desJointInits0 = p_CommonData->wearableDelta0->GetJointAngles();
     p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
 
+    p_CommonData->adjustedDynamicForceReduction = 1.0;
+
     ui->normalBox->setChecked(true);
     ui->lateralBox->setChecked(true);
     p_CommonData->flagNormal = true;
@@ -336,6 +338,9 @@ void MainWindow::UpdateGUIInfo()
         p_CommonData->calibClock.stop();
         p_CommonData->calibClock.reset();
         on_CalibratePushButton_clicked();
+        ui->sliderControl->setChecked(true);
+        this->ui->verticalSliderZ0->setValue(this->ui->verticalSliderZ0->value() + 40);
+        this->ui->verticalSliderZ1->setValue(this->ui->verticalSliderZ1->value() + 50);
     }
 
     if(p_CommonData->isRef == 1)
@@ -1700,7 +1705,7 @@ void MainWindow::on_pushButton_2_clicked()
 void MainWindow::on_AllDown01_clicked()
 {
     p_CommonData->calibClock.reset();
-    p_CommonData->calibClock.setTimeoutPeriodSeconds(4.0);
+    p_CommonData->calibClock.setTimeoutPeriodSeconds(3.0);
     p_CommonData->calibClock.start();
     p_CommonData->device0Initing = true;
     p_CommonData->device1Initing = true;

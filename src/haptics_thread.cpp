@@ -1187,7 +1187,7 @@ void haptics_thread::RenderDynamicBodies()
         boxSize1 = 0.05;
         friction1 = 2.0;
         mass1 = 0.2;
-        stiffness1 = 200;
+        stiffness1 = 160 ;
         break;
     }
 
@@ -1840,8 +1840,6 @@ void haptics_thread::SetInitJointAngles()
         p_CommonData->device0Initing = false;
         p_CommonData->device1Initing = false;
     }
-
-
 }
 
 void haptics_thread::RenderPalpation()
