@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifndef OCULUS
     windowGLDisplay = new Widget_OpenGLDisplay(this->centralWidget());
     windowGLDisplay->setObjectName(QStringLiteral("windowGLDisplay"));
-    windowGLDisplay->setGeometry(QRect(20, 50, 661, 431));
+    windowGLDisplay->setGeometry(QRect(10, 10, 701, 471));
 #endif
 }
 
@@ -113,6 +113,7 @@ void MainWindow::Initialize()
     p_CommonData->desJointInits1 = p_CommonData->wearableDelta1->GetJointAngles();
 
     p_CommonData->adjustedDynamicForceReduction = 1.0;
+    p_CommonData->adjustedForceToPosMult = 2.0;
 
     ui->normalBox->setChecked(true);
     ui->lateralBox->setChecked(true);
@@ -516,6 +517,15 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
         p_CommonData->showCursorFrames = !p_CommonData->showCursorFrames;
     }
 
+    if(a_event->key() == Qt::Key_I)
+    {
+        p_CommonData->camRadius = p_CommonData->camRadius - 0.05;
+    }
+    if(a_event->key() == Qt::Key_O)
+    {
+        p_CommonData->camRadius = p_CommonData->camRadius + 0.05;
+    }
+
     // used for progressing through size-weight illusion experiment trials
     if (a_event->key() == Qt::Key_Control)
     {
@@ -848,17 +858,17 @@ void MainWindow::keyPressEvent(QKeyEvent *a_event)
             p_CommonData->recordFlag = true;
         }
 
-        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
-        {
-            if(p_CommonData->pairNo == 2)
-            {
-                p_CommonData->pairNo = 1;
-                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
-                double max = 0.01; double min = -0.01;
-                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
-                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
-            }
-        }
+//        else if(!(localDesiredPos0[2] < p_CommonData->wearableDelta0->neutralPos[2]))
+//        {
+//            if(p_CommonData->pairNo == 2)
+//            {
+//                p_CommonData->pairNo = 1;
+//                p_CommonData->p_expFrictionBox->m_material->setBlueAqua();
+//                double max = 0.01; double min = -0.01;
+//                double randPos = ((double) rand()*(max-min)/(double)RAND_MAX+min);
+//                p_CommonData->p_expFrictionBox->setLocalPos(0,0,randPos);
+//            }
+//        }
     }
 
     if (a_event->key() == Qt::Key_1)
@@ -1396,7 +1406,7 @@ void MainWindow::ResetDynamicEnviron()
     p_CommonData->fingerDisplayScale = 1.0; //will get changed in dynsim if necessary
 
     // set mass of box based on latest experiment params
-    p_CommonData->ODEBody1->setMass(p_CommonData->expMass);
+    p_CommonData->ODEBody1->setMass(p_CommonData-> expMass);
 
     // wait until we're sure fingers aren't in the way
     while(!CheckFingers())

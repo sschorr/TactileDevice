@@ -352,7 +352,7 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(!(interactionPoint->getLastComputedForce().length() > 40))
+                    if(!(interactionPoint->getLastComputedForce().length() > 25))
                         ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
@@ -388,7 +388,7 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(!(interactionPoint->getLastComputedForce().length() > 40))
+                    if(!(interactionPoint->getLastComputedForce().length() > 25))
                         ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                            collisionEvent->m_globalPos);
                     else
@@ -440,8 +440,8 @@ void haptics_thread::UpdateVRGraphics()
         ODEWorld->updateDynamics(timeInterval);
 
         m_tool0->updateFromDevice();
-        m_tool0->computeInteractionForces();
         m_tool1->updateFromDevice();
+        m_tool0->computeInteractionForces();        
         m_tool1->computeInteractionForces();
         ODEWorld->updateDynamics(timeInterval);
 
@@ -635,7 +635,7 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     globalForceRecord1 << computedForce1.x(), computedForce1.y(), computedForce1.z();
 
     // filter param
-    double fc = 7.0;
+    double fc = 5.0;
     double RC = 1.0/(fc*2.0*PI);
     double alpha = (timeInterval)/(RC + timeInterval);
 
@@ -1187,7 +1187,7 @@ void haptics_thread::RenderDynamicBodies()
         boxSize1 = 0.05;
         friction1 = 2.0;
         mass1 = 0.2;
-        stiffness1 = 160 ;
+        stiffness1 = 160;
         break;
     }
 
@@ -1504,49 +1504,21 @@ void haptics_thread::RenderTwoFriction()
     cCreateBox(p_CommonData->p_frictionBox2, .08, .08, .01); // make mesh a box
     p_CommonData->p_frictionBox1->createAABBCollisionDetector(toolRadius);
     p_CommonData->p_frictionBox2->createAABBCollisionDetector(toolRadius);
-    p_CommonData->p_frictionBox1->setLocalPos(0,.08, 0);
-    p_CommonData->p_frictionBox2->setLocalPos(0,-.08, 0);
+    p_CommonData->p_frictionBox1->setLocalPos(0,.08, -0.07);
+    p_CommonData->p_frictionBox2->setLocalPos(0,-.08, -0.07);
 
-    p_CommonData->p_frictionBox1->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(600);
+    p_CommonData->p_frictionBox1->m_material->setStiffness(120);
+    p_CommonData->p_frictionBox1->m_material->setLateralStiffness(3*120);
     p_CommonData->p_frictionBox1->m_material->setStaticFriction(0.25);
-    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*0.9);
+    p_CommonData->p_frictionBox1->m_material->setDynamicFriction(0.25*.9);
 
-    p_CommonData->p_frictionBox2->m_material->setStiffness(300);
-    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(600);
+    p_CommonData->p_frictionBox2->m_material->setStiffness(120);
+    p_CommonData->p_frictionBox2->m_material->setLateralStiffness(3*120);
     p_CommonData->p_frictionBox2->m_material->setStaticFriction(0.8);
     p_CommonData->p_frictionBox2->m_material->setDynamicFriction(0.8*.9);
 
-    // try creating texture box
-    p_CommonData->p_textureBox->loadFromFile("./Resources/Texture.obj");
-    p_CommonData->p_textureBox->setLocalPos(0,0,0);
-    p_CommonData->p_textureBox->rotateAboutLocalAxisDeg(-1,0,0,90);
-    p_CommonData->p_textureBox->rotateAboutLocalAxisDeg(0,1,0, 90);
-
-    p_CommonData->p_textureBox->setUseVertexColors(true);
-    chai3d::cColorf textureBoxColor;
-    textureBoxColor.setBlue();
-    p_CommonData->p_textureBox->setVertexColor(textureBoxColor);
-    p_CommonData->p_textureBox->m_material->m_ambient.set(0.1, 0.1, 0.1);
-    p_CommonData->p_textureBox->m_material->m_diffuse.set(0.3, 0.3, 0.3);
-    p_CommonData->p_textureBox->m_material->m_specular.set(1.0, 1.0, 1.0);
-    p_CommonData->p_textureBox->setUseMaterial(true);
-
-    // compute a boundary box
-    p_CommonData->p_textureBox->computeBoundaryBox(true);
-
-    // compute collision detection algorithm
-    p_CommonData->p_textureBox->createAABBCollisionDetector(toolRadius);
-
-    // define a default stiffness for the object
-    p_CommonData->p_textureBox->setTransparencyLevel(1, true, true);
-
-    p_CommonData->p_textureBox->setStiffness(300, true);
-    p_CommonData->p_textureBox->setFriction(.6, .5, TRUE);
-
     p_CommonData->p_world->addChild(p_CommonData->p_frictionBox1);
     p_CommonData->p_world->addChild(p_CommonData->p_frictionBox2);
-    p_CommonData->p_world->addChild(p_CommonData->p_textureBox);
     p_CommonData->p_world->addChild(m_tool0);
     p_CommonData->p_world->addChild(m_tool1);
     p_CommonData->p_world->addChild(finger);
@@ -1847,11 +1819,12 @@ void haptics_thread::RenderPalpation()
     p_CommonData->p_world->addChild(m_tool0);
     p_CommonData->p_world->addChild(m_tool1);
     p_CommonData->p_world->addChild(finger);
+    p_CommonData->p_world->addChild(scaledFinger);
 
-    double tissueNomStiffness = 300;
+    double tissueNomStiffness = 120;
     double staticFriction = 0.6;
     double dynamicFriction = staticFriction*0.9;
-    double vertOffset = 0.03;
+    double vertOffset = -0.03;
     //----------------------------------------------Create Tissue One---------------------------------------------------
     // add object to world
     p_CommonData->p_world->addChild(p_CommonData->p_tissueOne);

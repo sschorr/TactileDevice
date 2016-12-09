@@ -481,8 +481,8 @@ bool c3dofChaiDevice::getPosition(cVector3d& a_position)
         //posOffsetinB.set(-.060, 0, .019); //index thumb dimensions
 
         // Tilted harness
-        posOffsetinB.set(-.068, 0 , .014); //large tilted thumb
-        //posOffsetinB.set(-.06413, 0, .014); //small (old index) tilted thumb
+        //posOffsetinB.set(-.068, 0 , .014); //large tilted thumb
+        posOffsetinB.set(-.06413, 0, .014); //small (old index) tilted thumb
     }
 
     chai3d::cMatrix3d R_BtoA = pose.getLocalRot();
