@@ -737,8 +737,8 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.motorTorque1 = p_CommonData->wearableDelta1->motorTorques;
     p_CommonData->dataRecorder.magTrackerPos1 = position1;
 
-    p_CommonData->dataRecorder.deviceRotation0 = deviceRotation0;
-    p_CommonData->dataRecorder.deviceRotation1 = deviceRotation1;
+    p_CommonData->dataRecorder.deviceRotation0 = rotation0;
+    p_CommonData->dataRecorder.deviceRotation1 = rotation1;
 
     p_CommonData->dataRecorder.box1Pos = p_CommonData->ODEBody1->getLocalPos();
     p_CommonData->dataRecorder.scaledBox1Pos = p_CommonData->p_dynamicScaledBox1->getLocalPos();
@@ -747,13 +747,12 @@ void haptics_thread::RecordData()
     p_CommonData->dataRecorder.boxMass = p_CommonData->expMass;
     p_CommonData->dataRecorder.CDRatio = p_CommonData->expCD;
     p_CommonData->dataRecorder.isRef = p_CommonData->isRef;
-    p_CommonData->dataRecorder.subjResponse = 0;//fill in right before recording in window thread
+    p_CommonData->dataRecorder.subjResponse = 0;//fill in right before recording in mainwindow thread
     p_CommonData->dataRecorder.isUpperCurve = p_CommonData->isUpperCurve;
 
     //p_CommonData->dataRecorder.isReversal handled by mainwindow thread manually at end of each trial
 
     p_CommonData->dataRecorderVector.push_back(p_CommonData->dataRecorder);
-
     p_CommonData->dataRecordMutex.unlock();
 }
 
