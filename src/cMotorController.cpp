@@ -20,6 +20,8 @@ void cMotorController::InitEncoder()
     int fail = S826_CounterModeWrite(PCI_BOARD, channelNum, MODE_ENC);
     if (fail == 0)
        qDebug() << "encoder" << channelNum << "init'ed";
+    S826_CounterStateWrite(PCI_BOARD, channelNum, 0);
+    Sleep(100);
     S826_CounterStateWrite(PCI_BOARD, channelNum, 1); //sets the counter to start keeping track
 #endif
 
