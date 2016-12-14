@@ -1187,7 +1187,6 @@ void MainWindow::on_startExperiment_2_clicked()
 
 void MainWindow::on_StartCD_clicked()
 {
-
     p_CommonData->currentExperimentState = CDTrial;
     p_CommonData->currentEnvironmentState = dynamicBodies;
     p_CommonData->currentDynamicObjectState = dynamicCDExp;

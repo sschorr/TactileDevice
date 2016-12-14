@@ -352,13 +352,11 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(!(interactionPoint->getLastComputedForce().length() > 25))
-                        ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
-                                                           collisionEvent->m_globalPos);
-                    else
-                    {
-                        p_CommonData->resetBoxPosFlag = true;
-                    }
+                    ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+
+                    if((interactionPoint->getLastComputedForce().length() > 10))
+                         p_CommonData->resetBoxPosFlag = true;
                 }
             }
         }
@@ -388,13 +386,10 @@ void haptics_thread::UpdateVRGraphics()
                 // if ODE object, we apply interaction forces
                 if (ODEobject != NULL)
                 {
-                    if(!(interactionPoint->getLastComputedForce().length() > 25))
-                        ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
-                                                           collisionEvent->m_globalPos);
-                    else
-                    {
-                        p_CommonData->resetBoxPosFlag = true;
-                    }
+                    ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
+                                                       collisionEvent->m_globalPos);
+                    if((interactionPoint->getLastComputedForce().length() > 10))
+                         p_CommonData->resetBoxPosFlag = true;
                 }
             }
         }
@@ -437,12 +432,8 @@ void haptics_thread::UpdateVRGraphics()
         chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
         p_CommonData->ODEBody1->setLocalPos(0,0,-1);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
-        ODEWorld->updateDynamics(timeInterval);
-
         m_tool0->updateFromDevice();
         m_tool1->updateFromDevice();
-        m_tool0->computeInteractionForces();        
-        m_tool1->computeInteractionForces();
         ODEWorld->updateDynamics(timeInterval);
 
         p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
@@ -545,9 +536,9 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     computedForce0 = m_tool0->getDeviceGlobalForce();
     computedForce1 = m_tool1->getDeviceGlobalForce();
 
-    if(computedForce0.length() > 40)
+    if(computedForce0.length() > 12)
         computedForce0.set(0,0,0);
-    if(computedForce1.length() > 40)
+    if(computedForce1.length() > 12)
         computedForce1.set(0,0,0);
 
     // rotation of delta mechanism in world frame from cursor updates(originally from mag tracker, but already rotated the small bend angle of finger)

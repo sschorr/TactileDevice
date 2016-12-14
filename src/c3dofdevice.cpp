@@ -31,8 +31,12 @@ c3DOFDevice::c3DOFDevice(int num)
 c3DOFDevice::~c3DOFDevice()
 {   
     delete this->motor_1;
+    Sleep(100);
     delete this->motor_2;
+    Sleep(100);
     delete this->motor_3;
+    Sleep(100);
+
 #ifdef SENSORAY826
     S826_SystemClose();
 #endif
