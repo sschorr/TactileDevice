@@ -1416,6 +1416,10 @@ void MainWindow::ResetDynamicEnviron()
     // set haptics thread to reset box after its already updated fingers
     p_CommonData->resetBoxPosFlag = true;
 
+//    p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
+//    chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
+//    p_CommonData->ODEBody1->setLocalRot(eyeMat);
+
     if(p_CommonData->pairNo == 1)
     {
         p_CommonData->oneModel->setTransparencyLevel(1.0);

@@ -317,6 +317,8 @@ void haptics_thread::UpdateVRGraphics()
     if(timeInterval > .001)
         timeInterval = 0.001;
 
+    double forceLimit = 8;
+
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
     {
@@ -355,7 +357,7 @@ void haptics_thread::UpdateVRGraphics()
                     ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
 
-                    if((interactionPoint->getLastComputedForce().length() > 10))
+                    if((interactionPoint->getLastComputedForce().length() > forceLimit) & (computedForce0.length() > forceLimit))
                          p_CommonData->resetBoxPosFlag = true;
                 }
             }
@@ -388,7 +390,7 @@ void haptics_thread::UpdateVRGraphics()
                 {
                     ODEobject->addExternalForceAtPoint(-p_CommonData->adjustedDynamicForceReduction * interactionPoint->getLastComputedForce(),
                                                        collisionEvent->m_globalPos);
-                    if((interactionPoint->getLastComputedForce().length() > 10))
+                    if((interactionPoint->getLastComputedForce().length() > forceLimit) & (computedForce1.length() > forceLimit))
                          p_CommonData->resetBoxPosFlag = true;
                 }
             }
@@ -428,14 +430,25 @@ void haptics_thread::UpdateVRGraphics()
     // if fingers reset in box, fix it and reset the environment again
     if(p_CommonData->resetBoxPosFlag)
     {
+        qDebug() << "resetting";
+        p_CommonData->p_world->computeGlobalPositions(true);
         // set position of box back to starting point
         chai3d::cMatrix3d eyeMat(1,0,0,0,1,0,0,0,1);
-        p_CommonData->ODEBody1->setLocalPos(0,0,-1);
+        p_CommonData->ODEBody1->setLocalPos(0,0,-10);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
-        m_tool0->updateFromDevice();
-        m_tool1->updateFromDevice();
+        p_CommonData->p_world->removeChild(m_tool0);
+        p_CommonData->p_world->removeChild(m_tool1);
         ODEWorld->updateDynamics(timeInterval);
 
+        p_CommonData->p_world->addChild(m_tool0);
+        p_CommonData->p_world->addChild(m_tool1);
+        m_tool0->updateFromDevice();
+        m_tool1->updateFromDevice();
+        p_CommonData->p_world->computeGlobalPositions(true);
+        m_tool0->updateFromDevice();
+        m_tool1->updateFromDevice();
+
+        p_CommonData->p_world->computeGlobalPositions(true);
         p_CommonData->ODEBody1->setLocalPos(p_CommonData->box1InitPos);
         p_CommonData->ODEBody1->setLocalRot(eyeMat);
         ODEWorld->updateDynamics(timeInterval);
@@ -536,11 +549,6 @@ void haptics_thread::ComputeVRDesiredDevicePos()
     computedForce0 = m_tool0->getDeviceGlobalForce();
     computedForce1 = m_tool1->getDeviceGlobalForce();
 
-    if(computedForce0.length() > 12)
-        computedForce0.set(0,0,0);
-    if(computedForce1.length() > 12)
-        computedForce1.set(0,0,0);
-
     // rotation of delta mechanism in world frame from cursor updates(originally from mag tracker, but already rotated the small bend angle of finger)
     rotation0.trans(); //from deviceToWorld to worldToDevice
     rotation1.trans();
@@ -618,6 +626,11 @@ void haptics_thread::ComputeVRDesiredDevicePos()
 //            qDebug() << "forceToIndexLocal: " << forceToIndexLocal.x() << forceToIndexLocal.y() << forceToIndexLocal.z();
 //        }
     }
+
+    if(deviceComputedForce0.length() > 12)
+        deviceComputedForce0.set(0,0,0);
+    if(deviceComputedForce1.length() > 12)
+        deviceComputedForce1.set(0,0,0);
 
     // write down the most recent device and world forces for recording
     deviceForceRecord0 << deviceComputedForce0.x(),deviceComputedForce0.y(),deviceComputedForce0.z();
