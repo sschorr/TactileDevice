@@ -317,7 +317,7 @@ void haptics_thread::UpdateVRGraphics()
     if(timeInterval > .001)
         timeInterval = 0.001;
 
-    double forceLimit = 8;
+    double forceLimit = 9;
 
     // perform our dynamic body updates if we are in a dynamic environment
     if(p_CommonData->currentEnvironmentState == dynamicBodies)
